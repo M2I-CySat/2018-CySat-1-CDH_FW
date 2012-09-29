@@ -174,7 +174,7 @@ static void prvSetupHardware( void );
 
 /* The queue used to send messages to the LCD task. */
 static xQueueHandle xLCDQueue;
-static xQueueHandle xUartQueue;
+//static xQueueHandle xUartQueue;
 
 /*-----------------------------------------------------------*/
 
@@ -200,7 +200,7 @@ int main( void )
 	to the queue used to write text out to the task. */
 	xLCDQueue = xStartLCDTask();
 
-        xUartQueue = xStartUartTask();
+        vStartUartTask();
 
 	/* Start the high frequency interrupt test. */
 //	vSetupTimerTest( mainTEST_INTERRUPT_FREQUENCY );
@@ -227,21 +227,18 @@ portTickType xLastExecutionTime;
 
 /* Buffer into which the maximum jitter time is written as a string. */
 static char cStringBuffer[ mainMAX_STRING_LENGTH ];
-static char cUartBuffer[ mainMAX_STRING_LENGTH ];
 
 /* The message that is sent on the queue to the LCD task.  The first
 parameter is the minimum time (in ticks) that the message should be
 left on the LCD without being overwritten.  The second parameter is a pointer
 to the message to display itself. */
 xLCDMessage xMessage = { 0, cStringBuffer };
-xUartMessage xUartMessage = { 0, cUartBuffer };
 
     /* Initialise xLastExecutionTime so the first call to vTaskDelayUntil()
     works correctly. */
     xLastExecutionTime = xTaskGetTickCount();
 
     sprintf( cStringBuffer, "I'm an LCD" );
-    sprintf( cUartBuffer, "Are we UART together?\r\n" );
 
     for( ;; )
     {
@@ -252,7 +249,7 @@ xUartMessage xUartMessage = { 0, cUartBuffer };
         /* Send the message to the LCD gatekeeper for display. */
         xQueueSend( xLCDQueue, &xMessage, portMAX_DELAY );
 
-        xQueueSend( xUartQueue, &xUartMessage, portMAX_DELAY );
+        vUartPuts( "Are we UART together?\r\n" );
     }
 }
 /*-----------------------------------------------------------*/

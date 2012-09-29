@@ -18,14 +18,12 @@
 
 /* Create the task that will control the UART.  Returned is a handle to the queue
 on which messages to get written to the UART should be written. */
-xQueueHandle xStartUartTask( void );
+void vStartUartTask( void );
+
+void vUartPuts(char* message);
 
 typedef struct
 {
-	/* The minimum amount of time the message should remain on the LCD without
-	being overwritten. */
-	portTickType xMinDisplayTime;
-
 	/* A pointer to the string to be displayed. */
 	char *pcMessage;
 

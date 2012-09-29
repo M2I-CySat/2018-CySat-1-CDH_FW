@@ -13,7 +13,8 @@
  * access the UART directly.  Other tasks wanting to display a message send
  * the message to the gatekeeper.
  */
-static void vUartTask( void *pvParameters );
+static void vUartTxTask( void *pvParameters );
+static void vUartRxTask( void *pvParameters );
 
 /*
  * Setup UART2.
@@ -33,24 +34,41 @@ static void prvUartGets( char *s, int len );
 
 
 /* The length of the queue used to send messages to the UART gatekeeper task. */
-#define uartQUEUE_SIZE		3
+#define uartQUEUE_SIZE      3
+
+#define uartBUFFER_SIZE     80
 
 
 /* The queue used to send messages to the LCD task. */
-xQueueHandle xUartQueue;
+static xQueueHandle xUartTxQueue;
+static xQueueHandle xUartRxQueue;
 
-xQueueHandle xStartUartTask( void )
+void vStartUartTask( void )
 {
+    /* Initialise the hardware. */
+    prvUartInit();
+
     /* Create the queue used by the UART task.  Messages for display on the UART
     are received via this queue. */
-    xUartQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( xUartMessage ) );
+    xUartTxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( xUartMessage ) );
+    xUartRxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( xUartMessage ) );
 
-    xTaskCreate( vUartTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
-
-    return xUartQueue;
+    xTaskCreate( vUartTxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+//    xTaskCreate( vUartRxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
 }
 
-void prvUartInit (void)
+void vUartPuts(char* message)
+{
+    static char cUartBuffer[ uartBUFFER_SIZE ];
+    static xUartMessage xMessage = { cUartBuffer };
+
+    sprintf(cUartBuffer, message);
+
+    xQueueSend( xUartTxQueue, &xMessage, portMAX_DELAY );
+}
+
+
+static void prvUartInit (void)
 {
     /* init the serial port (UART2, 9600@32MHz, 8, N, 1, CTS/RTS) */
     U2BRG   = BRATE;    // initialize the baud rate generator
@@ -99,14 +117,9 @@ static void prvUartGets( char *s, int len )
     *s = '\0';
 }
 
-
-static void vUartTask( void *pvParameters )
+static void vUartTxTask( void *pvParameters )
 {
     xUartMessage xMessage;
-
-    /* Initialise the hardware.  This uses delays so must not be called prior
-    to the scheduler being started. */
-    prvUartInit();
 
     /* Welcome message. */
     prvUartPuts( "I'm a Uart; Hello World!\r\n" );
@@ -116,8 +129,12 @@ static void vUartTask( void *pvParameters )
 
 //        prvUartPuts( "I'm still a UART!\r\n" );
         /* Wait for a message to arrive that requires displaying. */
-        while( xQueueReceive( xUartQueue, &xMessage, portMAX_DELAY ) != pdPASS );
+        while( xQueueReceive( xUartTxQueue, &xMessage, portMAX_DELAY ) != pdPASS );
         prvUartPuts( xMessage.pcMessage );
 
     }
+}
+
+static void vUartRxTask( void *pvParameters )
+{
 }
