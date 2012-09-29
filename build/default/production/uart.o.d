@@ -1,5 +1,5 @@
-build/default/production/src/lcd.o:  \
-src/lcd.c  \
+build/default/production/uart.o:  \
+uart.c  \
 include/FreeRTOS/FreeRTOS.h  \
  include/FreeRTOS/projdefs.h  \
 include/FreeRTOSConfig.h  \
@@ -9,4 +9,5 @@ include/FreeRTOS/portmacro.h  \
 include/FreeRTOS/task.h  \
  include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
-include/lcd.h 
+pic24.h  \
+uart.h 

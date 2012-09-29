@@ -41,11 +41,11 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/lcd.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/ParTest.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/timertest.o ${OBJECTDIR}/src/BlockQ.o ${OBJECTDIR}/src/blocktim.o ${OBJECTDIR}/src/comtest.o ${OBJECTDIR}/src/crflash.o ${OBJECTDIR}/src/integer.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/lcd.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/ParTest.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/src/timertest.o.d ${OBJECTDIR}/src/BlockQ.o.d ${OBJECTDIR}/src/blocktim.o.d ${OBJECTDIR}/src/comtest.o.d ${OBJECTDIR}/src/crflash.o.d ${OBJECTDIR}/src/integer.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/lcd.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/ParTest.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/timertest.o ${OBJECTDIR}/src/BlockQ.o ${OBJECTDIR}/src/blocktim.o ${OBJECTDIR}/src/comtest.o ${OBJECTDIR}/src/crflash.o ${OBJECTDIR}/src/integer.o ${OBJECTDIR}/uart.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/lcd.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/ParTest.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/src/timertest.o.d ${OBJECTDIR}/src/BlockQ.o.d ${OBJECTDIR}/src/blocktim.o.d ${OBJECTDIR}/src/comtest.o.d ${OBJECTDIR}/src/crflash.o.d ${OBJECTDIR}/src/integer.o.d ${OBJECTDIR}/uart.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/lcd.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/ParTest.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/timertest.o ${OBJECTDIR}/src/BlockQ.o ${OBJECTDIR}/src/blocktim.o ${OBJECTDIR}/src/comtest.o ${OBJECTDIR}/src/crflash.o ${OBJECTDIR}/src/integer.o
+OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/lcd.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/ParTest.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/timertest.o ${OBJECTDIR}/src/BlockQ.o ${OBJECTDIR}/src/blocktim.o ${OBJECTDIR}/src/comtest.o ${OBJECTDIR}/src/crflash.o ${OBJECTDIR}/src/integer.o ${OBJECTDIR}/uart.o
 
 
 CFLAGS=
@@ -73,206 +73,218 @@ ${OBJECTDIR}/src/FreeRTOS/croutine.o: src/FreeRTOS/croutine.c  nbproject/Makefil
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/croutine.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/croutine.c  -o ${OBJECTDIR}/src/FreeRTOS/croutine.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/croutine.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/croutine.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/croutine.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/heap_1.o: src/FreeRTOS/heap_1.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/heap_1.c  -o ${OBJECTDIR}/src/FreeRTOS/heap_1.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/list.o: src/FreeRTOS/list.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/list.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/list.c  -o ${OBJECTDIR}/src/FreeRTOS/list.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/list.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/list.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/list.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/port.o: src/FreeRTOS/port.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/port.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/port.c  -o ${OBJECTDIR}/src/FreeRTOS/port.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/port.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/port.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/port.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/queue.o: src/FreeRTOS/queue.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/queue.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/queue.c  -o ${OBJECTDIR}/src/FreeRTOS/queue.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/queue.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/queue.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/queue.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/tasks.o: src/FreeRTOS/tasks.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/tasks.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/tasks.c  -o ${OBJECTDIR}/src/FreeRTOS/tasks.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/tasks.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/tasks.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/tasks.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/timers.o: src/FreeRTOS/timers.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/timers.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/timers.c  -o ${OBJECTDIR}/src/FreeRTOS/timers.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/timers.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/timers.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/timers.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/lcd.o: src/lcd.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/lcd.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/lcd.c  -o ${OBJECTDIR}/src/lcd.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/lcd.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/lcd.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/lcd.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/main.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/main.c  -o ${OBJECTDIR}/src/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/main.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/main.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/ParTest.o: src/ParTest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/ParTest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/ParTest.c  -o ${OBJECTDIR}/src/ParTest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/ParTest.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/ParTest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/ParTest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/serial.o: src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/serial.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/serial.c  -o ${OBJECTDIR}/src/serial.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/serial.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/serial.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/serial.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/timertest.o: src/timertest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/timertest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/timertest.c  -o ${OBJECTDIR}/src/timertest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/timertest.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/timertest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/timertest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/BlockQ.o: src/BlockQ.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/BlockQ.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/BlockQ.c  -o ${OBJECTDIR}/src/BlockQ.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/BlockQ.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/BlockQ.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/BlockQ.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/blocktim.o: src/blocktim.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/blocktim.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/blocktim.c  -o ${OBJECTDIR}/src/blocktim.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/blocktim.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/blocktim.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/blocktim.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/comtest.o: src/comtest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/comtest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/comtest.c  -o ${OBJECTDIR}/src/comtest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/comtest.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/comtest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/comtest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/crflash.o: src/crflash.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/crflash.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/crflash.c  -o ${OBJECTDIR}/src/crflash.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/crflash.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/crflash.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/crflash.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/integer.o: src/integer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/integer.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/integer.c  -o ${OBJECTDIR}/src/integer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/integer.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/integer.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/integer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/uart.o: uart.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/uart.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  uart.c  -o ${OBJECTDIR}/uart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/uart.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
+	@${FIXDEPS} "${OBJECTDIR}/uart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 else
 ${OBJECTDIR}/src/FreeRTOS/croutine.o: src/FreeRTOS/croutine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/croutine.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/croutine.c  -o ${OBJECTDIR}/src/FreeRTOS/croutine.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/croutine.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/croutine.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/croutine.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/heap_1.o: src/FreeRTOS/heap_1.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/heap_1.c  -o ${OBJECTDIR}/src/FreeRTOS/heap_1.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/heap_1.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/list.o: src/FreeRTOS/list.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/list.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/list.c  -o ${OBJECTDIR}/src/FreeRTOS/list.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/list.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/list.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/list.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/port.o: src/FreeRTOS/port.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/port.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/port.c  -o ${OBJECTDIR}/src/FreeRTOS/port.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/port.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/port.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/port.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/queue.o: src/FreeRTOS/queue.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/queue.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/queue.c  -o ${OBJECTDIR}/src/FreeRTOS/queue.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/queue.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/queue.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/queue.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/tasks.o: src/FreeRTOS/tasks.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/tasks.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/tasks.c  -o ${OBJECTDIR}/src/FreeRTOS/tasks.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/tasks.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/tasks.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/tasks.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/FreeRTOS/timers.o: src/FreeRTOS/timers.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/timers.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/FreeRTOS/timers.c  -o ${OBJECTDIR}/src/FreeRTOS/timers.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/timers.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/timers.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/timers.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/lcd.o: src/lcd.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/lcd.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/lcd.c  -o ${OBJECTDIR}/src/lcd.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/lcd.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/lcd.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/lcd.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/main.o: src/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/main.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/main.c  -o ${OBJECTDIR}/src/main.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/main.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/main.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/main.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/ParTest.o: src/ParTest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/ParTest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/ParTest.c  -o ${OBJECTDIR}/src/ParTest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/ParTest.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/ParTest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/ParTest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/serial.o: src/serial.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/serial.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/serial.c  -o ${OBJECTDIR}/src/serial.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/serial.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/serial.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/serial.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/timertest.o: src/timertest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/timertest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/timertest.c  -o ${OBJECTDIR}/src/timertest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/timertest.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/timertest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/timertest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/BlockQ.o: src/BlockQ.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/BlockQ.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/BlockQ.c  -o ${OBJECTDIR}/src/BlockQ.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/BlockQ.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/BlockQ.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/BlockQ.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/blocktim.o: src/blocktim.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/blocktim.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/blocktim.c  -o ${OBJECTDIR}/src/blocktim.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/blocktim.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/blocktim.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/blocktim.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/comtest.o: src/comtest.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/comtest.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/comtest.c  -o ${OBJECTDIR}/src/comtest.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/comtest.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/comtest.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/comtest.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/crflash.o: src/crflash.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/crflash.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/crflash.c  -o ${OBJECTDIR}/src/crflash.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/crflash.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/crflash.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/crflash.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 ${OBJECTDIR}/src/integer.o: src/integer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src 
 	@${RM} ${OBJECTDIR}/src/integer.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/integer.c  -o ${OBJECTDIR}/src/integer.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/integer.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
-	@${FIXDEPS} "${OBJECTDIR}/src/integer.o.d" $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/integer.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/uart.o: uart.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/uart.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  uart.c  -o ${OBJECTDIR}/uart.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/uart.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
+	@${FIXDEPS} "${OBJECTDIR}/uart.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 
@@ -289,14 +301,14 @@ ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o: src/FreeRTOS/portasm_PIC24.S  nbproje
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  src/FreeRTOS/portasm_PIC24.S  -o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d"  -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -I"." -I".\include" -I".\include\FreeRTOS" -I".\src" -I".\src\FreeRTOS" -I".\src" -I".\src\FreeRTOS" -Wa,-MD,"${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d",--defsym=__MPLAB_BUILD=1,--defsym=__MPLAB_DEBUG=1,--defsym=__ICD2RAM=1,--defsym=__DEBUG=1,--defsym=__MPLAB_DEBUGGER_ICD3=1,-g,--no-relax,-g$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d" "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d"  -t $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d" "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d"  -t $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 else
 ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o: src/FreeRTOS/portasm_PIC24.S  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
 	@${RM} ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d 
 	${MP_CC} $(MP_EXTRA_AS_PRE)  src/FreeRTOS/portasm_PIC24.S  -o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d"  -omf=elf -I"." -I".\include" -I".\include\FreeRTOS" -I".\src" -I".\src\FreeRTOS" -I".\src" -I".\src\FreeRTOS" -Wa,-MD,"${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d",--defsym=__MPLAB_BUILD=1,-g,--no-relax,-g$(MP_EXTRA_AS_POST)
-	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d" "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d"  -t $(SILENT) 
+	@${FIXDEPS} "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d" "${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.asm.d"  -t $(SILENT)  -rsi ${MP_CC_DIR}../  
 	
 endif
 
