@@ -22,6 +22,8 @@ don't have to block to send. */
 
 #define uartBAUD             9600
 
+#define uartBUFFER_SIZE      lcdSTRING_LENGTH
+
 /*
  * The UART is written to by more than one task so is controlled by this
  * 'gatekeeper' task.  This is the only task that is actually permitted to
@@ -36,10 +38,9 @@ static void vUartRxTask( void *pvParameters );
  */
 static void prvUartInit (void);
 
+static char pcBuffer[uartBUFFER_SIZE];
 
-//static xQueueHandle xUartTxQueue;
-//static xQueueHandle xUartRxQueue;
-
+char pcUartCommand[uartBUFFER_SIZE];
 
 
 static void prvUartInit (void)
@@ -52,42 +53,8 @@ void vStartUartTask( void )
     /* Initialise the hardware. */
     prvUartInit();
 
-    /* Create the queue used by the UART task.  Messages for display on the UART
-    are received via this queue. */
-//    xUartTxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( signed char ) );
-//    xUartRxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( signed char ) );
-
-//    xTaskCreate( vUartTxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
     xTaskCreate( vUartRxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
 }
-
-
-//static char prvUartGetc( void )
-//{
-//    while (!U2STAbits.URXDA);   // wait for a new character to arrive
-//    return (char) U2RXREG;      // read the character from the receive buffer
-//}
-//
-//static void prvUartGets( char *s, int len )
-//{
-//    char *p = s;
-//    int i;
-//    for (i=0; i<len-1; ++i) {
-//        *s = prvUartGetc();
-//        prvUartPutc(*s);
-//        if ((*s==BACKSPACE)&&(s>p)) {
-//            prvUartPutc(' ');     // overwrite last character
-//            prvUartPutc(BACKSPACE);
-//            ++len;
-//            --s;
-//            continue;
-//        }
-//        if (*s=='\r' || *s=='\n')
-//            break;
-//        ++s;
-//    }
-//    *s = '\0';
-//}
 
 void vUartPutc( char cChar )
 {
@@ -120,12 +87,70 @@ void vUartPuts( char *pcString )
 //    }
 //}
 
+static void prvUartCopyCommandBuffer()
+{
+    static unsigned int i = 0;
+    for( i = 0; i < uartBUFFER_SIZE; ++i )
+    {
+        pcUartCommand[i] = pcBuffer[i];
+
+        if( pcUartCommand[i] == '\0' )
+        {
+            break;
+        }
+    }
+}
+
+static unsigned short prvUartGetc( char c )
+{
+    static unsigned int i = 0;
+    unsigned short usEnter = 0;
+
+    switch(c) {
+        case -1:    // Yes, it happens.
+            break;
+        case 1:     // ^A
+        case 2:     // ^B
+        case 3:     // ^C
+            break;
+        case 8:     // Backspace
+        case 127:   // Delete
+            if (i > 0) {
+                vUartPutc(c);
+                --i;
+            }
+            break;
+        case 10:    // Line feed
+        case 11:    // Vertical tab
+        case 13:    // Carriage return
+            vUartPutc('\r');
+            vUartPutc('\n');
+            i = 0;
+            prvUartCopyCommandBuffer();
+            usEnter = 1;
+            break;
+        case 27:    // Escape
+            break;
+        default:
+            vUartPutc(c);
+            pcBuffer[i] = c;
+            ++i;
+    }
+
+    if (i >= uartBUFFER_SIZE) {
+        vUartPuts("(OVERFLOW!)\r\n");
+        i = 0;
+    }
+
+    pcBuffer[i] = '\0';
+    
+    return usEnter;
+}
+
 static void vUartRxTask( void *pvParameters )
 {
-    char buffer[lcdSTRING_LENGTH];
-    unsigned short i = 0;
-
     signed char cRxByte;
+    char pcEchoCommand[uartBUFFER_SIZE + 40];
 
     for( ;; )
     {
@@ -133,15 +158,15 @@ static void vUartRxTask( void *pvParameters )
         available. */
         if( xSerialGetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
-            /* echo */
-            vUartPutc(cRxByte);
-
-            /* print to LCD */
-            buffer[i] = cRxByte;
-            buffer[i+1] = '\0';
-            i = (i+1)%(lcdSTRING_LENGTH - 1);
-            
-            vLcdPuts(buffer);
+            if( prvUartGetc( cRxByte ) )
+            {
+                sprintf( pcEchoCommand, "You told me '%s'\r\n", pcUartCommand );
+                vUartPuts(pcEchoCommand);
+            }
+            else
+            {
+                vLcdPuts( pcBuffer );
+            }
         }
     }
 }
