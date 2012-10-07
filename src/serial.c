@@ -134,6 +134,7 @@ char cChar;
 	U2MODEbits.UARTEN	= serUART_ENABLED;
 
 	U2BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
+//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
 
 	U2STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
 	U2STAbits.UTXEN		= serTX_ENABLE;

@@ -10,4 +10,6 @@ include/FreeRTOS/task.h  \
  include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
 pic24.h  \
-uart.h 
+ include/serial.h  \
+uart.h  \
+include/lcd.h 

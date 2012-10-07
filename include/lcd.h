@@ -67,9 +67,14 @@
 #ifndef LCD_INC_H
 #define LCD_INC_H
 
+/* 32 characters + 1 null character */
+#define lcdSTRING_LENGTH ( 32 + 1 )
+
 /* Create the task that will control the LCD.  Returned is a handle to the queue
 on which messages to get written to the LCD should be written. */
 xQueueHandle xStartLCDTask( void );
+
+void vLcdPuts( char *pcString );
 
 typedef struct
 {

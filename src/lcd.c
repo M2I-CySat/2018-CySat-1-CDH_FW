@@ -122,6 +122,17 @@ static void prvLCDClear( void );
 xQueueHandle xLCDQueue;
 
 
+/* Buffer into which the maximum jitter time is written as a string. */
+static char pcPutsString[lcdSTRING_LENGTH];
+
+/* The message that is sent on the queue to the LCD task.  The first
+ * parameter is the minimum time (in ticks) that the message should be
+ * left on the LCD without being overwritten.  The second parameter is a pointer
+ * to the message to display itself.
+ */
+static xLCDMessage xPutsMessage = { 0, pcPutsString };
+
+
 /*-----------------------------------------------------------*/
 
 xQueueHandle xStartLCDTask( void )
@@ -136,6 +147,24 @@ xQueueHandle xStartLCDTask( void )
 
 	return xLCDQueue;
 }
+
+void vLcdPuts( char *pcMessage )
+{
+    int i;
+    for( i = 0; i < lcdSTRING_LENGTH; ++i )
+    {
+        pcPutsString[i] = pcMessage[i];
+
+        if( pcMessage[i] == '\0' )
+        {
+            break;
+        }
+    }
+    pcPutsString[lcdSTRING_LENGTH-1] = '\0';
+
+    xQueueSend( xLCDQueue, &xPutsMessage, portMAX_DELAY );
+}
+
 /*-----------------------------------------------------------*/
 
 static void prvLCDGotoRow( unsigned portSHORT usRow )
@@ -214,7 +243,7 @@ unsigned portSHORT usRow = 0;
 	prvSetupLCD();
 
 	/* Welcome message. */
-	prvLCDPutString( "www.FreeRTOS.org" );
+	prvLCDPutString( "Hello world!" );
 
 	for( ;; )
 	{
@@ -227,7 +256,7 @@ unsigned portSHORT usRow = 0;
 		/* Switch rows each time so we can see that the display is still being
 		updated. */
 		prvLCDGotoRow( usRow & 0x01 );
-		usRow++;
+//		usRow++;
 		prvLCDPutString( xMessage.pcMessage );
 
 		/* Delay the requested amount of time to ensure the text just written 

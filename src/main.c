@@ -114,6 +114,7 @@
 //#include "partest.h"
 #include "lcd.h"
 //#include "timertest.h"
+#include "serial.h"
 #include "uart.h"
 
 /* Demo task priorities. */
@@ -125,7 +126,7 @@
 #define mainCHECK_TAKS_STACK_SIZE			( configMINIMAL_STACK_SIZE * 2 )
 
 /* The execution period of the check task. */
-#define mainCHECK_TASK_PERIOD				( ( portTickType ) 3000 / portTICK_RATE_MS )
+#define mainCHECK_TASK_PERIOD				( ( portTickType ) 500 / portTICK_RATE_MS )
 
 /* The number of flash co-routines to create. */
 #define mainNUM_FLASH_COROUTINES			( 5 )
@@ -183,34 +184,35 @@ static xQueueHandle xLCDQueue;
  */
 int main( void )
 {
-	/* Configure any hardware required for this demo. */
-	prvSetupHardware();
+    /* Configure any hardware required for this demo. */
+    prvSetupHardware();
 
-	/* Create the standard demo tasks. */
-//	vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-//	vStartIntegerMathTasks( tskIDLE_PRIORITY );
-//	vStartFlashCoRoutines( mainNUM_FLASH_COROUTINES );
-//	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
-//	vCreateBlockTimeTasks();
+    /* Create the standard demo tasks. */
+//  vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
+//  vStartIntegerMathTasks( tskIDLE_PRIORITY );
+//  vStartFlashCoRoutines( mainNUM_FLASH_COROUTINES );
+//  vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
+//  vCreateBlockTimeTasks();
 
-	/* Create the test tasks defined within this file. */
-	xTaskCreate( vCheckTask, ( signed char * ) "Check", mainCHECK_TAKS_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+    /* Create the test tasks defined within this file. */
+    xTaskCreate( vCheckTask, ( signed char * ) "Check", mainCHECK_TAKS_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
 
-	/* Start the task that will control the LCD.  This returns the handle
-	to the queue used to write text out to the task. */
-	xLCDQueue = xStartLCDTask();
+    /* Start the task that will control the LCD.  This returns the handle
+    to the queue used to write text out to the task. */
+    xLCDQueue = xStartLCDTask();
 
-        vStartUartTask();
+//    xSerialPortInitMinimal( 9600, 80 );
+    vStartUartTask();
 
-	/* Start the high frequency interrupt test. */
-//	vSetupTimerTest( mainTEST_INTERRUPT_FREQUENCY );
+    /* Start the high frequency interrupt test. */
+//  vSetupTimerTest( mainTEST_INTERRUPT_FREQUENCY );
 
-	/* Finally start the scheduler. */
-	vTaskStartScheduler();
+    /* Finally start the scheduler. */
+    vTaskStartScheduler();
 
-	/* Will only reach here if there is insufficient heap available to start
-	the scheduler. */
-	return 0;
+    /* Will only reach here if there is insufficient heap available to start
+    the scheduler. */
+    return 0;
 }
 /*-----------------------------------------------------------*/
 
@@ -222,23 +224,26 @@ static void prvSetupHardware( void )
 
 static void vCheckTask( void *pvParameters )
 {
-/* Used to wake the task at the correct frequency. */
-portTickType xLastExecutionTime; 
+    /* Used to wake the task at the correct frequency. */
+    portTickType xLastExecutionTime;
 
-/* Buffer into which the maximum jitter time is written as a string. */
-static char cStringBuffer[ mainMAX_STRING_LENGTH ];
+    /* Buffer into which the maximum jitter time is written as a string. */
+//    static char cStringBuffer[ mainMAX_STRING_LENGTH ];
 
-/* The message that is sent on the queue to the LCD task.  The first
-parameter is the minimum time (in ticks) that the message should be
-left on the LCD without being overwritten.  The second parameter is a pointer
-to the message to display itself. */
-xLCDMessage xMessage = { 0, cStringBuffer };
+    /* The message that is sent on the queue to the LCD task.  The first
+    parameter is the minimum time (in ticks) that the message should be
+    left on the LCD without being overwritten.  The second parameter is a pointer
+    to the message to display itself. */
+//    xLCDMessage xMessage = { 0, cStringBuffer };
 
     /* Initialise xLastExecutionTime so the first call to vTaskDelayUntil()
     works correctly. */
     xLastExecutionTime = xTaskGetTickCount();
 
-    sprintf( cStringBuffer, "I'm an LCD" );
+//    sprintf( cStringBuffer, "I'm an LCD" );
+
+    vLcdPuts("I'm an LCD!");
+    vUartPuts( "I am a UART!\r\n" );
 
     for( ;; )
     {
@@ -247,9 +252,8 @@ xLCDMessage xMessage = { 0, cStringBuffer };
         vTaskDelayUntil( &xLastExecutionTime, mainCHECK_TASK_PERIOD );
 
         /* Send the message to the LCD gatekeeper for display. */
-        xQueueSend( xLCDQueue, &xMessage, portMAX_DELAY );
-
-        vUartPuts( "Are we UART together?\r\n" );
+//        xQueueSend( xLCDQueue, &xMessage, portMAX_DELAY );
+ 
     }
 }
 /*-----------------------------------------------------------*/

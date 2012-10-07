@@ -5,7 +5,22 @@
 
 #include "pic24.h"
 
+#include "serial.h"
 #include "uart.h"
+#include "lcd.h"
+
+
+/* We should find that each character can be queued for Tx immediately and we
+don't have to block to send. */
+#define uartNO_BLOCK         ( ( portTickType ) 0 )
+
+/* The Rx task will block on the Rx queue for a long period. */
+#define uartRX_BLOCK_TIME    ( ( portTickType ) 0xffff )
+
+/* The length of the queue used to send messages to the UART queue. */
+#define uartQUEUE_SIZE       320
+
+#define uartBAUD             9600
 
 /*
  * The UART is written to by more than one task so is controlled by this
@@ -13,7 +28,7 @@
  * access the UART directly.  Other tasks wanting to display a message send
  * the message to the gatekeeper.
  */
-static void vUartTxTask( void *pvParameters );
+//static void vUartTxTask( void *pvParameters );
 static void vUartRxTask( void *pvParameters );
 
 /*
@@ -21,27 +36,16 @@ static void vUartRxTask( void *pvParameters );
  */
 static void prvUartInit (void);
 
-/*
- * Write a string of text to the UART
- */
-static void prvUartPuts( char *s );
 
-static void prvUartPutc( char c );
-
-static char prvUartGetc( void );
-
-static void prvUartGets( char *s, int len );
+//static xQueueHandle xUartTxQueue;
+//static xQueueHandle xUartRxQueue;
 
 
-/* The length of the queue used to send messages to the UART gatekeeper task. */
-#define uartQUEUE_SIZE      3
 
-#define uartBUFFER_SIZE     80
-
-
-/* The queue used to send messages to the LCD task. */
-static xQueueHandle xUartTxQueue;
-static xQueueHandle xUartRxQueue;
+static void prvUartInit (void)
+{
+    xSerialPortInitMinimal( uartBAUD, uartQUEUE_SIZE );
+}
 
 void vStartUartTask( void )
 {
@@ -50,91 +54,95 @@ void vStartUartTask( void )
 
     /* Create the queue used by the UART task.  Messages for display on the UART
     are received via this queue. */
-    xUartTxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( xUartMessage ) );
-    xUartRxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( xUartMessage ) );
+//    xUartTxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( signed char ) );
+//    xUartRxQueue = xQueueCreate( uartQUEUE_SIZE, sizeof( signed char ) );
 
-    xTaskCreate( vUartTxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
-//    xTaskCreate( vUartRxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
-}
-
-void vUartPuts(char* message)
-{
-    static char cUartBuffer[ uartBUFFER_SIZE ];
-    static xUartMessage xMessage = { cUartBuffer };
-
-    sprintf(cUartBuffer, message);
-
-    xQueueSend( xUartTxQueue, &xMessage, portMAX_DELAY );
+//    xTaskCreate( vUartTxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+    xTaskCreate( vUartRxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
 }
 
 
-static void prvUartInit (void)
+//static char prvUartGetc( void )
+//{
+//    while (!U2STAbits.URXDA);   // wait for a new character to arrive
+//    return (char) U2RXREG;      // read the character from the receive buffer
+//}
+//
+//static void prvUartGets( char *s, int len )
+//{
+//    char *p = s;
+//    int i;
+//    for (i=0; i<len-1; ++i) {
+//        *s = prvUartGetc();
+//        prvUartPutc(*s);
+//        if ((*s==BACKSPACE)&&(s>p)) {
+//            prvUartPutc(' ');     // overwrite last character
+//            prvUartPutc(BACKSPACE);
+//            ++len;
+//            --s;
+//            continue;
+//        }
+//        if (*s=='\r' || *s=='\n')
+//            break;
+//        ++s;
+//    }
+//    *s = '\0';
+//}
+
+void vUartPutc( char cChar )
 {
-    /* init the serial port (UART2, 9600@32MHz, 8, N, 1, CTS/RTS) */
-    U2BRG   = BRATE;    // initialize the baud rate generator
-    U2MODE  = U_ENABLE; // initialize the UART module
-    U2STA   = U_TX;     // enable the Transmitter
+    xSerialPutChar( NULL, (signed char) cChar, uartNO_BLOCK );
 }
 
-static void prvUartPutc( char c )
+void vUartPuts( char *pcString )
 {
-    while (U2STAbits.UTXBF);    // wait while Tx buffer full
-    U2TXREG = (unsigned int) c;
-}
-
-static void prvUartPuts( char *s )
-{
-    while (*s)
+    while (*pcString)
     {
-        prvUartPutc(*s++);
+        vUartPutc(*pcString++);
     }
 }
 
-static char prvUartGetc( void )
-{
-    while (!U2STAbits.URXDA);   // wait for a new character to arrive
-    return (char) U2RXREG;      // read the character from the receive buffer
-}
-
-static void prvUartGets( char *s, int len )
-{
-    char *p = s;
-    int i;
-    for (i=0; i<len-1; ++i) {
-        *s = prvUartGetc();
-        prvUartPutc(*s);
-        if ((*s==BACKSPACE)&&(s>p)) {
-            prvUartPutc(' ');     // overwrite last character
-            prvUartPutc(BACKSPACE);
-            ++len;
-            --s;
-            continue;
-        }
-        if (*s=='\r' || *s=='\n')
-            break;
-        ++s;
-    }
-    *s = '\0';
-}
-
-static void vUartTxTask( void *pvParameters )
-{
-    xUartMessage xMessage;
-
-    /* Welcome message. */
-    prvUartPuts( "I'm a Uart; Hello World!\r\n" );
-
-    for( ;; )
-    {
-
-//        prvUartPuts( "I'm still a UART!\r\n" );
-        /* Wait for a message to arrive that requires displaying. */
-        while( xQueueReceive( xUartTxQueue, &xMessage, portMAX_DELAY ) != pdPASS );
-        prvUartPuts( xMessage.pcMessage );
-
-    }
-}
+//static void vUartTxTask( void *pvParameters )
+//{
+//    char cChar;
+//
+//    /* Welcome message. */
+////    vUartPuts( "I'm a Uart; Hello World!\r\n" );
+//
+//    for( ;; )
+//    {
+//
+////        vUartPuts( "I'm still a UART!\r\n" );
+//        /* Wait for a message to arrive that requires displaying. */
+//        while( xQueueReceive( xUartTxQueue, &cChar, portMAX_DELAY ) != pdPASS );
+//        vUartPutc( cChar );
+//
+//    }
+//}
 
 static void vUartRxTask( void *pvParameters )
 {
+    char buffer[lcdSTRING_LENGTH];
+    unsigned short i = 0;
+
+    signed char cRxByte;
+
+    for( ;; )
+    {
+        /* Block on the queue that contains received bytes until a byte is
+        available. */
+        if( xSerialGetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
+        {
+            /* echo */
+            vUartPutc(cRxByte);
+
+            /* print to LCD */
+            buffer[i] = cRxByte;
+            buffer[i+1] = '\0';
+            i = (i+1)%(lcdSTRING_LENGTH - 1);
+            
+            vLcdPuts(buffer);
+        }
+    }
 }
+
