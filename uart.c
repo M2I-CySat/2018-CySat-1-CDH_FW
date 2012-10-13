@@ -7,6 +7,7 @@
 
 #include "serial.h"
 #include "uart.h"
+#include "testing.h"
 #include "lcd.h"
 
 
@@ -22,7 +23,10 @@ don't have to block to send. */
 
 #define uartBAUD             9600
 
-#define uartBUFFER_SIZE      lcdSTRING_LENGTH
+#define uartESCAPE_CHARACTER "\033"
+#define uartDEFAULT_TEXT     uartESCAPE_CHARACTER "[0;37m"
+#define uartERROR_TEXT       uartESCAPE_CHARACTER "[0;31m"
+
 
 /*
  * The UART is written to by more than one task so is controlled by this
@@ -39,8 +43,6 @@ static void vUartRxTask( void *pvParameters );
 static void prvUartInit (void);
 
 static char pcBuffer[uartBUFFER_SIZE];
-
-char pcUartCommand[uartBUFFER_SIZE];
 
 
 static void prvUartInit (void)
@@ -69,6 +71,14 @@ void vUartPuts( char *pcString )
     }
 }
 
+void vUartPutsError( char *pcString )
+{
+    // TODO: Add more useful info
+    vUartPuts(uartERROR_TEXT "[ERROR] ");
+    vUartPuts(pcString);
+    vUartPuts(uartDEFAULT_TEXT);
+}
+
 //static void vUartTxTask( void *pvParameters )
 //{
 //    char cChar;
@@ -87,21 +97,7 @@ void vUartPuts( char *pcString )
 //    }
 //}
 
-static void prvUartCopyCommandBuffer()
-{
-    static unsigned int i = 0;
-    for( i = 0; i < uartBUFFER_SIZE; ++i )
-    {
-        pcUartCommand[i] = pcBuffer[i];
-
-        if( pcUartCommand[i] == '\0' )
-        {
-            break;
-        }
-    }
-}
-
-static unsigned short prvUartGetc( char c )
+static unsigned short prvUartGetc( char c, char* pcCommandBuffer )
 {
     static unsigned int i = 0;
     unsigned short usEnter = 0;
@@ -112,6 +108,7 @@ static unsigned short prvUartGetc( char c )
         case 1:     // ^A
         case 2:     // ^B
         case 3:     // ^C
+            // TODO: Interrupt command
             break;
         case 8:     // Backspace
         case 127:   // Delete
@@ -126,7 +123,7 @@ static unsigned short prvUartGetc( char c )
             vUartPutc('\r');
             vUartPutc('\n');
             i = 0;
-            prvUartCopyCommandBuffer();
+            sprintf( pcCommandBuffer, "%s", pcBuffer );
             usEnter = 1;
             break;
         case 27:    // Escape
@@ -149,8 +146,9 @@ static unsigned short prvUartGetc( char c )
 
 static void vUartRxTask( void *pvParameters )
 {
+    static char pcCommandBuffer[uartBUFFER_SIZE];
+    
     signed char cRxByte;
-    char pcEchoCommand[uartBUFFER_SIZE + 40];
 
     for( ;; )
     {
@@ -158,13 +156,15 @@ static void vUartRxTask( void *pvParameters )
         available. */
         if( xSerialGetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
-            if( prvUartGetc( cRxByte ) )
+
+            if( prvUartGetc( cRxByte, pcCommandBuffer ) )
             {
-                sprintf( pcEchoCommand, "You told me '%s'\r\n", pcUartCommand );
-                vUartPuts(pcEchoCommand);
+                // User pressed enter
+                interpretTestingCommand(pcCommandBuffer);
             }
             else
             {
+                // User entered key other than enter
                 vLcdPuts( pcBuffer );
             }
         }

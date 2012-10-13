@@ -162,11 +162,6 @@ _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
 /*
- * The check task as described at the top of this file.
- */
-static void vCheckTask( void *pvParameters );
-
-/*
  * Setup the processor ready for the demo.
  */
 static void prvSetupHardware( void );
@@ -194,9 +189,6 @@ int main( void )
 //  vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
 //  vCreateBlockTimeTasks();
 
-    /* Create the test tasks defined within this file. */
-    xTaskCreate( vCheckTask, ( signed char * ) "Check", mainCHECK_TAKS_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
-
     /* Start the task that will control the LCD.  This returns the handle
     to the queue used to write text out to the task. */
     xLCDQueue = xStartLCDTask();
@@ -206,6 +198,9 @@ int main( void )
 
     /* Start the high frequency interrupt test. */
 //  vSetupTimerTest( mainTEST_INTERRUPT_FREQUENCY );
+    
+    vLcdPuts("I'm an LCD!");
+    vUartPuts( "I am a UART!\r\n" );
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();
@@ -219,42 +214,6 @@ int main( void )
 static void prvSetupHardware( void )
 {
 //	vParTestInitialise();
-}
-/*-----------------------------------------------------------*/
-
-static void vCheckTask( void *pvParameters )
-{
-    /* Used to wake the task at the correct frequency. */
-    portTickType xLastExecutionTime;
-
-    /* Buffer into which the maximum jitter time is written as a string. */
-//    static char cStringBuffer[ mainMAX_STRING_LENGTH ];
-
-    /* The message that is sent on the queue to the LCD task.  The first
-    parameter is the minimum time (in ticks) that the message should be
-    left on the LCD without being overwritten.  The second parameter is a pointer
-    to the message to display itself. */
-//    xLCDMessage xMessage = { 0, cStringBuffer };
-
-    /* Initialise xLastExecutionTime so the first call to vTaskDelayUntil()
-    works correctly. */
-    xLastExecutionTime = xTaskGetTickCount();
-
-//    sprintf( cStringBuffer, "I'm an LCD" );
-
-    vLcdPuts("I'm an LCD!");
-    vUartPuts( "I am a UART!\r\n" );
-
-    for( ;; )
-    {
-
-        /* Wait until it is time for the next cycle. */
-        vTaskDelayUntil( &xLastExecutionTime, mainCHECK_TASK_PERIOD );
-
-        /* Send the message to the LCD gatekeeper for display. */
-//        xQueueSend( xLCDQueue, &xMessage, portMAX_DELAY );
- 
-    }
 }
 /*-----------------------------------------------------------*/
 
