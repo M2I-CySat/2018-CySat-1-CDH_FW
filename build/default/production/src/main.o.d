@@ -10,6 +10,5 @@ include/FreeRTOS/mpu_wrappers.h  \
 include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
  include/FreeRTOS/croutine.h  \
-include/lcd.h  \
 include/serial.h  \
 uart.h 

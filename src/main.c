@@ -1,100 +1,3 @@
-/*
-    FreeRTOS V7.2.0 - Copyright (C) 2012 Real Time Engineers Ltd.
-	
-
-    ***************************************************************************
-     *                                                                       *
-     *    FreeRTOS tutorial books are available in pdf and paperback.        *
-     *    Complete, revised, and edited pdf reference manuals are also       *
-     *    available.                                                         *
-     *                                                                       *
-     *    Purchasing FreeRTOS documentation will not only help you, by       *
-     *    ensuring you get running as quickly as possible and with an        *
-     *    in-depth knowledge of how to use FreeRTOS, it will also help       *
-     *    the FreeRTOS project to continue with its mission of providing     *
-     *    professional grade, cross platform, de facto standard solutions    *
-     *    for microcontrollers - completely free of charge!                  *
-     *                                                                       *
-     *    >>> See http://www.FreeRTOS.org/Documentation for details. <<<     *
-     *                                                                       *
-     *    Thank you for using FreeRTOS, and thank you for your support!      *
-     *                                                                       *
-    ***************************************************************************
-
-
-    This file is part of the FreeRTOS distribution.
-
-    FreeRTOS is free software; you can redistribute it and/or modify it under
-    the terms of the GNU General Public License (version 2) as published by the
-    Free Software Foundation AND MODIFIED BY the FreeRTOS exception.
-    >>>NOTE<<< The modification to the GPL is included to allow you to
-    distribute a combined work that includes FreeRTOS without being obliged to
-    provide the source code for proprietary components outside of the FreeRTOS
-    kernel.  FreeRTOS is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-    or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-    more details. You should have received a copy of the GNU General Public
-    License and the FreeRTOS license exception along with FreeRTOS; if not it
-    can be viewed here: http://www.freertos.org/a00114.html and also obtained
-    by writing to Richard Barry, contact details for whom are available on the
-    FreeRTOS WEB site.
-
-    1 tab == 4 spaces!
-    
-    ***************************************************************************
-     *                                                                       *
-     *    Having a problem?  Start by reading the FAQ "My application does   *
-     *    not run, what could be wrong?                                      *
-     *                                                                       *
-     *    http://www.FreeRTOS.org/FAQHelp.html                               *
-     *                                                                       *
-    ***************************************************************************
-
-    
-    http://www.FreeRTOS.org - Documentation, training, latest information, 
-    license and contact details.
-    
-    http://www.FreeRTOS.org/plus - A selection of FreeRTOS ecosystem products,
-    including FreeRTOS+Trace - an indispensable productivity tool.
-
-    Real Time Engineers ltd license FreeRTOS to High Integrity Systems, who sell 
-    the code with commercial support, indemnification, and middleware, under 
-    the OpenRTOS brand: http://www.OpenRTOS.com.  High Integrity Systems also
-    provide a safety engineered and independently SIL3 certified version under 
-    the SafeRTOS brand: http://www.SafeRTOS.com.
-*/
-
-/*
- * Creates all the demo application tasks, then starts the scheduler.  The WEB
- * documentation provides more details of the standard demo application tasks.
- * In addition to the standard demo tasks, the following tasks and tests are
- * defined and/or created within this file:
- *
- * "Fast Interrupt Test" - A high frequency periodic interrupt is generated
- * using a free running timer to demonstrate the use of the 
- * configKERNEL_INTERRUPT_PRIORITY configuration constant.  The interrupt 
- * service routine measures the number of processor clocks that occur between
- * each interrupt - and in so doing measures the jitter in the interrupt 
- * timing.  The maximum measured jitter time is latched in the usMaxJitter 
- * variable, and displayed on the LCD by the 'Check' as described below.  
- * The fast interrupt is configured and handled in the timer_test.c source 
- * file.
- *
- * "LCD" task - the LCD task is a 'gatekeeper' task.  It is the only task that
- * is permitted to access the LCD directly.  Other tasks wishing to write a
- * message to the LCD send the message on a queue to the LCD task instead of 
- * accessing the LCD themselves.  The LCD task just blocks on the queue waiting 
- * for messages - waking and displaying the messages as they arrive.  The LCD
- * task is defined in lcd.c.  
- * 
- * "Check" task -  This only executes every three seconds but has the highest 
- * priority so is guaranteed to get processor time.  Its main function is to 
- * check that all the standard demo tasks are still operational.  Should any
- * unexpected behaviour within a demo task be discovered the 'check' task will
- * write "FAIL #n" to the LCD (via the LCD task).  If all the demo tasks are 
- * executing with their expected behaviour then the check task writes the max
- * jitter time to the LCD (again via the LCD task), as described above.
- */
 
 /* Standard includes. */
 #include <stdio.h>
@@ -105,55 +8,9 @@
 #include "queue.h"
 #include "croutine.h"
 
-/* Demo application includes. */
-//#include "BlockQ.h"
-//#include "crflash.h"
-//#include "blocktim.h"
-//#include "integer.h"
-//#include "comtest2.h"
-//#include "partest.h"
-#include "lcd.h"
-//#include "timertest.h"
+/* Application includes */
 #include "serial.h"
 #include "uart.h"
-
-/* Demo task priorities. */
-#define mainBLOCK_Q_PRIORITY				( tskIDLE_PRIORITY + 2 )
-#define mainCHECK_TASK_PRIORITY				( tskIDLE_PRIORITY + 3 )
-#define mainCOM_TEST_PRIORITY				( 2 )
-
-/* The check task may require a bit more stack as it calls sprintf(). */
-#define mainCHECK_TAKS_STACK_SIZE			( configMINIMAL_STACK_SIZE * 2 )
-
-/* The execution period of the check task. */
-#define mainCHECK_TASK_PERIOD				( ( portTickType ) 500 / portTICK_RATE_MS )
-
-/* The number of flash co-routines to create. */
-#define mainNUM_FLASH_COROUTINES			( 5 )
-
-/* Baud rate used by the comtest tasks. */
-#define mainCOM_TEST_BAUD_RATE				( 19200 )
-
-/* The LED used by the comtest tasks.  mainCOM_TEST_LED + 1 is also used.
-See the comtest.c file for more information. */
-#define mainCOM_TEST_LED					( 6 )
-
-/* The frequency at which the "fast interrupt test" interrupt will occur. */
-#define mainTEST_INTERRUPT_FREQUENCY		( 20000 )
-
-/* The number of processor clocks we expect to occur between each "fast
-interrupt test" interrupt. */
-#define mainEXPECTED_CLOCKS_BETWEEN_INTERRUPTS ( configCPU_CLOCK_HZ / mainTEST_INTERRUPT_FREQUENCY )
-
-/* The number of nano seconds between each processor clock. */
-#define mainNS_PER_CLOCK ( ( unsigned short ) ( ( 1.0 / ( double ) configCPU_CLOCK_HZ ) * 1000000000.0 ) )
-
-/* Dimension the buffer used to hold the value of the maximum jitter time when
-it is converted to a string. */
-#define mainMAX_STRING_LENGTH				( 20 )
-
-/*-----------------------------------------------------------*/
-
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
 _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
@@ -161,46 +18,12 @@ _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 // Oscillator in HS mode, Use primary oscillator (no PLL)
 _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
-/*
- * Setup the processor ready for the demo.
- */
-static void prvSetupHardware( void );
 
-/*-----------------------------------------------------------*/
-
-/* The queue used to send messages to the LCD task. */
-static xQueueHandle xLCDQueue;
-//static xQueueHandle xUartQueue;
-
-/*-----------------------------------------------------------*/
-
-/*
- * Create the demo tasks then start the scheduler.
- */
 int main( void )
 {
-    /* Configure any hardware required for this demo. */
-    prvSetupHardware();
-
-    /* Create the standard demo tasks. */
-//  vStartBlockingQueueTasks( mainBLOCK_Q_PRIORITY );
-//  vStartIntegerMathTasks( tskIDLE_PRIORITY );
-//  vStartFlashCoRoutines( mainNUM_FLASH_COROUTINES );
-//  vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
-//  vCreateBlockTimeTasks();
-
-    /* Start the task that will control the LCD.  This returns the handle
-    to the queue used to write text out to the task. */
-    xLCDQueue = xStartLCDTask();
-
-//    xSerialPortInitMinimal( 9600, 80 );
     vStartUartTask();
-
-    /* Start the high frequency interrupt test. */
-//  vSetupTimerTest( mainTEST_INTERRUPT_FREQUENCY );
     
-    vLcdPuts("I'm an LCD!");
-    vUartPuts( "I am a UART!\r\n" );
+    vConsolePuts( "I am a UART!\r\n" );
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();
@@ -209,13 +32,6 @@ int main( void )
     the scheduler. */
     return 0;
 }
-/*-----------------------------------------------------------*/
-
-static void prvSetupHardware( void )
-{
-//	vParTestInitialise();
-}
-/*-----------------------------------------------------------*/
 
 void vApplicationIdleHook( void )
 {

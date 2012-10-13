@@ -8,8 +8,9 @@
 #include "serial.h"
 #include "uart.h"
 #include "testing.h"
-#include "lcd.h"
 
+/* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
+#define uartCONSOLE_UART     2
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
@@ -35,11 +36,9 @@ don't have to block to send. */
  * the message to the gatekeeper.
  */
 //static void vUartTxTask( void *pvParameters );
-static void vUartRxTask( void *pvParameters );
+static void vUart1RxTask( void *pvParameters );
+static void vUart2RxTask( void *pvParameters );
 
-/*
- * Setup UART2.
- */
 static void prvUartInit (void);
 
 static char pcBuffer[uartBUFFER_SIZE];
@@ -47,7 +46,8 @@ static char pcBuffer[uartBUFFER_SIZE];
 
 static void prvUartInit (void)
 {
-    xSerialPortInitMinimal( uartBAUD, uartQUEUE_SIZE );
+    vSetupUart1( uartBAUD, uartQUEUE_SIZE );
+    vSetupUart2( uartBAUD, uartQUEUE_SIZE );
 }
 
 void vStartUartTask( void )
@@ -55,49 +55,61 @@ void vStartUartTask( void )
     /* Initialise the hardware. */
     prvUartInit();
 
-    xTaskCreate( vUartRxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+    xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
 }
 
-void vUartPutc( char cChar )
+void vUart1Putc( char cChar )
 {
-    xSerialPutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+    xUart1PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+}
+void vUart2Putc( char cChar )
+{
+    xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
 }
 
-void vUartPuts( char *pcString )
+void vUart1Puts( char *pcString )
 {
     while (*pcString)
     {
-        vUartPutc(*pcString++);
+        vUart1Putc(*pcString++);
+    }
+}
+void vUart2Puts( char *pcString )
+{
+    while (*pcString)
+    {
+        vUart2Putc(*pcString++);
     }
 }
 
-void vUartPutsError( char *pcString )
+void vConsolePutc( char cChar )
 {
-    // TODO: Add more useful info
-    vUartPuts(uartERROR_TEXT "[ERROR] ");
-    vUartPuts(pcString);
-    vUartPuts(uartDEFAULT_TEXT);
+#if uartCONSOLE_UART == 1
+    vUart1Putc( cChar );
+#else
+    vUart2Putc( cChar );
+#endif
 }
 
-//static void vUartTxTask( void *pvParameters )
-//{
-//    char cChar;
-//
-//    /* Welcome message. */
-////    vUartPuts( "I'm a Uart; Hello World!\r\n" );
-//
-//    for( ;; )
-//    {
-//
-////        vUartPuts( "I'm still a UART!\r\n" );
-//        /* Wait for a message to arrive that requires displaying. */
-//        while( xQueueReceive( xUartTxQueue, &cChar, portMAX_DELAY ) != pdPASS );
-//        vUartPutc( cChar );
-//
-//    }
-//}
+void vConsolePuts( char *pcString )
+{
+#if uartCONSOLE_UART == 1
+    vUart1Puts( pcString );
+#else
+    vUart2Puts( pcString );
+#endif
+}
 
-static unsigned short prvUartGetc( char c, char* pcCommandBuffer )
+void vConsolePutsError( char *pcString )
+{
+    // TODO: Add more useful info
+    vConsolePuts( uartERROR_TEXT "[ERROR] " );
+    vConsolePuts( pcString );
+    vConsolePuts( uartDEFAULT_TEXT );
+}
+
+static unsigned short prvConsoleGetc( char c, char* pcCommandBuffer )
 {
     static unsigned int i = 0;
     unsigned short usEnter = 0;
@@ -113,15 +125,15 @@ static unsigned short prvUartGetc( char c, char* pcCommandBuffer )
         case 8:     // Backspace
         case 127:   // Delete
             if (i > 0) {
-                vUartPutc(c);
+                vConsolePutc(c);
                 --i;
             }
             break;
         case 10:    // Line feed
         case 11:    // Vertical tab
         case 13:    // Carriage return
-            vUartPutc('\r');
-            vUartPutc('\n');
+            vConsolePutc('\r');
+            vConsolePutc('\n');
             i = 0;
             sprintf( pcCommandBuffer, "%s", pcBuffer );
             usEnter = 1;
@@ -129,13 +141,13 @@ static unsigned short prvUartGetc( char c, char* pcCommandBuffer )
         case 27:    // Escape
             break;
         default:
-            vUartPutc(c);
+            vConsolePutc(c);
             pcBuffer[i] = c;
             ++i;
     }
 
     if (i >= uartBUFFER_SIZE) {
-        vUartPuts("(OVERFLOW!)\r\n");
+        vConsolePuts("(OVERFLOW!)\r\n");
         i = 0;
     }
 
@@ -144,29 +156,54 @@ static unsigned short prvUartGetc( char c, char* pcCommandBuffer )
     return usEnter;
 }
 
-static void vUartRxTask( void *pvParameters )
+static void prvConsoleRx( signed char cRxByte )
 {
     static char pcCommandBuffer[uartBUFFER_SIZE];
     
+    if( prvConsoleGetc( cRxByte, pcCommandBuffer ) )
+    {
+        // User pressed enter
+        interpretTestingCommand( pcCommandBuffer );
+    }
+    else
+    {
+        // User entered key other than enter
+    }
+}
+
+static void vUart1RxTask( void *pvParameters )
+{
+
     signed char cRxByte;
 
     for( ;; )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
-        if( xSerialGetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
+        if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
+#if uartCONSOLE_UART == 1
+            prvConsoleRx(cRxByte);
+#endif
+        }
+    }
+}
 
-            if( prvUartGetc( cRxByte, pcCommandBuffer ) )
-            {
-                // User pressed enter
-                interpretTestingCommand(pcCommandBuffer);
-            }
-            else
-            {
-                // User entered key other than enter
-                vLcdPuts( pcBuffer );
-            }
+static void vUart2RxTask( void *pvParameters )
+{
+    signed char cRxByte;
+
+    for( ;; )
+    {
+        /* Block on the queue that contains received bytes until a byte is
+        available. */
+        if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
+        {
+#if uartCONSOLE_UART != 1
+            prvConsoleRx(cRxByte);
+#else
+            vUart1Putc(cRxByte);
+#endif
         }
     }
 }

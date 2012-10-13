@@ -106,101 +106,200 @@ an example of an efficient driver. */
 
 
 /* The queues used to communicate between tasks and ISR's. */
-static xQueueHandle xRxedChars; 
-static xQueueHandle xCharsForTx; 
+static xQueueHandle xUart1RxQueue;
+static xQueueHandle xUart1TxQueue;
+static xQueueHandle xUart2RxQueue;
+static xQueueHandle xUart2TxQueue;
 
-static portBASE_TYPE xTxHasEnded;
+static portBASE_TYPE xU1TxHasEnded;
+static portBASE_TYPE xU2TxHasEnded;
 /*-----------------------------------------------------------*/
+
+void vSetupUart1( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
+{
+    char cChar;
+
+    /* Create the queues used by the com test task. */
+    xUart1RxQueue = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
+    xUart1TxQueue = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
+
+    /* Setup the UART. */
+    U1MODEbits.BRGH		= serLOW_SPEED;
+    U1MODEbits.STSEL	= serONE_STOP_BIT;
+    U1MODEbits.PDSEL	= serEIGHT_DATA_BITS_NO_PARITY;
+    U1MODEbits.RXINV	= serNORMAL_IDLE_STATE;
+    U1MODEbits.ABAUD	= serAUTO_BAUD_OFF;
+    U1MODEbits.LPBACK	= serLOOPBACK_OFF;
+    U1MODEbits.WAKE		= serWAKE_UP_DISABLE;
+    U1MODEbits.UEN		= serNO_HARDWARE_FLOW_CONTROL;
+    U1MODEbits.IREN		= serNO_IRDA;
+    U1MODEbits.USIDL	= serCONTINUE_IN_IDLE_MODE;
+    U1MODEbits.UARTEN	= serUART_ENABLED;
+
+    U1BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
+//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
+
+    U1STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
+    U1STAbits.UTXEN		= serTX_ENABLE;
+    U1STAbits.UTXINV	= serNORMAL_IDLE_STATE;
+    U1STAbits.UTXISEL0	= serINTERRUPT_ON_SINGLE_CHAR;
+    U1STAbits.UTXISEL1	= serINTERRUPT_ON_SINGLE_CHAR;
+
+    /* It is assumed that this function is called prior to the scheduler being
+    started.  Therefore interrupts must not be allowed to occur yet as they
+    may attempt to perform a context switch. */
+    portDISABLE_INTERRUPTS();
+
+    _U1RXIF = serCLEAR_FLAG;
+    _U1TXIF = serCLEAR_FLAG;
+    _U1RXIP = configKERNEL_INTERRUPT_PRIORITY;
+    _U1TXIP = configKERNEL_INTERRUPT_PRIORITY;
+    _U1TXIE = serINTERRUPT_ENABLE;
+    _U1RXIE = serINTERRUPT_ENABLE;
+
+    /* Clear the Rx buffer. */
+    while( U1STAbits.URXDA == serSET_FLAG )
+    {
+            cChar = U1RXREG;
+    }
+
+    xU1TxHasEnded = pdTRUE;
+}
+void vSetupUart2( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
+{
+    char cChar;
+
+    /* Create the queues used by the com test task. */
+    xUart2RxQueue = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
+    xUart2TxQueue = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
+
+    /* Setup the UART. */
+    U2MODEbits.BRGH		= serLOW_SPEED;
+    U2MODEbits.STSEL	= serONE_STOP_BIT;
+    U2MODEbits.PDSEL	= serEIGHT_DATA_BITS_NO_PARITY;
+    U2MODEbits.RXINV	= serNORMAL_IDLE_STATE;
+    U2MODEbits.ABAUD	= serAUTO_BAUD_OFF;
+    U2MODEbits.LPBACK	= serLOOPBACK_OFF;
+    U2MODEbits.WAKE		= serWAKE_UP_DISABLE;
+    U2MODEbits.UEN		= serNO_HARDWARE_FLOW_CONTROL;
+    U2MODEbits.IREN		= serNO_IRDA;
+    U2MODEbits.USIDL	= serCONTINUE_IN_IDLE_MODE;
+    U2MODEbits.UARTEN	= serUART_ENABLED;
+
+    U2BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
+//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
+
+    U2STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
+    U2STAbits.UTXEN		= serTX_ENABLE;
+    U2STAbits.UTXINV	= serNORMAL_IDLE_STATE;
+    U2STAbits.UTXISEL0	= serINTERRUPT_ON_SINGLE_CHAR;
+    U2STAbits.UTXISEL1	= serINTERRUPT_ON_SINGLE_CHAR;
+
+    /* It is assumed that this function is called prior to the scheduler being
+    started.  Therefore interrupts must not be allowed to occur yet as they
+    may attempt to perform a context switch. */
+    portDISABLE_INTERRUPTS();
+
+    _U2RXIF = serCLEAR_FLAG;
+    _U2TXIF = serCLEAR_FLAG;
+    _U2RXIP = configKERNEL_INTERRUPT_PRIORITY;
+    _U2TXIP = configKERNEL_INTERRUPT_PRIORITY;
+    _U2TXIE = serINTERRUPT_ENABLE;
+    _U2RXIE = serINTERRUPT_ENABLE;
+
+    /* Clear the Rx buffer. */
+    while( U2STAbits.URXDA == serSET_FLAG )
+    {
+            cChar = U2RXREG;
+    }
+
+    xU2TxHasEnded = pdTRUE;
+}
 
 xComPortHandle xSerialPortInitMinimal( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLength )
 {
-char cChar;
-
-	/* Create the queues used by the com test task. */
-	xRxedChars = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
-	xCharsForTx = xQueueCreate( uxQueueLength, ( unsigned portBASE_TYPE ) sizeof( signed char ) );
-
-	/* Setup the UART. */
-	U2MODEbits.BRGH		= serLOW_SPEED;
-	U2MODEbits.STSEL	= serONE_STOP_BIT;
-	U2MODEbits.PDSEL	= serEIGHT_DATA_BITS_NO_PARITY;
-	U2MODEbits.RXINV	= serNORMAL_IDLE_STATE;
-	U2MODEbits.ABAUD	= serAUTO_BAUD_OFF;
-	U2MODEbits.LPBACK	= serLOOPBACK_OFF;
-	U2MODEbits.WAKE		= serWAKE_UP_DISABLE;
-	U2MODEbits.UEN		= serNO_HARDWARE_FLOW_CONTROL;
-	U2MODEbits.IREN		= serNO_IRDA;
-	U2MODEbits.USIDL	= serCONTINUE_IN_IDLE_MODE;
-	U2MODEbits.UARTEN	= serUART_ENABLED;
-
-	U2BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
-//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
-
-	U2STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
-	U2STAbits.UTXEN		= serTX_ENABLE;
-	U2STAbits.UTXINV	= serNORMAL_IDLE_STATE;
-	U2STAbits.UTXISEL0	= serINTERRUPT_ON_SINGLE_CHAR;
-	U2STAbits.UTXISEL1	= serINTERRUPT_ON_SINGLE_CHAR;
-
-	/* It is assumed that this function is called prior to the scheduler being
-	started.  Therefore interrupts must not be allowed to occur yet as they
-	may attempt to perform a context switch. */
-	portDISABLE_INTERRUPTS();
-
-	IFS1bits.U2RXIF = serCLEAR_FLAG;
-	IFS1bits.U2TXIF = serCLEAR_FLAG;
-	IPC7bits.U2RXIP = configKERNEL_INTERRUPT_PRIORITY;
-	IPC7bits.U2TXIP = configKERNEL_INTERRUPT_PRIORITY;
-	IEC1bits.U2TXIE = serINTERRUPT_ENABLE;
-	IEC1bits.U2RXIE = serINTERRUPT_ENABLE;
-
-	/* Clear the Rx buffer. */
-	while( U2STAbits.URXDA == serSET_FLAG )
-	{
-		cChar = U2RXREG;
-	}
-
-	xTxHasEnded = pdTRUE;
-
-	return NULL;
+    vSetupUart1( ulWantedBaud, uxQueueLength );
+    vSetupUart2( ulWantedBaud, uxQueueLength );
+    return NULL;
 }
 /*-----------------------------------------------------------*/
 
-signed portBASE_TYPE xSerialGetChar( xComPortHandle pxPort, signed char *pcRxedChar, portTickType xBlockTime )
+signed portBASE_TYPE xUart1GetChar( xComPortHandle pxPort, signed char *pcRxedChar, portTickType xBlockTime )
 {
-	/* Only one port is supported. */
-	( void ) pxPort;
+    /* Only one port is supported. */
+    ( void ) pxPort;
 
-	/* Get the next character from the buffer.  Return false if no characters
-	are available or arrive before xBlockTime expires. */
-	if( xQueueReceive( xRxedChars, pcRxedChar, xBlockTime ) )
-	{
-		return pdTRUE;
-	}
-	else
-	{
-		return pdFALSE;
-	}
+    /* Get the next character from the buffer.  Return false if no characters
+    are available or arrive before xBlockTime expires. */
+    if( xQueueReceive( xUart1RxQueue, pcRxedChar, xBlockTime ) )
+    {
+        return pdTRUE;
+    }
+    else
+    {
+        return pdFALSE;
+    }
 }
 /*-----------------------------------------------------------*/
 
-signed portBASE_TYPE xSerialPutChar( xComPortHandle pxPort, signed char cOutChar, portTickType xBlockTime )
+signed portBASE_TYPE xUart1PutChar( xComPortHandle pxPort, signed char cOutChar, portTickType xBlockTime )
+{
+    /* Only one port is supported. */
+    ( void ) pxPort;
+
+    /* Return false if after the block time there is no room on the Tx queue. */
+    if( xQueueSend( xUart1TxQueue, &cOutChar, xBlockTime ) != pdPASS )
+    {
+        return pdFAIL;
+    }
+
+    /* A critical section should not be required as xTxHasEnded will not be
+    written to by the ISR if it is already 0 (is this correct?). */
+    if( xU1TxHasEnded )
+    {
+        xU1TxHasEnded = pdFALSE;
+        _U2TXIF = serSET_FLAG;
+    }
+
+    return pdPASS;
+}
+/*-----------------------------------------------------------*/
+
+signed portBASE_TYPE xUart2GetChar( xComPortHandle pxPort, signed char *pcRxedChar, portTickType xBlockTime )
+{
+    /* Only one port is supported. */
+    ( void ) pxPort;
+
+    /* Get the next character from the buffer.  Return false if no characters
+    are available or arrive before xBlockTime expires. */
+    if( xQueueReceive( xUart2RxQueue, pcRxedChar, xBlockTime ) )
+    {
+        return pdTRUE;
+    }
+    else
+    {
+        return pdFALSE;
+    }
+}
+/*-----------------------------------------------------------*/
+
+signed portBASE_TYPE xUart2PutChar( xComPortHandle pxPort, signed char cOutChar, portTickType xBlockTime )
 {
 	/* Only one port is supported. */
 	( void ) pxPort;
 
 	/* Return false if after the block time there is no room on the Tx queue. */
-	if( xQueueSend( xCharsForTx, &cOutChar, xBlockTime ) != pdPASS )
+	if( xQueueSend( xUart2TxQueue, &cOutChar, xBlockTime ) != pdPASS )
 	{
-		return pdFAIL;
+            return pdFAIL;
 	}
 
 	/* A critical section should not be required as xTxHasEnded will not be
 	written to by the ISR if it is already 0 (is this correct?). */
-	if( xTxHasEnded )
+	if( xU2TxHasEnded )
 	{
-		xTxHasEnded = pdFALSE;
-		IFS1bits.U2TXIF = serSET_FLAG;
+            xU2TxHasEnded = pdFALSE;
+            _U2TXIF = serSET_FLAG;
 	}
 
 	return pdPASS;
@@ -212,56 +311,109 @@ void vSerialClose( xComPortHandle xPort )
 }
 /*-----------------------------------------------------------*/
 
+void __attribute__((__interrupt__, auto_psv)) _U1RXInterrupt( void )
+{
+    char cChar;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+
+    /* Get the character and post it on the queue of Rxed characters.
+    If the post causes a task to wake force a context switch as the woken task
+    may have a higher priority than the task we have interrupted. */
+    _U1RXIF = serCLEAR_FLAG;
+    while( U1STAbits.URXDA )
+    {
+        cChar = U1RXREG;
+        xQueueSendFromISR( xUart1RxQueue, &cChar, &xHigherPriorityTaskWoken );
+    }
+
+    if( xHigherPriorityTaskWoken != pdFALSE )
+    {
+        taskYIELD();
+    }
+}
+/*-----------------------------------------------------------*/
+
+void __attribute__((__interrupt__, auto_psv)) _U1TXInterrupt( void )
+{
+    signed char cChar;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+
+    /* If the transmit buffer is full we cannot get the next character.
+    Another interrupt will occur the next time there is space so this does
+    not matter. */
+    _U1TXIF = serCLEAR_FLAG;
+    while( !( U1STAbits.UTXBF ) )
+    {
+        if( xQueueReceiveFromISR( xUart1TxQueue, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
+        {
+            /* Send the next character queued for Tx. */
+            U1TXREG = cChar;
+        }
+        else
+        {
+            /* Queue empty, nothing to send. */
+            xU1TxHasEnded = pdTRUE;
+            break;
+        }
+    }
+
+    if( xHigherPriorityTaskWoken != pdFALSE )
+    {
+        taskYIELD();
+    }
+}
+/*-----------------------------------------------------------*/
+
 void __attribute__((__interrupt__, auto_psv)) _U2RXInterrupt( void )
 {
-char cChar;
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    char cChar;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-	/* Get the character and post it on the queue of Rxed characters.
-	If the post causes a task to wake force a context switch as the woken task
-	may have a higher priority than the task we have interrupted. */
-	IFS1bits.U2RXIF = serCLEAR_FLAG;
-	while( U2STAbits.URXDA )
-	{
-		cChar = U2RXREG;
-		xQueueSendFromISR( xRxedChars, &cChar, &xHigherPriorityTaskWoken );
-	}
+    /* Get the character and post it on the queue of Rxed characters.
+    If the post causes a task to wake force a context switch as the woken task
+    may have a higher priority than the task we have interrupted. */
+    _U2RXIF = serCLEAR_FLAG;
+    while( U2STAbits.URXDA )
+    {
+        cChar = U2RXREG;
+        xQueueSendFromISR( xUart2RxQueue, &cChar, &xHigherPriorityTaskWoken );
+    }
 
-	if( xHigherPriorityTaskWoken != pdFALSE )
-	{
-		taskYIELD();
-	}
+    if( xHigherPriorityTaskWoken != pdFALSE )
+    {
+        taskYIELD();
+    }
 }
 /*-----------------------------------------------------------*/
 
 void __attribute__((__interrupt__, auto_psv)) _U2TXInterrupt( void )
 {
-signed char cChar;
-portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    signed char cChar;
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
 
-	/* If the transmit buffer is full we cannot get the next character.
-	Another interrupt will occur the next time there is space so this does
-	not matter. */
-	IFS1bits.U2TXIF = serCLEAR_FLAG;
-	while( !( U2STAbits.UTXBF ) )
-	{
-		if( xQueueReceiveFromISR( xCharsForTx, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
-		{
-			/* Send the next character queued for Tx. */
-			U2TXREG = cChar;
-		}
-		else
-		{
-			/* Queue empty, nothing to send. */
-			xTxHasEnded = pdTRUE;
-			break;
-		}
-	}
+    /* If the transmit buffer is full we cannot get the next character.
+    Another interrupt will occur the next time there is space so this does
+    not matter. */
+    _U2TXIF = serCLEAR_FLAG;
+    while( !( U2STAbits.UTXBF ) )
+    {
+        if( xQueueReceiveFromISR( xUart2TxQueue, &cChar, &xHigherPriorityTaskWoken ) == pdTRUE )
+        {
+            /* Send the next character queued for Tx. */
+            U2TXREG = cChar;
+        }
+        else
+        {
+            /* Queue empty, nothing to send. */
+            xU2TxHasEnded = pdTRUE;
+            break;
+        }
+    }
 
-	if( xHigherPriorityTaskWoken != pdFALSE )
-	{
-		taskYIELD();
-	}
+    if( xHigherPriorityTaskWoken != pdFALSE )
+    {
+        taskYIELD();
+    }
 }
 
 

@@ -21,9 +21,12 @@
 on which messages to get written to the UART should be written. */
 void vStartUartTask( void );
 
-void vUartPuts(char* pcMessage);
-void vUartPutsError(char* pcMessage);
-void vUartPutc(char cChar);
+void vUart1Putc(char cChar);
+void vUart1Puts(char* pcMessage);
+void vUart2Putc(char cChar);
+void vUart2Puts(char* pcMessage);
+void vConsolePuts(char* pcMessage);
+void vConsolePutsError(char* pcMessage);
 
 #endif	/* UART_H */
 

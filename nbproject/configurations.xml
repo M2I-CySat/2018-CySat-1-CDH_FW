@@ -19,15 +19,6 @@
         <itemPath>include/FreeRTOS/timers.h</itemPath>
       </logicalFolder>
       <itemPath>include/FreeRTOSConfig.h</itemPath>
-      <itemPath>include/lcd.h</itemPath>
-      <itemPath>include/timertest.h</itemPath>
-      <itemPath>include/BlockQ.h</itemPath>
-      <itemPath>include/blocktim.h</itemPath>
-      <itemPath>include/comtest.h</itemPath>
-      <itemPath>include/comtest2.h</itemPath>
-      <itemPath>include/crflash.h</itemPath>
-      <itemPath>include/integer.h</itemPath>
-      <itemPath>include/partest.h</itemPath>
       <itemPath>include/serial.h</itemPath>
       <itemPath>pic24.h</itemPath>
       <itemPath>uart.h</itemPath>
@@ -51,16 +42,8 @@
         <itemPath>src/FreeRTOS/timers.c</itemPath>
         <itemPath>src/FreeRTOS/portasm_PIC24.S</itemPath>
       </logicalFolder>
-      <itemPath>src/lcd.c</itemPath>
       <itemPath>src/main.c</itemPath>
-      <itemPath>src/ParTest.c</itemPath>
       <itemPath>src/serial.c</itemPath>
-      <itemPath>src/timertest.c</itemPath>
-      <itemPath>src/BlockQ.c</itemPath>
-      <itemPath>src/blocktim.c</itemPath>
-      <itemPath>src/comtest.c</itemPath>
-      <itemPath>src/crflash.c</itemPath>
-      <itemPath>src/integer.c</itemPath>
       <itemPath>uart.c</itemPath>
       <itemPath>testing.c</itemPath>
     </logicalFolder>

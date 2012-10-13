@@ -12,5 +12,4 @@ include/FreeRTOS/queue.h  \
 pic24.h  \
  include/serial.h  \
 uart.h  \
-testing.h  \
-include/lcd.h 
+testing.h 

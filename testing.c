@@ -10,7 +10,7 @@
 #include "testing.h"
 
 /* TODO: Need better way to do this (Don't judge me) */
-#define COMMAND(str)        if(strcmp(pcBase,str)==0&&(sMatchCommand = 1))
+#define COMMAND(str)        if((!sMatchCommand)&&(strcmp(pcBase,str)==0)&&((sMatchCommand = 1)))
 
 void interpretTestingCommand( char* pcCommand )
 {
@@ -40,29 +40,33 @@ void interpretTestingCommand( char* pcCommand )
         }
     }
 
+    COMMAND( "" ) 
+    {
+        return;
+    }
     COMMAND( "echo" )
     {
-        vUartPuts( pcArgs );
+        vConsolePuts( pcArgs );
     }
     COMMAND( "whoami" )
     {
-        vUartPuts( "cysat" );
+        vConsolePuts( "cysat" );
     }
     COMMAND( "ls" )
     {
-        vUartPutsError( "Do I look like a UNIX machine?!" );
+        vConsolePutsError( "Do I look like a UNIX machine?!" );
     }
     COMMAND( "rm" )
     {
-        vUartPuts( "Nice try, jerk." );
+        vConsolePuts( "Nice try, jerk." );
     }
 
     if (!sMatchCommand)
     {
         static char pcEchoCommand[uartBUFFER_SIZE + 40];
         sprintf( pcEchoCommand, "I don't understand '%s'", pcBase );
-        vUartPutsError( pcEchoCommand );
+        vConsolePutsError( pcEchoCommand );
     }
     
-    vUartPuts( "\r\n" );
+    vConsolePuts( "\r\n" );
 }
