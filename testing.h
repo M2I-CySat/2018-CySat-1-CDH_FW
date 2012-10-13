@@ -8,7 +8,7 @@
 #ifndef TESTING_H
 #define	TESTING_H
 
-void interpretTestingCommand(char* command);
+void interpretTestingCommand(char* pcCommand);
 
 #endif	/* TESTING_H */
 
