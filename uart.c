@@ -5,12 +5,13 @@
 
 #include "pic24.h"
 
+#include "iomapping.h"
 #include "serial.h"
 #include "uart.h"
 #include "testing.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
-#define uartCONSOLE_UART     2
+#define uartCONSOLE_UART     1
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
@@ -46,8 +47,16 @@ static char pcBuffer[uartBUFFER_SIZE];
 
 static void prvUartInit (void)
 {
-    vSetupUart1( uartBAUD, uartQUEUE_SIZE );
+    vIoMap();
+
+    RPINR19bits.U2RXR = 10;
+    RPOR8bits.RP17R = 5;
     vSetupUart2( uartBAUD, uartQUEUE_SIZE );
+    vUart2ChannelSelect(HEM);
+
+    RPINR18bits.U1RXR=30;
+    RPOR8bits.RP16R = 3;
+    vSetupUart1( uartBAUD, uartQUEUE_SIZE );
 }
 
 void vStartUartTask( void )
@@ -55,8 +64,8 @@ void vStartUartTask( void )
     /* Initialise the hardware. */
     prvUartInit();
 
-    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
     xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
 }
 
 void vUart1Putc( char cChar )
@@ -184,6 +193,7 @@ static void vUart1RxTask( void *pvParameters )
         {
 #if uartCONSOLE_UART == 1
             prvConsoleRx(cRxByte);
+//            vUart2Putc(cRxByte);
 #endif
         }
     }

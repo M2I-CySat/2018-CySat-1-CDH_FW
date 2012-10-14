@@ -67,7 +67,8 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include <p24FJ128GA010.h>
+//#include <p24FJ128GA010.h>
+#include <p24Fxxxx.h>
 
 /*-----------------------------------------------------------
  * Application specific definitions.

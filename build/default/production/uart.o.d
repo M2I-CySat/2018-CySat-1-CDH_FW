@@ -10,6 +10,7 @@ include/FreeRTOS/task.h  \
  include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
 pic24.h  \
+iomapping.h  \
  include/serial.h  \
 uart.h  \
 testing.h 

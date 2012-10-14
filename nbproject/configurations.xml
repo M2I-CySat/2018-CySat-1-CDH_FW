@@ -23,11 +23,11 @@
       <itemPath>pic24.h</itemPath>
       <itemPath>uart.h</itemPath>
       <itemPath>testing.h</itemPath>
+      <itemPath>iomapping.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
-      <itemPath>p24FJ128GA010.gld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -46,6 +46,7 @@
       <itemPath>src/serial.c</itemPath>
       <itemPath>uart.c</itemPath>
       <itemPath>testing.c</itemPath>
+      <itemPath>iomapping.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -62,12 +63,12 @@
     <conf name="default" type="2">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
-        <targetDevice>PIC24FJ128GA010</targetDevice>
+        <targetDevice>PIC24FJ256GA110</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.00</languageToolchainVersion>
+        <languageToolchainVersion></languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <compileType>

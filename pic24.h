@@ -18,8 +18,8 @@
 #include <stdlib.h>
 
 #include <p24Fxxxx.h>
-#include <p24fj128ga010.h>
-#include <libpic30.h>
+//#include <p24fj128ga010.h>
+//#include <libpic30.h>
 
 #include <GenericTypeDefs.h>
 
