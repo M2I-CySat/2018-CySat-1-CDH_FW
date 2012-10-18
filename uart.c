@@ -66,6 +66,13 @@ void vStartUartTask( void )
 
     xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
     xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+
+    /* TODO (Bug?): Figure out why U1TXREG must be set for UART to work. */
+    /* UxTXREG can be set to anything, as long as it's written*/
+//    while(U1STAbits.UTXBF == 1);
+    U1TXREG = 0;
+//    while(U2STAbits.UTXBF == 1);
+    U2TXREG = 0;
 }
 
 void vUart1Putc( char cChar )
@@ -189,8 +196,10 @@ static void vUart1RxTask( void *pvParameters )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
+        U1TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
+//            vConsolePuts( "Uart1Rx!\r\n" );
 #if uartCONSOLE_UART == 1
             prvConsoleRx(cRxByte);
 //            vUart2Putc(cRxByte);
@@ -207,8 +216,10 @@ static void vUart2RxTask( void *pvParameters )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
+        U2TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
+//            vConsolePuts( "Uart2Rx!\r\n" );
 #if uartCONSOLE_UART != 1
             prvConsoleRx(cRxByte);
 #else

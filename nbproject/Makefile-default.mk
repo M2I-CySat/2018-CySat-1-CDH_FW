@@ -65,7 +65,7 @@ FIXDEPS=fixDeps
 	${MAKE} ${MAKE_OPTIONS} -f nbproject/Makefile-default.mk dist/${CND_CONF}/${IMAGE_TYPE}/cysat.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
 
 MP_PROCESSOR_OPTION=24FJ256GA110
-MP_LINKER_FILE_OPTION=,--script=p24FJ256GA110.gld
+MP_LINKER_FILE_OPTION=,--script="..\..\..\..\..\Program Files (x86)\Microchip\xc16\v1.10\support\PIC24F\gld\p24FJ256GA110.gld"
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)

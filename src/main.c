@@ -18,12 +18,13 @@ _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 // Oscillator in HS mode, Use primary oscillator (no PLL)
 _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
-
 int main( void )
 {
     vStartUartTask();
     
     vConsolePuts( "I am a UART!\r\n" );
+    vUart1Puts("Uart1\r\n");
+//    vUart2Puts("Uart2\r\n");
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();
