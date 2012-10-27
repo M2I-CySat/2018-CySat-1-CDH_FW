@@ -41,11 +41,11 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/testing.o ${OBJECTDIR}/iomapping.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/uart.o.d ${OBJECTDIR}/testing.o.d ${OBJECTDIR}/iomapping.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/testing.o ${OBJECTDIR}/iomapping.o ${OBJECTDIR}/heliumradio.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/uart.o.d ${OBJECTDIR}/testing.o.d ${OBJECTDIR}/iomapping.o.d ${OBJECTDIR}/heliumradio.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/testing.o ${OBJECTDIR}/iomapping.o
+OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/uart.o ${OBJECTDIR}/testing.o ${OBJECTDIR}/iomapping.o ${OBJECTDIR}/heliumradio.o
 
 
 CFLAGS=
@@ -141,6 +141,12 @@ ${OBJECTDIR}/iomapping.o: iomapping.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  iomapping.c  -o ${OBJECTDIR}/iomapping.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/iomapping.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
 	@${FIXDEPS} "${OBJECTDIR}/iomapping.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/heliumradio.o: heliumradio.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/heliumradio.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  heliumradio.c  -o ${OBJECTDIR}/heliumradio.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/heliumradio.o.d"        -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
+	@${FIXDEPS} "${OBJECTDIR}/heliumradio.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/src/FreeRTOS/croutine.o: src/FreeRTOS/croutine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
@@ -213,6 +219,12 @@ ${OBJECTDIR}/iomapping.o: iomapping.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/iomapping.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  iomapping.c  -o ${OBJECTDIR}/iomapping.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/iomapping.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
 	@${FIXDEPS} "${OBJECTDIR}/iomapping.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/heliumradio.o: heliumradio.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR} 
+	@${RM} ${OBJECTDIR}/heliumradio.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  heliumradio.c  -o ${OBJECTDIR}/heliumradio.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/heliumradio.o.d"        -g -omf=elf -O0 -I"." -I".\include" -I".\include\FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off -fno-omit-frame-pointer
+	@${FIXDEPS} "${OBJECTDIR}/heliumradio.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

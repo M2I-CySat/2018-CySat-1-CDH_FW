@@ -24,6 +24,8 @@
       <itemPath>uart.h</itemPath>
       <itemPath>testing.h</itemPath>
       <itemPath>iomapping.h</itemPath>
+      <itemPath>heliumradio.h</itemPath>
+      <itemPath>typedef.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -48,6 +50,7 @@
       <itemPath>uart.c</itemPath>
       <itemPath>testing.c</itemPath>
       <itemPath>iomapping.c</itemPath>
+      <itemPath>heliumradio.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

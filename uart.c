@@ -44,6 +44,11 @@ static void prvUartInit (void);
 
 static char pcBuffer[uartBUFFER_SIZE];
 
+/* Static variables */
+
+static int isUartRelay;
+
+/* Implementations */
 
 static void prvUartInit (void)
 {
@@ -52,11 +57,28 @@ static void prvUartInit (void)
     RPINR19bits.U2RXR = 10;
     RPOR8bits.RP17R = 5;
     vSetupUart2( uartBAUD, uartQUEUE_SIZE );
+    
+//    RPINR19bits.U2RXR = 10;
+//    RPOR8bits.RP17R = 5;
+//    U2STA= 0x0000;
+//    U2MODE  = 0x0000; // initialize the UART module
+//    U2MODEbits.UARTEN = 1;
+//    U2STAbits.UTXEN=1;
+//    IFS1bits.U2RXIF = 0;
+
     vUart2ChannelSelect(HEM);
 
     RPINR18bits.U1RXR=30;
     RPOR8bits.RP16R = 3;
     vSetupUart1( uartBAUD, uartQUEUE_SIZE );
+
+//    RPINR18bits.U1RXR=30;
+//    RPOR8bits.RP16R = 3;
+//    U1STA= 0x0000;
+//    U1MODE  = 0x0000; // initialize the UART module
+//    U1MODEbits.UARTEN = 1;
+//    U1STAbits.UTXEN=1;
+//    IFS0bits.U1RXIF = 0;
 }
 
 void vStartUartTask( void )
@@ -108,7 +130,7 @@ void vConsolePutc( char cChar )
 #endif
 }
 
-void vConsolePuts( char *pcString )
+void vConsolePrint( char *pcString )
 {
 #if uartCONSOLE_UART == 1
     vUart1Puts( pcString );
@@ -117,12 +139,23 @@ void vConsolePuts( char *pcString )
 #endif
 }
 
+void vConsolePuts( char *pcString )
+{
+    vConsolePrint( pcString );
+    vConsolePrint( "\r\n" );
+}
+
 void vConsolePutsError( char *pcString )
 {
     // TODO: Add more useful info
-    vConsolePuts( uartERROR_TEXT "[ERROR] " );
-    vConsolePuts( pcString );
+    vConsolePrint( uartERROR_TEXT "[ERROR] " );
+    vConsolePrint( pcString );
     vConsolePuts( uartDEFAULT_TEXT );
+}
+
+void vUartRelayMode( int mode )
+{
+    isUartRelay = mode;
 }
 
 static unsigned short prvConsoleGetc( char c, char* pcCommandBuffer )
@@ -163,7 +196,7 @@ static unsigned short prvConsoleGetc( char c, char* pcCommandBuffer )
     }
 
     if (i >= uartBUFFER_SIZE) {
-        vConsolePuts("(OVERFLOW!)\r\n");
+        vConsolePuts("(OVERFLOW!)");
         i = 0;
     }
 
@@ -179,7 +212,7 @@ static void prvConsoleRx( signed char cRxByte )
     if( prvConsoleGetc( cRxByte, pcCommandBuffer ) )
     {
         // User pressed enter
-        interpretTestingCommand( pcCommandBuffer );
+        vInterpretTestingCommand( pcCommandBuffer );
     }
     else
     {
@@ -199,11 +232,17 @@ static void vUart1RxTask( void *pvParameters )
         U1TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
-//            vConsolePuts( "Uart1Rx!\r\n" );
+//            vConsolePuts( "Uart1Rx!" );
+            if( isUartRelay )
+            {
+                vUart2Putc(cRxByte);
+            }
+            else
+            {
 #if uartCONSOLE_UART == 1
-            prvConsoleRx(cRxByte);
-//            vUart2Putc(cRxByte);
+                prvConsoleRx(cRxByte);
 #endif
+            }
         }
     }
 }
@@ -216,15 +255,22 @@ static void vUart2RxTask( void *pvParameters )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
-        U2TXREG = 0; /* TODO (bug?) why is this needed? */
+//        U2TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
         {
-//            vConsolePuts( "Uart2Rx!\r\n" );
+//            vConsolePuts( "Uart2Rx!" );
+            if( isUartRelay )
+            {
+                vUart1Putc(cRxByte);
+            }
+            else
+            {
 #if uartCONSOLE_UART != 1
-            prvConsoleRx(cRxByte);
+                prvConsoleRx(cRxByte);
 #else
-            vUart1Putc(cRxByte);
+                vUart1Putc(cRxByte);
 #endif
+            }
         }
     }
 }

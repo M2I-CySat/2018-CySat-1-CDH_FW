@@ -25,8 +25,11 @@ void vUart1Putc(char cChar);
 void vUart1Puts(char* pcMessage);
 void vUart2Putc(char cChar);
 void vUart2Puts(char* pcMessage);
+void vConsolePrint( char *pcString );
 void vConsolePuts(char* pcMessage);
 void vConsolePutsError(char* pcMessage);
+
+void vUartRelayMode( int mode );
 
 #endif	/* UART_H */
 
