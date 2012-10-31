@@ -11,7 +11,11 @@
 /* Application includes */
 #include "serial.h"
 #include "uart.h"
+#include "wire.h"
+
 #include "heliumradio.h"
+#include "power.h"
+#include "payload.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
 _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
@@ -23,7 +27,10 @@ int main( void )
 {
     vRadioInit();
 
-    vStartUartTask();
+    vUartStartTask();
+//    vWireStartTask();
+//    vPowerStartTask();
+//    vPayloadStartTask();
 
     /* Don't send UART Rx to radio by default */
     vUartRelayMode( 0 );

@@ -1,5 +1,5 @@
-build/default/production/uart.o:  \
-uart.c  \
+build/default/production/payload.o:  \
+payload.c  \
 include/FreeRTOS/FreeRTOS.h  \
  include/FreeRTOS/projdefs.h  \
 include/FreeRTOSConfig.h  \
@@ -9,9 +9,6 @@ include/FreeRTOS/portmacro.h  \
 include/FreeRTOS/task.h  \
  include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
-pic24.h  \
 system.h  \
- iomapping.h  \
-include/serial.h  \
 uart.h  \
-testing.h 
+ payload.h 

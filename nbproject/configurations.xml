@@ -26,6 +26,10 @@
       <itemPath>iomapping.h</itemPath>
       <itemPath>heliumradio.h</itemPath>
       <itemPath>typedef.h</itemPath>
+      <itemPath>power.h</itemPath>
+      <itemPath>wire.h</itemPath>
+      <itemPath>system.h</itemPath>
+      <itemPath>payload.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -51,6 +55,9 @@
       <itemPath>testing.c</itemPath>
       <itemPath>iomapping.c</itemPath>
       <itemPath>heliumradio.c</itemPath>
+      <itemPath>power.c</itemPath>
+      <itemPath>wire.c</itemPath>
+      <itemPath>payload.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

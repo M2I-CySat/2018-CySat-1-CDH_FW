@@ -12,5 +12,8 @@ include/FreeRTOS/queue.h  \
  include/FreeRTOS/croutine.h  \
 include/serial.h  \
 uart.h  \
+wire.h  \
 heliumradio.h  \
- typedef.h 
+ typedef.h  \
+power.h  \
+payload.h 

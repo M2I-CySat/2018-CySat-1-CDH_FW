@@ -19,7 +19,7 @@
 
 /* Create the task that will control the UART.  Returned is a handle to the queue
 on which messages to get written to the UART should be written. */
-void vStartUartTask( void );
+void vUartStartTask( void );
 
 void vUart1Putc(char cChar);
 void vUart1Puts(char* pcMessage);

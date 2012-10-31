@@ -194,6 +194,12 @@ void vInterpretTestingCommand( char* pcCommand )
         vUart2Puts( pcArgs );
     }
 
+    COMMAND( "sleep" )
+    {
+        HELP( "Delays Console task by n milliseconds" );
+        vTaskDelay( atoi( pcArgs ) );
+    }
+
     COMMAND( "echo" )
     {
         puts( pcArgs );

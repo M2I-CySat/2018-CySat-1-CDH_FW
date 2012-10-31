@@ -5,6 +5,7 @@
 
 #include "pic24.h"
 
+#include "system.h"
 #include "iomapping.h"
 #include "serial.h"
 #include "uart.h"
@@ -81,13 +82,13 @@ static void prvUartInit (void)
 //    IFS0bits.U1RXIF = 0;
 }
 
-void vStartUartTask( void )
+void vUartStartTask( void )
 {
     /* Initialise the hardware. */
     prvUartInit();
 
-    xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
-    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 2, NULL );
+    xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
+    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 
     /* TODO (Bug?): Figure out why U1TXREG must be set for UART to work. */
     /* UxTXREG can be set to anything, as long as it's written*/
