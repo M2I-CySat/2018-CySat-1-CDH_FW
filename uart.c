@@ -12,19 +12,39 @@
 #include "testing.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
-#define uartCONSOLE_UART     1
+#define uartCONSOLE_UART    1
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
-#define uartNO_BLOCK         ( ( portTickType ) 0 )
+#define uartNO_BLOCK        ( ( portTickType ) 0 )
 
 /* The Rx task will block on the Rx queue for a long period. */
-#define uartRX_BLOCK_TIME    ( ( portTickType ) 0xffff )
+#define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
 
 /* The length of the queue used to send messages to the UART queue. */
-#define uartQUEUE_SIZE       320
+#define uartQUEUE_SIZE      ( (unsigned portBASE_TYPE) 320 )
 
-#define uartBAUD             9600
+#define uartBAUD            9600ul
+#define uartPARITY          serNO_PARITY
+#define uartDATA_BITS       serBITS_8
+#define uartSTOP_BITS       serSTOP_1
+
+#define uart1COM            serCOM1
+#define uart1BAUD           uartBAUD
+#define uart1PARITY         uartPARITY
+#define uart1DATA_BITS      uartDATA_BITS
+#define uart1STOP_BITS      uartSTOP_BITS
+#define uart1TX_QUEUE_SIZE  uartQUEUE_SIZE
+#define uart1RX_QUEUE_SIZE  uartQUEUE_SIZE
+
+#define uart2COM            serCOM2
+#define uart2BAUD           uartBAUD
+#define uart2PARITY         uartPARITY
+#define uart2DATA_BITS      uartDATA_BITS
+#define uart2STOP_BITS      uartSTOP_BITS
+#define uart2TX_QUEUE_SIZE  uartQUEUE_SIZE
+#define uart2RX_QUEUE_SIZE  uartQUEUE_SIZE
+
 
 #define uartESCAPE_CHARACTER "\033"
 #define uartDEFAULT_TEXT     uartESCAPE_CHARACTER "[0;37m"
@@ -49,6 +69,11 @@ static char pcBuffer[uartBUFFER_SIZE];
 
 static int isUartRelay;
 
+#ifdef serialALTERNATE_IMPLEMENTATION
+static xComPortHandle xUart1Handle;
+static xComPortHandle xUart2Handle;
+#endif
+
 /* Implementations */
 
 static void prvUartInit (void)
@@ -57,7 +82,12 @@ static void prvUartInit (void)
 
     RPINR19bits.U2RXR = 10;
     RPOR8bits.RP17R = 5;
-    vSetupUart2( uartBAUD, uartQUEUE_SIZE );
+
+#ifdef serialALTERNATE_IMPLEMENTATION
+    xUart2Handle = xSerialPortInit( uart2COM, uart2BAUD, uart2PARITY, uart2DATA_BITS, uart2STOP_BITS, uart2TX_QUEUE_SIZE, uart2RX_QUEUE_SIZE );
+#else
+    vSetupUart2( uart2BAUD, uartQUEUE_SIZE );
+#endif
     
 //    RPINR19bits.U2RXR = 10;
 //    RPOR8bits.RP17R = 5;
@@ -71,7 +101,12 @@ static void prvUartInit (void)
 
     RPINR18bits.U1RXR=30;
     RPOR8bits.RP16R = 3;
-    vSetupUart1( uartBAUD, uartQUEUE_SIZE );
+    
+#ifdef serialALTERNATE_IMPLEMENTATION
+    xUart1Handle = xSerialPortInit( uart1COM, uart1BAUD, uart1PARITY, uart1DATA_BITS, uart1STOP_BITS, uart1TX_QUEUE_SIZE, uart1RX_QUEUE_SIZE );
+#else
+    vSetupUart1( uart1BAUD, uartQUEUE_SIZE );
+#endif
 
 //    RPINR18bits.U1RXR=30;
 //    RPOR8bits.RP16R = 3;
@@ -100,11 +135,19 @@ void vUartStartTask( void )
 
 void vUart1Putc( char cChar )
 {
+#ifdef serialALTERNATE_IMPLEMENTATION
+    xSerialPutChar( xUart1Handle, (signed char) cChar, uartNO_BLOCK );
+#else
     xUart1PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+#endif
 }
 void vUart2Putc( char cChar )
 {
+#ifdef serialALTERNATE_IMPLEMENTATION
+    xSerialPutChar( xUart2Handle, (signed char) cChar, uartNO_BLOCK );
+#else
     xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+#endif
 }
 
 void vUart1Puts( char *pcString )
@@ -230,8 +273,12 @@ static void vUart1RxTask( void *pvParameters )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
+#ifdef serialALTERNATE_IMPLEMENTATION
+        if( xSerialGetChar( xUart1Handle, &cRxByte, uartRX_BLOCK_TIME ) )
+#else
         U1TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
+#endif
         {
 //            vConsolePuts( "Uart1Rx!" );
             if( isUartRelay )
@@ -256,8 +303,12 @@ static void vUart2RxTask( void *pvParameters )
     {
         /* Block on the queue that contains received bytes until a byte is
         available. */
+#ifdef serialALTERNATE_IMPLEMENTATION
+        if( xSerialGetChar( xUart2Handle, &cRxByte, uartRX_BLOCK_TIME ) )
+#else
 //        U2TXREG = 0; /* TODO (bug?) why is this needed? */
         if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
+#endif
         {
 //            vConsolePuts( "Uart2Rx!" );
             if( isUartRelay )

@@ -28,9 +28,9 @@ int main( void )
     vRadioInit();
 
     vUartStartTask();
-//    vWireStartTask();
-//    vPowerStartTask();
-//    vPayloadStartTask();
+    vWireStartTask();
+    vPowerStartTask();
+    vPayloadStartTask();
 
     /* Don't send UART Rx to radio by default */
     vUartRelayMode( 0 );
