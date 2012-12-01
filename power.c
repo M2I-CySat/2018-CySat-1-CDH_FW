@@ -35,14 +35,14 @@ powerData* xPowerGetHousekeepingData()
 
 static void vPowerTask( void *pvParameters )
 {
-    wireMessage xMessage;
-
-    xMessage.callback = (void *) (xPowerGetHousekeepingData);
+//    wireMessage xMessage;
+//
+//    xMessage.callback = (void *) (xPowerGetHousekeepingData);
 
     for( ;; )
     {
         vConsolePuts("vPowerTask");
-        vWireRequest(&xMessage);
+//        vWireRequest(&xMessage);
         vTaskDelay(1000);
     }
 }

@@ -26,11 +26,12 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 int main( void )
 {
     vRadioInit();
+//    vWireInit();
 
     vUartStartTask();
     vWireStartTask();
-    vPowerStartTask();
-    vPayloadStartTask();
+//    vPowerStartTask();
+//    vPayloadStartTask();
 
     /* Don't send UART Rx to radio by default */
     vUartRelayMode( 0 );
