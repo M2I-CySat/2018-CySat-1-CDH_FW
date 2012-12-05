@@ -11,123 +11,268 @@
 
 #include "system.h"
 #include "uart.h"
-#include "soft_i2c.h"
-#include "i2c_wiki.h"
 #include "wire.h"
 
 #define wireQUEUE_LENGTH    10
 #define wireBLOCK_TIME      ( ( portTickType ) 0xffff )
 
+/* The SCL output pin */
+#define SCL         _RG2
+/* The SCL Direction Register Bit */
+#define SCL_TRIS    _TRISG2
+/* The SDA output pin */
+#define SDA         _RG3
+/* The SDA Direction Register Bit */
+#define SDA_TRIS    _TRISG3
+
+#define wireLOW     0
+#define wireHIGH    1
+
+/* I2C Bus Timing - usec */
+#define wireSTARTDELAY 50
+#define wireSTOPDELAY  50
+#define wireDATASETTLE 20
+#define wireCLOCKHIGH  100
+#define wireHALFCLOCK  50
+#define wireCLOCKLOW   100
+#define wireACKWAITMIN 50
+
 static xQueueHandle xWireQueue;
 
 static void vWireTask( void *pvParameters );
 
-void vWireInit()
+char cWireSendByte(char byte);
+char cWireGetByte(void);
+char cWireGetAck(void);
+void vWireSendAck(void);
+void vWireDelay(char delay);
+void vWireStart(void);
+void vWireStop(void);
+void vWireClock(void);
+char cWireReadBit(void);
+
+char vWireWrite( char cAddress, char *pcData, char cBytes )
 {
+    vWireStart();
 
-    UINT config1 = 0;
-    UINT config2 = 0;
+    /* Send Address */
+    cWireSendByte( cAddress & 0xFE );
+    if( !cWireGetAck() )
+    {
+        vWireStop();
+        return 0;
+    }
 
-    TRISAbits.TRISA2 = 1;
+    /* Send Data */
+    while( cBytes-- )
+    {
+        cWireSendByte( *pcData );
+        if( !cWireGetAck() )
+        {
+            vWireStop();
+            return 0;
+        }
+        ++pcData;
+    }
 
-    // Turn off I2C modules
-    CloseI2C2(); //Disbale I2C2 mdolue if enabled previously
+    vWireStop();
+    return 1;
+}
 
-    // I2C interrupt configuration
-    ConfigIntI2C2(MI2C_INT_OFF); //Disable I2C interrupt
+char vWireRead( char cAddress, char *pcData, char cBytes )
+{
+    vWireStart();
 
-    // I2C2 configuration
-    //    I2C2 enabled
-    //    continue I2C module in Idle mode
-    //    IPMI mode not enabled
-    //    I2CADD is 7-bit address
-    //    Disable Slew Rate Control for 100KHz
-    //    Enable SM bus specification
-    //    Disable General call address
-    //    Baud @ 8MHz = 39 into I2CxBRG
+    /* Send Address */
+    cWireSendByte( cAddress | 0x01 );
+    if( !cWireGetAck() )
+    {
+        vWireStop();
+        return 0;
+    }
 
-//    config1 = (I2C_ON & I2C_7BIT_ADD);
-    config2 = 39;
+    /* Read Data */
+    while( cBytes-- )
+    {
+        *pcData = cWireGetByte();
+        pcData++;
 
-//    // Baud rate is set for 100 kHz
-//    config2 = 0x11;
-    // Configure I2C for 7 bit address mode
-    config1 = (I2C_ON & I2C_IDLE_CON & I2C_CLK_HLD &
-               I2C_IPMI_DIS & I2C_7BIT_ADD &
-               I2C_SLW_DIS & I2C_SM_DIS &
-               I2C_GCALL_DIS & I2C_STR_DIS &
-               I2C_NACK & I2C_ACK_DIS & I2C_RCV_DIS &
-               I2C_STOP_DIS & I2C_RESTART_DIS &
-               I2C_START_DIS);
+        if( cBytes > 0 )
+        {
+            vWireSendAck();
+        }
+    }
 
-    OpenI2C2(config1, config2); //configure I2C2
+    vWireStop();
+    return 1;
+}
+
+char cWireSendByte( char cByte )
+{
+    char cCount;
+
+    SDA = wireLOW;
+    SCL = wireLOW;
+
+    /* Give clock time to go low */
+    vWireDelay(wireCLOCKLOW);
+
+    /* Send 8 bits */
+    for( cCount = 8; cCount; --cCount )
+    {
+        /* Get next bit from byte */
+        if( (cByte & 0x80) == 0 )
+        {
+            /* Pull pin low */
+            SDA = wireLOW;
+            SDA_TRIS = wireLOW;
+        }
+        else
+        {
+            /* Release pin */
+            SDA_TRIS = wireHIGH;
+        }
+
+        cByte = cByte << 1;
+        
+        vWireClock();
+    }
+
+    SDA_TRIS = wireHIGH;
+    return 1;
+}
+
+char cWireGetByte()
+{
+    char cCount,
+         cByte = 0;
+
+    SDA = wireLOW;
+    SCL = wireLOW;
+
+    vWireDelay(wireCLOCKLOW);
+
+    for( cCount = 8; cCount; --cCount )
+    {
+        cByte = cByte << 1;
+
+        /* Release the pin */
+        SDA_TRIS = wireHIGH;
+
+        cByte |= cWireReadBit();
+    }
+
+    return cByte;
 }
 
 void vWireStart()
 {
-    IdleI2C2(); //wait for the I2C to be Idle
-    StartI2C2();
-    while (I2C2CONbits.SEN); //Wait till Start sequence is completed
-}
+    /* Ensure pins are in high-Z mode */
+    SDA_TRIS = wireHIGH;
+    SCL_TRIS = wireHIGH;
+    SCL = wireLOW;
+    SDA = wireLOW;
 
-void vWireRestart()
-{
-    IdleI2C2(); //wait for the I2C to be Idle
-    RestartI2C2(); //Restart signal
-    while (I2C2CONbits.RSEN); //Wait till Restart sequence is completed
+    vWireDelay( wireSTARTDELAY );
+
+    /* I2C Start condition */
+    SDA_TRIS = wireLOW;
+    SDA = wireLOW;
+    vWireDelay( wireSTARTDELAY );
+    SCL_TRIS = wireLOW;
+    vWireDelay( wireCLOCKLOW );
 }
 
 void vWireStop()
 {
-    IdleI2C2(); //wait for the I2C to be Idle
-    StopI2C2(); //Terminate communication protocol with stop signal
-    while (I2C2CONbits.PEN); //Wait till stop sequence is completed
-    IdleI2C2();
+    /* I2C Stop condition */
+    SDA_TRIS = wireLOW;
+    SCL_TRIS = wireHIGH;
+    vWireDelay(wireSTOPDELAY);
+    SDA_TRIS = wireHIGH;
 }
 
-void vWireWait()
+void vWireClock()
 {
-    UINT i;
-    for (i = 0; i < 1000; i++);
-    Nop();
+    vWireDelay(wireDATASETTLE);
+    SCL_TRIS = wireHIGH;
+    vWireDelay(wireCLOCKHIGH);
+    SCL_TRIS = wireLOW;
+    vWireDelay(wireCLOCKLOW);
 }
 
-void vWireWrite(BYTE data)
+char cWireReadBit()
 {
-    I2C2ADD=0x00;
-    MasterWriteI2C2(data);
-    I2C2ADD=0x00;
-    while (I2C2STATbits.TBF); //Wait till address is transmitted
-    while (!_MI2C2IF); //Wait for ninth clock cycle
-    while (I2C2STATbits.ACKSTAT);
+    char cBit = 0;
+
+    vWireDelay(wireDATASETTLE);
+    SCL_TRIS = wireHIGH;
+    vWireDelay(wireHALFCLOCK);
+
+    if( SDA != 0 )
+    {
+        cBit = 1;
+    }
+
+    vWireDelay(wireHALFCLOCK);
+    SCL_TRIS = wireLOW;
+    vWireDelay(wireCLOCKLOW);
+
+    return cBit;
 }
 
-BYTE ucWireRead()
+char cWireGetAck()
 {
-    BYTE r = MasterReadI2C2();
-    while (!_MI2C2IF); //Wait for ninth clock cycle
-    AckI2C2();
-    return r;
+    SDA = wireLOW;
+    SCL = wireLOW;
+
+    /* Ensure clock is low */
+    SCL_TRIS = wireLOW;
+    /* Release the data pin so slave can ACK */
+    SDA_TRIS = wireHIGH;
+    /* Release the clock pin */
+    SCL_TRIS = wireHIGH;
+
+    vWireDelay(wireHALFCLOCK);
+    if( SDA )
+    {
+        /* No ACK */
+        return 0;
+    }
+    vWireDelay(wireHALFCLOCK);
+
+    /* Finish the clock pulse */
+    SCL_TRIS = wireLOW;
+    vWireDelay(wireCLOCKLOW);
+    vWireDelay(wireCLOCKLOW);
+
+    return 1;
 }
 
-BYTE ucWireReadAndStop()
+void vWireSendAck()
 {
-    BYTE r = MasterReadI2C2();
-    while (!_MI2C2IF); //Wait for ninth clock cycle
-    NotAckI2C2();
-    vWireStop();
-    return r;
+    SDA = 0;
+    SDA_TRIS = wireLOW;
+    vWireDelay(wireDATASETTLE);
+    vWireClock();
+    SDA_TRIS = wireHIGH;
+    vWireDelay(wireDATASETTLE);
+}
+
+void vWireDelay(const char delay)
+{
+    /* delay_us(delay) */
+    unsigned char c = delay / 20;
+    while( c-- != 0 )
+    {
+        continue;
+    }
 }
 
 void vWireStartTask()
 {
     xWireQueue = xQueueCreate( wireQUEUE_LENGTH, ( unsigned portBASE_TYPE ) sizeof( wireMessage ) );
     xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_WIRE, NULL );
-}
-
-void vWireRequest(wireMessage* xMessage)
-{
-    xQueueSend( xWireQueue, xMessage, wireBLOCK_TIME );
 }
 
 
@@ -149,7 +294,7 @@ static void vInit9Dof()
 //    vWireWrite(0x08);
 //    vWireStop();
 
-    I2C_Send(WRITE_9DOF, I2CBUFF, 2);
+    vWireWrite(WRITE_9DOF, I2CBUFF, 2);
 
 //    i2c_write_byte(1,0,WRITE_9DOF);
 //    i2c_write_byte(0,0,0x2D);
@@ -161,8 +306,10 @@ static void vInit9Dof()
 static void vTest9Dof()
 {
     static char str[35];
-    char I2CBUFF[2] = {0, 0};
-    int x, y, z;
+    char I2CBUFF[6] = {0, 0, 0, 0, 0, 0};
+    int x = 0,
+        y = 0,
+        z = 0;
 
     if( !is9DofInit )
     {
@@ -193,19 +340,27 @@ static void vTest9Dof()
 //    z = ucWireRead() | (ucWireReadAndStop() << 8);
 
     I2CBUFF[0] = 0x32;
-    I2C_Send(WRITE_9DOF, I2CBUFF, 1);
-    I2C_Read(READ_9DOF, I2CBUFF, 2);
+    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
+    I2CBUFF[0] = 0;
+    vWireRead(READ_9DOF, I2CBUFF, 6);
     x = I2CBUFF[0] | (I2CBUFF[1] << 8);
+    y = I2CBUFF[2] | (I2CBUFF[3] << 8);
+    z = I2CBUFF[4] | (I2CBUFF[5] << 8);
 
-    I2CBUFF[0] = 0x34;
-    I2C_Send(WRITE_9DOF, I2CBUFF, 1);
-    I2C_Read(READ_9DOF, I2CBUFF, 2);
-    y = I2CBUFF[0] | (I2CBUFF[1] << 8);
-
-    I2CBUFF[0] = 0x36;
-    I2C_Send(WRITE_9DOF, I2CBUFF, 1);
-    I2C_Read(READ_9DOF, I2CBUFF, 2);
-    z = I2CBUFF[0] | (I2CBUFF[1] << 8);
+//    I2CBUFF[0] = 0x32;
+//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
+//    vWireRead(READ_9DOF, I2CBUFF, 2);
+//    x = I2CBUFF[0] | (I2CBUFF[1] << 8);
+//
+//    I2CBUFF[0] = 0x34;
+//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
+//    vWireRead(READ_9DOF, I2CBUFF, 2);
+//    y = I2CBUFF[0] | (I2CBUFF[1] << 8);
+//
+//    I2CBUFF[0] = 0x36;
+//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
+//    vWireRead(READ_9DOF, I2CBUFF, 2);
+//    z = I2CBUFF[0] | (I2CBUFF[1] << 8);
 
 //    i2c_write_byte(1,0,WRITE_9DOF);
 //    i2c_write_byte(0,1,0x32);
@@ -229,16 +384,15 @@ static void vTest9Dof()
 #define READ_RTC 0xd0
 static void vTestRtc()
 {
-    i2c_write_byte(1,0,READ_RTC);
+//    i2c_write_byte(1,0,READ_RTC);
 
 }
 
 static void vSoftI2cScan()
 {
     static unsigned char addr = 0x00;
-//    char I2CBUFF[5]={0x00,0x0F,0xF0,0x01,0x10};
-//    if( I2C_Send(addr,I2CBUFF,0) )
-    if( !i2c_write_byte(1,1,addr) )
+    if( vWireWrite(addr,NULL,0) )
+//    if( !i2c_write_byte(1,1,addr) )
     {
         static char out[20];
         sprintf(out, "Hit addr: 0x%x (0x%x Read)", addr, addr>>1);

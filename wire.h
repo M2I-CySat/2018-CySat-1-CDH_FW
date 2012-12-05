@@ -2,6 +2,10 @@
  * File:   wire.h
  * Author: Kris
  *
+ * Custom software I2C implemented while referencing code created by
+ * Mike Pearces, University of Canterbury, 2000
+ * http://www.microchipc.com/sourcecode/PIC_Hi-Tech_C_Mike_Pearces_I2C_routines.zip
+ *
  * Created on October 29, 2012, 10:09 AM
  */
 
@@ -16,16 +20,8 @@ typedef struct {
 } wireMessage;
 
 void vWireStartTask();
-void vWireRequest(wireMessage* xMessage);
-
-void vWireInit();
-void vWireStart();
-void vWireRestart();
-void vWireStop();
-void vWireWait();
-void vWireWrite(BYTE data);
-BYTE ucWireRead();
-BYTE ucWireReadAndStop();
+char vWireWrite( char cAddress, char *pcData, char cBytes );
+char vWireRead( char cAddress, char *pcData, char cBytes );
 
 #endif	/* WIRE_H */
 

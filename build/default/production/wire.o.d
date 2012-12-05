@@ -11,6 +11,4 @@ include/FreeRTOS/queue.h  \
 include/FreeRTOS/list.h  \
 system.h  \
 uart.h  \
- soft_i2c.h  \
-i2c_wiki.h  \
 wire.h 
