@@ -51,7 +51,7 @@ void vWireStop(void);
 void vWireClock(void);
 char cWireReadBit(void);
 
-char vWireWrite( char cAddress, char *pcData, char cBytes )
+char cWireWrite( char cAddress, char *pcData, char cBytes )
 {
     vWireStart();
 
@@ -79,7 +79,7 @@ char vWireWrite( char cAddress, char *pcData, char cBytes )
     return 1;
 }
 
-char vWireRead( char cAddress, char *pcData, char cBytes )
+char cWireRead( char cAddress, char *pcData, char cBytes )
 {
     vWireStart();
 
@@ -262,7 +262,7 @@ void vWireSendAck()
 void vWireDelay(const char delay)
 {
     /* delay_us(delay) */
-    unsigned char c = delay / 20;
+    unsigned char c = delay;
     while( c-- != 0 )
     {
         continue;
@@ -284,29 +284,27 @@ static void vInit9Dof()
 {
     char I2CBUFF[2]={0x2D,0x08};
 
-    is9DofInit = 1;
-
     vConsolePuts("Initializing ADXL345...");
+
     // Setup ADXL345 for constant measurement mode
-//    vWireStart();
-//    vWireWrite(WRITE_9DOF);
-//    vWireWrite(0x2D);
-//    vWireWrite(0x08);
-//    vWireStop();
+    is9DofInit = cWireWrite(WRITE_9DOF, I2CBUFF, 2);
 
-    vWireWrite(WRITE_9DOF, I2CBUFF, 2);
-
-//    i2c_write_byte(1,0,WRITE_9DOF);
-//    i2c_write_byte(0,0,0x2D);
-//    i2c_write_byte(0,1,0x08);
-
-    vConsolePuts("9DOF Initialized.");
+    if( is9DofInit )
+    {
+        vConsolePuts("Done.");
+    }
+    else
+    {
+        vConsolePuts("I2C Error");
+    }
+    
 }
 
 static void vTest9Dof()
 {
-    static char str[35];
-    char I2CBUFF[6] = {0, 0, 0, 0, 0, 0};
+    static char str[40];
+    char cBuf[6] = {0, 0, 0, 0, 0, 0};
+    unsigned char* ucBuf = (unsigned char*) cBuf;
     int x = 0,
         y = 0,
         z = 0;
@@ -314,70 +312,28 @@ static void vTest9Dof()
     if( !is9DofInit )
     {
         vInit9Dof();
+        return;
     }
 
-//    vWireStart();
-//    vWireWrite(WRITE_9DOF);
-//    vWireWrite(0x32);
-//    vWireRestart();
-//    vWireWrite(READ_9DOF);
-//    vConsolePuts("baz");
-//    x = ucWireRead() | (ucWireReadAndStop() << 8);
-//    vConsolePuts("qux");
-//
-//    vWireStart();
-//    vWireWrite(WRITE_9DOF);
-//    vWireWrite(0x34);
-//    vWireRestart();
-//    vWireWrite(READ_9DOF);
-//    y = ucWireRead() | (ucWireReadAndStop() << 8);
-//
-//    vWireStart();
-//    vWireWrite(WRITE_9DOF);
-//    vWireWrite(0x36);
-//    vWireRestart();
-//    vWireWrite(READ_9DOF);
-//    z = ucWireRead() | (ucWireReadAndStop() << 8);
+    cBuf[0] = 0x32;
+    cWireWrite(WRITE_9DOF, cBuf, 1);
+    cBuf[0] = 0;
+    cWireRead(READ_9DOF, cBuf, 6);
+//    x = (unsigned) ucBuf[0] | ((unsigned) ucBuf[1] << 8);
+//    y = (unsigned) ucBuf[2] | ((unsigned) ucBuf[3] << 8);
+//    z = (unsigned) ucBuf[4] | ((unsigned) ucBuf[5] << 8);
+    x = *((int*) &ucBuf[0]);
+    y = *((int*) &ucBuf[2]);
+    z = *((int*) &ucBuf[4]);
 
-    I2CBUFF[0] = 0x32;
-    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
-    I2CBUFF[0] = 0;
-    vWireRead(READ_9DOF, I2CBUFF, 6);
-    x = I2CBUFF[0] | (I2CBUFF[1] << 8);
-    y = I2CBUFF[2] | (I2CBUFF[3] << 8);
-    z = I2CBUFF[4] | (I2CBUFF[5] << 8);
-
-//    I2CBUFF[0] = 0x32;
-//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
-//    vWireRead(READ_9DOF, I2CBUFF, 2);
-//    x = I2CBUFF[0] | (I2CBUFF[1] << 8);
-//
-//    I2CBUFF[0] = 0x34;
-//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
-//    vWireRead(READ_9DOF, I2CBUFF, 2);
-//    y = I2CBUFF[0] | (I2CBUFF[1] << 8);
-//
-//    I2CBUFF[0] = 0x36;
-//    vWireWrite(WRITE_9DOF, I2CBUFF, 1);
-//    vWireRead(READ_9DOF, I2CBUFF, 2);
-//    z = I2CBUFF[0] | (I2CBUFF[1] << 8);
-
-//    i2c_write_byte(1,0,WRITE_9DOF);
-//    i2c_write_byte(0,1,0x32);
-//    i2c_write_byte(1,0,READ_9DOF);
-//    x = i2c_read_byte(0,0) | (i2c_read_byte(1,1) << 8);
-//    i2c_write_byte(1,0,WRITE_9DOF);
-//    i2c_write_byte(0,1,0x34);
-//    i2c_write_byte(1,0,READ_9DOF);
-//    y = i2c_read_byte(0,0) | (i2c_read_byte(1,1) << 8);
-//    i2c_write_byte(1,0,WRITE_9DOF);
-//    i2c_write_byte(0,1,0x36);
-//    i2c_write_byte(1,0,READ_9DOF);
-//    z = i2c_read_byte(0,0) | (i2c_read_byte(1,1) << 8);
-
+    /* Read bytes as signed! */
 //    sprintf(str, "[ADXL345] x=0x%04x, y=0x%04x, z=0x%04x", x, y, z);
-    sprintf(str, "[ADXL345] x=%04d, y=%04d, z=%04d", x, y, z);
-//    sprintf(str, "[ADXL345] x=0x%04x", x);
+    sprintf(str, "[ADXL345] %04x%04x%04x -> x=%4d, y=%4d, z=%4d",
+//            *((unsigned*) &ucBuf[0]), *((unsigned*) &ucBuf[2]), *((unsigned*) &ucBuf[4]),
+//            *((unsigned*) &ucBuf[0]), *((unsigned*) &ucBuf[2]), *((unsigned*) &ucBuf[4]));
+            ucBuf[0]<<8 | ucBuf[1], ucBuf[2]<<8 | ucBuf[3], ucBuf[4]<<8 | ucBuf[5], /* force endianness */
+            x, y, z);
+//    sprintf(str, "[ADXL345] x=%+03d, y=%+03d, z=%+03d", x, y, z);
     vConsolePuts(str);
 }
 
@@ -391,7 +347,7 @@ static void vTestRtc()
 static void vSoftI2cScan()
 {
     static unsigned char addr = 0x00;
-    if( vWireWrite(addr,NULL,0) )
+    if( cWireWrite(addr,NULL,0) )
 //    if( !i2c_write_byte(1,1,addr) )
     {
         static char out[20];
@@ -409,7 +365,7 @@ static void vWireTask( void *pvParameters )
     {
         vTest9Dof();
 //        vSoftI2cScan();
-        vTaskDelay(100);
+        vTaskDelay(200);
 
 //        if( xQueueReceive( xWireQueue, &xMessage, wireBLOCK_TIME ) )
 //        {

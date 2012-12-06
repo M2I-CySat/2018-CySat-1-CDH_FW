@@ -20,8 +20,8 @@ typedef struct {
 } wireMessage;
 
 void vWireStartTask();
-char vWireWrite( char cAddress, char *pcData, char cBytes );
-char vWireRead( char cAddress, char *pcData, char cBytes );
+char cWireWrite( char cAddress, char *pcData, char cBytes );
+char cWireRead( char cAddress, char *pcData, char cBytes );
 
 #endif	/* WIRE_H */
 
