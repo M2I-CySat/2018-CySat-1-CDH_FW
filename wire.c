@@ -39,6 +39,7 @@
 
 static xQueueHandle xWireQueue;
 
+static void vWireTestTask( void *pvParameters );
 static void vWireTask( void *pvParameters );
 
 char cWireSendByte(char byte);
@@ -275,6 +276,11 @@ void vWireStartTask()
     xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_WIRE, NULL );
 }
 
+void vWireStartTestTask()
+{
+    xTaskCreate( vWireTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_WIRE + 1, NULL );
+}
+
 
 #define WRITE_9DOF 0xA6
 #define READ_9DOF 0xA7
@@ -282,12 +288,12 @@ void vWireStartTask()
 BOOL is9DofInit = 0;
 static void vInit9Dof()
 {
-    char I2CBUFF[2]={0x2D,0x08};
+    char pcWireBuff[2]={0x2D,0x08};
 
     vConsolePuts("Initializing ADXL345...");
 
     // Setup ADXL345 for constant measurement mode
-    is9DofInit = cWireWrite(WRITE_9DOF, I2CBUFF, 2);
+    is9DofInit = cWireWrite(WRITE_9DOF, pcWireBuff, 2);
 
     if( is9DofInit )
     {
@@ -357,19 +363,148 @@ static void vSoftI2cScan()
     addr += 2;
 }
 
-static void vWireTask( void *pvParameters )
+char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes )
 {
-//    wireMessage xMessage;
+    wireMessage xMessage;
+    char pcStatus = wireSTATUS_DEFAULT;
+
+    xMessage.cBus = cBus;
+    xMessage.cAddress = cAddress;
+    xMessage.pcData = pcData;
+    xMessage.cBytes = cBytes;
+    xMessage.pcStatus = &pcStatus;
+
+    if( xQueueSend( xWireQueue, &xMessage, wireBLOCK_TIME ) != pdPASS )
+    {
+        return wireSTATUS_FAIL;
+    }
+
+    /* TODO: Make this interrupt-based instead of polling */
+    while ( wireSTATUS_DEFAULT == pcStatus )
+    {
+        vTaskDelay( 100 );
+    }
+
+    return ( wireSTATUS_SUCCESS == pcStatus );
+}
+
+char cWireQueueWrite( char cBus, char cAddress, char *pcData, char cBytes )
+{
+    /* Ensure read bit is cleared */
+    cAddress &= 0xfe;
+    return cWireQueueAdd( cBus, cAddress, pcData, cBytes );
+}
+
+char cWireQueueRead( char cBus, char cAddress, char *pcData, char cBytes )
+{
+    /* Ensure read bit is set */
+    cAddress |= 0x01;
+    return cWireQueueAdd( cBus, cAddress, pcData, cBytes );
+}
+
+static void vWireTestTask( void *pvParameters )
+{
+    char pcData[20];
 
     for( ;; )
     {
-        vTest9Dof();
+        vConsolePrint("\r\n");
+
+        sprintf(pcData, "ZYXWVUTSRQPONML");
+
+        vConsolePuts( "Test Write 0xA6" );
+        if( cWireQueueWrite( wireBUS1, 0xA6, pcData, 20 ) )
+        {
+            vConsolePuts("Write success!");
+        }
+        else
+        {
+            vConsolePuts("Write failed!");
+        }
+
+        vConsolePuts( "Test Read 0xA7" );
+        if( cWireQueueRead( wireBUS1, 0xA7, pcData, 20 ) )
+        {
+            vConsolePuts("Read success:");
+            vConsolePuts(pcData);
+        }
+        else
+        {
+            vConsolePuts("Read failed!");
+        }
+
+        vTaskDelay(5000);
+    }
+}
+
+static void vWireTask( void *pvParameters )
+{
+    wireMessage xMessage;
+
+    for( ;; )
+    {
+//        vTest9Dof();
 //        vSoftI2cScan();
         vTaskDelay(200);
 
-//        if( xQueueReceive( xWireQueue, &xMessage, wireBLOCK_TIME ) )
-//        {
-//            xMessage.callback();
-//        }
+        if( xQueueReceive( xWireQueue, &xMessage, wireBLOCK_TIME ) )
+        {
+            /* Check if read bit is cleared */
+            if( 0 == ( xMessage.cAddress & 0x01 ) )
+            {
+                /* Write */
+#if 0
+                if( cWireWrite( xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
+                {
+                    *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
+                }
+                else
+                {
+                    *(xMessage.pcStatus) = wireSTATUS_FAIL;
+                }
+#else
+                char out[30];
+                unsigned i;
+                sprintf( out, "Write to 0x%x (%d bytes):", 0x00ff & (int) xMessage.cAddress, xMessage.cBytes);
+                vConsolePuts( out );
+                for( i=0; i<xMessage.cBytes-1 && i < 30-1; ++i )
+                {
+                    out[i] = xMessage.pcData[i];
+                }
+                out[i] = 0;
+                vConsolePuts( out );
+                vTaskDelay( 300 );
+                vConsolePuts( "Done" );
+                *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
+#endif
+            }
+            else
+            {
+                /* Read */
+#if 0
+                if( cWireRead( xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
+                {
+                    *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
+                }
+                else
+                {
+                    *(xMessage.pcStatus) = wireSTATUS_FAIL;
+                }
+#else
+                char out[30];
+                unsigned i;
+                sprintf( out, "Read from 0x%x (%d bytes)", 0x00ff & (int) xMessage.cAddress, xMessage.cBytes);
+                vConsolePuts( out );
+                for( i=0; i<xMessage.cBytes-1; ++i )
+                {
+                    xMessage.pcData[i] = i+'A';
+                }
+                xMessage.pcData[i] = 0;
+                vTaskDelay( 300 );
+                vConsolePuts( "Done" );
+                *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
+#endif
+            }
+        }
     }
 }
