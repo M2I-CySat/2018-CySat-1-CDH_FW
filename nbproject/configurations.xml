@@ -30,8 +30,6 @@
       <itemPath>wire.h</itemPath>
       <itemPath>system.h</itemPath>
       <itemPath>payload.h</itemPath>
-      <itemPath>soft_i2c.h</itemPath>
-      <itemPath>i2c_wiki.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -59,8 +57,6 @@
       <itemPath>power.c</itemPath>
       <itemPath>wire.c</itemPath>
       <itemPath>payload.c</itemPath>
-      <itemPath>soft_i2c.c</itemPath>
-      <itemPath>i2c_wiki.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

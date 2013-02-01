@@ -42,7 +42,6 @@ typedef struct {
 } wireMessage;
 
 void vWireStartTask();
-void vWireStartTestTask();
 
 char cWireWrite( char cAddress, char *pcData, char cBytes );
 char cWireRead( char cAddress, char *pcData, char cBytes );
