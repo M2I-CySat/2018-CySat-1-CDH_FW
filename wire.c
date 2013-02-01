@@ -16,14 +16,30 @@
 #define wireQUEUE_LENGTH    10
 #define wireBLOCK_TIME      ( ( portTickType ) 0xffff )
 
-/* The SCL output pin */
-#define SCL         _RG2
-/* The SCL Direction Register Bit */
-#define SCL_TRIS    _TRISG2
-/* The SDA output pin */
-#define SDA         _RG3
-/* The SDA Direction Register Bit */
-#define SDA_TRIS    _TRISG3
+/* SCL*:        The SCL output pin */
+/* SCL*_TRIS:   The SCL Direction Register Bit */
+/* SDA*:        The SDA output pin */
+/* SDA*_TRIS:   The SDA Direction Register Bit */
+
+#define SCL1         _RG2
+#define SCL1_TRIS    _TRISG2
+#define SDA1         _RG3
+#define SDA1_TRIS    _TRISG3
+
+#define SCL2         _RG2
+#define SCL2_TRIS    _TRISG2
+#define SDA2         _RG3
+#define SDA2_TRIS    _TRISG3
+
+#define SCL3         _RG2
+#define SCL3_TRIS    _TRISG2
+#define SDA3         _RG3
+#define SDA3_TRIS    _TRISG3
+
+#define SCL4         _RG2
+#define SCL4_TRIS    _TRISG2
+#define SDA4         _RG3
+#define SDA4_TRIS    _TRISG3
 
 #define wireLOW     0
 #define wireHIGH    1
@@ -41,81 +57,173 @@ static xQueueHandle xWireQueue;
 
 static void vWireTask( void *pvParameters );
 
-char cWireSendByte(char byte);
-char cWireGetByte(void);
-char cWireGetAck(void);
-void vWireSendAck(void);
-void vWireDelay(char delay);
-void vWireStart(void);
-void vWireStop(void);
-void vWireClock(void);
-char cWireReadBit(void);
+/* Internal write and read commands */
+char cWireWrite( char cBus, char cAddress, char *pcData, char cBytes );
+char cWireRead( char cBus, char cAddress, char *pcData, char cBytes );
 
-char cWireWrite( char cAddress, char *pcData, char cBytes )
+char cWireSendByte( char cBus, char byte );
+char cWireGetByte( char cBus );
+char cWireGetAck( char cBus );
+void vWireSendAck( char cBus );
+void vWireStart( char cBus );
+void vWireStop( char cBus );
+void vWireClock( char cBus );
+char cWireReadBit( char cBus );
+void vWireDelay( char delay );
+
+/* Bus selection and bit bashing */
+/* Todo: Eventually, find a cleaner way to do this. */
+void vBadBusError( char bus );
+void vSetSCL(char bus, char val);
+void vSetSDA(char bus, char val);
+void vSetSCL_TRIS(char bus, char val);
+void vSetSDA_TRIS(char bus, char val);
+char cGetSCL(char bus);
+char cGetSDA(char bus);
+
+void vBadBusError( char bus )
 {
-    vWireStart();
+    char out[50];
+    sprintf( out, "Bad I2C Bus error: wireBUS%d not defined!", bus );
+    vConsolePutsError( out );
+}
+
+void vSetSCL( char bus, char val )
+{
+    switch( bus )
+    {
+        case 1: SCL1 = val; return;
+        case 2: SCL2 = val; return;
+        case 3: SCL3 = val; return;
+        case 4: SCL4 = val; return;
+        default: vBadBusError( bus );
+    }
+}
+void vSetSDA( char bus, char val )
+{
+    switch( bus )
+    {
+        case 1: SDA1 = val; return;
+        case 2: SDA2 = val; return;
+        case 3: SDA3 = val; return;
+        case 4: SDA4 = val; return;
+        default: vBadBusError( bus );
+    }
+}
+void vSetSCL_TRIS( char bus, char val )
+{
+    switch( bus )
+    {
+        case 1: SCL1_TRIS = val; return;
+        case 2: SCL2_TRIS = val; return;
+        case 3: SCL3_TRIS = val; return;
+        case 4: SCL4_TRIS = val; return;
+        default: vBadBusError( bus );
+    }
+}
+void vSetSDA_TRIS( char bus, char val )
+{
+    switch( bus )
+    {
+        case 1: SDA1_TRIS = val; return;
+        case 2: SDA2_TRIS = val; return;
+        case 3: SDA3_TRIS = val; return;
+        case 4: SDA4_TRIS = val; return;
+        default: vBadBusError( bus );
+    }
+}
+char cGetSCL( char bus )
+{
+    switch( bus )
+    {
+        case 1: return SCL1;
+        case 2: return SCL2;
+        case 3: return SCL3;
+        case 4: return SCL4;
+        default: vBadBusError( bus );
+    }
+    return wireHIGH;
+}
+char cGetSDA( char bus )
+{
+    switch( bus )
+    {
+        case 1: return SDA1;
+        case 2: return SDA2;
+        case 3: return SDA3;
+        case 4: return SDA4;
+        default: vBadBusError( bus );
+    }
+    return wireHIGH;
+}
+
+char cWireWrite( char cBus, char cAddress, char *pcData, char cBytes )
+{
+    vWireStart( cBus );
 
     /* Send Address */
-    cWireSendByte( cAddress & 0xFE );
-    if( !cWireGetAck() )
+    cWireSendByte( cBus, cAddress & 0xFE );
+    if( !cWireGetAck( cBus ) )
     {
-        vWireStop();
+        vWireStop( cBus );
         return 0;
     }
 
     /* Send Data */
     while( cBytes-- )
     {
-        cWireSendByte( *pcData );
-        if( !cWireGetAck() )
+        cWireSendByte( cBus, *pcData );
+        if( !cWireGetAck( cBus ) )
         {
-            vWireStop();
+            vWireStop( cBus );
             return 0;
         }
         ++pcData;
     }
 
-    vWireStop();
+    vWireStop( cBus );
     return 1;
 }
 
-char cWireRead( char cAddress, char *pcData, char cBytes )
+char cWireRead( char cBus, char cAddress, char *pcData, char cBytes )
 {
-    vWireStart();
+    vWireStart( cBus );
 
     /* Send Address */
-    cWireSendByte( cAddress | 0x01 );
-    if( !cWireGetAck() )
+    cWireSendByte( cBus, cAddress | 0x01 );
+    if( !cWireGetAck( cBus ) )
     {
-        vWireStop();
+        vWireStop( cBus );
         return 0;
     }
 
     /* Read Data */
     while( cBytes-- )
     {
-        *pcData = cWireGetByte();
+        *pcData = cWireGetByte( cBus );
         pcData++;
 
         if( cBytes > 0 )
         {
-            vWireSendAck();
+            vWireSendAck( cBus );
         }
     }
 
-    vWireStop();
+    vWireStop( cBus );
     return 1;
 }
 
-char cWireSendByte( char cByte )
+char cWireSendByte( char cBus, char cByte )
 {
     char cCount;
 
-    SDA = wireLOW;
-    SCL = wireLOW;
+//    SDA = wireLOW;
+    vSetSDA( cBus, wireLOW );
+//    SCL = wireLOW;
+    vSetSCL( cBus, wireLOW );
 
     /* Give clock time to go low */
-    vWireDelay(wireCLOCKLOW);
+    vWireDelay( wireCLOCKLOW );
 
     /* Send 8 bits */
     for( cCount = 8; cCount; --cCount )
@@ -124,142 +232,174 @@ char cWireSendByte( char cByte )
         if( (cByte & 0x80) == 0 )
         {
             /* Pull pin low */
-            SDA = wireLOW;
-            SDA_TRIS = wireLOW;
+//            SDA = wireLOW;
+            vSetSDA( cBus, wireLOW );
+//            SDA_TRIS = wireLOW;
+            vSetSDA_TRIS( cBus, wireLOW );
         }
         else
         {
             /* Release pin */
-            SDA_TRIS = wireHIGH;
+//            SDA_TRIS = wireHIGH;
+            vSetSDA_TRIS( cBus, wireHIGH );
         }
 
         cByte = cByte << 1;
         
-        vWireClock();
+        vWireClock( cBus );
     }
 
-    SDA_TRIS = wireHIGH;
+//    SDA_TRIS = wireHIGH;
+    vSetSDA_TRIS( cBus, wireHIGH );
     return 1;
 }
 
-char cWireGetByte()
+char cWireGetByte( char cBus )
 {
     char cCount,
          cByte = 0;
 
-    SDA = wireLOW;
-    SCL = wireLOW;
+//    SDA = wireLOW;
+    vSetSDA( cBus, wireLOW );
+//    SCL = wireLOW;
+    vSetSCL( cBus, wireLOW );
 
-    vWireDelay(wireCLOCKLOW);
+    vWireDelay( wireCLOCKLOW );
 
     for( cCount = 8; cCount; --cCount )
     {
         cByte = cByte << 1;
 
         /* Release the pin */
-        SDA_TRIS = wireHIGH;
+//        SDA_TRIS = wireHIGH;
+        vSetSDA_TRIS( cBus, wireHIGH );
 
-        cByte |= cWireReadBit();
+        cByte |= cWireReadBit( cBus );
     }
 
     return cByte;
 }
 
-void vWireStart()
+void vWireStart( char cBus )
 {
     /* Ensure pins are in high-Z mode */
-    SDA_TRIS = wireHIGH;
-    SCL_TRIS = wireHIGH;
-    SCL = wireLOW;
-    SDA = wireLOW;
+//    SDA_TRIS = wireHIGH;
+    vSetSDA_TRIS( cBus, wireHIGH );
+//    SCL_TRIS = wireHIGH;
+    vSetSCL_TRIS( cBus, wireHIGH );
+//    SCL = wireLOW;
+    vSetSCL( cBus, wireLOW );
+//    SDA = wireLOW;
+    vSetSDA( cBus, wireLOW );
 
     vWireDelay( wireSTARTDELAY );
 
     /* I2C Start condition */
-    SDA_TRIS = wireLOW;
-    SDA = wireLOW;
+//    SDA_TRIS = wireLOW;
+    vSetSDA_TRIS( cBus, wireLOW );
+//    SDA = wireLOW;
+    vSetSDA( cBus, wireLOW );
     vWireDelay( wireSTARTDELAY );
-    SCL_TRIS = wireLOW;
+//    SCL_TRIS = wireLOW;
+    vSetSCL_TRIS( cBus, wireLOW );
     vWireDelay( wireCLOCKLOW );
 }
 
-void vWireStop()
+void vWireStop( char cBus )
 {
     /* I2C Stop condition */
-    SDA_TRIS = wireLOW;
-    SCL_TRIS = wireHIGH;
+//    SDA_TRIS = wireLOW;
+    vSetSDA_TRIS( cBus, wireLOW );
+//    SCL_TRIS = wireHIGH;
+    vSetSCL_TRIS( cBus, wireHIGH );
     vWireDelay(wireSTOPDELAY);
-    SDA_TRIS = wireHIGH;
+//    SDA_TRIS = wireHIGH;
+    vSetSDA_TRIS( cBus, wireHIGH );
 }
 
-void vWireClock()
+void vWireClock( char cBus )
 {
     vWireDelay(wireDATASETTLE);
-    SCL_TRIS = wireHIGH;
+//    SCL_TRIS = wireHIGH;
+    vSetSCL_TRIS( cBus, wireHIGH );
     vWireDelay(wireCLOCKHIGH);
-    SCL_TRIS = wireLOW;
+//    SCL_TRIS = wireLOW;
+    vSetSCL_TRIS( cBus, wireLOW );
     vWireDelay(wireCLOCKLOW);
 }
 
-char cWireReadBit()
+char cWireReadBit( char cBus )
 {
     char cBit = 0;
 
-    vWireDelay(wireDATASETTLE);
-    SCL_TRIS = wireHIGH;
-    vWireDelay(wireHALFCLOCK);
+    vWireDelay( wireDATASETTLE );
+//    SCL_TRIS = wireHIGH;
+    vSetSCL_TRIS( cBus, wireHIGH );
+    vWireDelay( wireHALFCLOCK );
 
-    if( SDA != 0 )
+//    if( SDA != 0 )
+    if ( cGetSDA( cBus ) != wireLOW )
     {
         cBit = 1;
     }
 
     vWireDelay(wireHALFCLOCK);
-    SCL_TRIS = wireLOW;
+//    SCL_TRIS = wireLOW;
+    vSetSCL_TRIS( cBus, wireLOW );
     vWireDelay(wireCLOCKLOW);
 
     return cBit;
 }
 
-char cWireGetAck()
+char cWireGetAck( char cBus )
 {
-    SDA = wireLOW;
-    SCL = wireLOW;
+//    SDA = wireLOW;
+    vSetSDA( cBus, wireLOW );
+//    SCL = wireLOW;
+    vSetSCL( cBus, wireLOW );
 
     /* Ensure clock is low */
-    SCL_TRIS = wireLOW;
+//    SCL_TRIS = wireLOW;
+    vSetSCL_TRIS( cBus, wireLOW );
     /* Release the data pin so slave can ACK */
-    SDA_TRIS = wireHIGH;
+//    SDA_TRIS = wireHIGH;
+    vSetSDA_TRIS( cBus, wireHIGH );
     /* Release the clock pin */
-    SCL_TRIS = wireHIGH;
+//    SCL_TRIS = wireHIGH;
+    vSetSCL_TRIS( cBus, wireHIGH );
 
-    vWireDelay(wireHALFCLOCK);
-    if( SDA )
+    vWireDelay( wireHALFCLOCK );
+//    if( SDA )
+    if( cGetSDA( cBus ) != wireLOW )
     {
         /* No ACK */
         return 0;
     }
-    vWireDelay(wireHALFCLOCK);
+    vWireDelay( wireHALFCLOCK );
 
     /* Finish the clock pulse */
-    SCL_TRIS = wireLOW;
-    vWireDelay(wireCLOCKLOW);
-    vWireDelay(wireCLOCKLOW);
+//    SCL_TRIS = wireLOW;
+    vSetSCL_TRIS( cBus, wireLOW );
+    vWireDelay( wireCLOCKLOW );
+    vWireDelay( wireCLOCKLOW );
 
     return 1;
 }
 
-void vWireSendAck()
+void vWireSendAck( char cBus )
 {
-    SDA = 0;
-    SDA_TRIS = wireLOW;
-    vWireDelay(wireDATASETTLE);
-    vWireClock();
-    SDA_TRIS = wireHIGH;
-    vWireDelay(wireDATASETTLE);
+//    SDA = 0;
+    vSetSDA( cBus, wireLOW );
+//    SDA_TRIS = wireLOW;
+    vSetSDA_TRIS( cBus, wireLOW );
+    vWireDelay( wireDATASETTLE );
+    vWireClock( cBus );
+//    SDA_TRIS = wireHIGH;
+    vSetSDA_TRIS( cBus, wireHIGH );
+    vWireDelay( wireDATASETTLE );
 }
 
-void vWireDelay(const char delay)
+void vWireDelay( const char delay )
 {
     /* delay_us(delay) */
     unsigned char c = delay;
@@ -278,6 +418,7 @@ void vWireStartTask()
 
 #define WRITE_9DOF 0xA6
 #define READ_9DOF 0xA7
+#define BUS_9DOF wireBUS1
 
 BOOL is9DofInit = 0;
 static void vInit9Dof()
@@ -287,7 +428,7 @@ static void vInit9Dof()
     vConsolePuts("Initializing ADXL345...");
 
     // Setup ADXL345 for constant measurement mode
-    is9DofInit = cWireWrite(WRITE_9DOF, pcWireBuff, 2);
+    is9DofInit = cWireWrite( BUS_9DOF, WRITE_9DOF, pcWireBuff, 2 );
 
     if( is9DofInit )
     {
@@ -316,9 +457,9 @@ static void vTest9Dof()
     }
 
     cBuf[0] = 0x32;
-    cWireWrite(WRITE_9DOF, cBuf, 1);
+    cWireWrite( BUS_9DOF, WRITE_9DOF, cBuf, 1 );
     cBuf[0] = 0;
-    cWireRead(READ_9DOF, cBuf, 6);
+    cWireRead( BUS_9DOF, READ_9DOF, cBuf, 6 );
 //    x = (unsigned) ucBuf[0] | ((unsigned) ucBuf[1] << 8);
 //    y = (unsigned) ucBuf[2] | ((unsigned) ucBuf[3] << 8);
 //    z = (unsigned) ucBuf[4] | ((unsigned) ucBuf[5] << 8);
@@ -347,11 +488,11 @@ static void vTestRtc()
 static void vSoftI2cScan()
 {
     static unsigned char addr = 0x00;
-    if( cWireWrite(addr,NULL,0) )
-//    if( !i2c_write_byte(1,1,addr) )
+    static char bus = wireBUS1;
+    if( cWireWrite( bus, addr, NULL, 0) )
     {
-        static char out[20];
-        sprintf(out, "Hit addr: 0x%x (0x%x Read)", addr, addr>>1);
+        char out[30];
+        sprintf(out, "Hit addr 0x%x (0x%x Read) on bus (%d)", addr, addr>>1, bus);
         vConsolePuts(out);
     }
     addr += 2;
@@ -413,7 +554,7 @@ static void vWireTask( void *pvParameters )
             if( 0 == ( xMessage.cAddress & 0x01 ) )
             {
                 /* Write */
-                if( cWireWrite( xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
+                if( cWireWrite( xMessage.cBus, xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
                 {
                     *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
                 }
@@ -425,7 +566,7 @@ static void vWireTask( void *pvParameters )
             else
             {
                 /* Read */
-                if( cWireRead( xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
+                if( cWireRead( xMessage.cBus, xMessage.cAddress, xMessage.pcData, xMessage.cBytes ) )
                 {
                     *(xMessage.pcStatus) = wireSTATUS_SUCCESS;
                 }

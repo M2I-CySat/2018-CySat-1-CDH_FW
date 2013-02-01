@@ -19,10 +19,10 @@
 #define wireSTATUS_SUCCESS  1
 #define wireSTATUS_DEFAULT  2
 
-#define wireBUS1    0
-#define wireBUS2    1
-#define wireBUS3    2
-#define wireBUS4    3
+#define wireBUS1    1
+#define wireBUS2    2
+#define wireBUS3    3
+#define wireBUS4    4
 
 typedef struct {
     /* Which I2C bus to use, wireBUS* */
@@ -43,8 +43,6 @@ typedef struct {
 
 void vWireStartTask();
 
-char cWireWrite( char cAddress, char *pcData, char cBytes );
-char cWireRead( char cAddress, char *pcData, char cBytes );
 char cWireQueueWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueRead( char cBus, char cAddress, char *pcData, char cBytes );
 
