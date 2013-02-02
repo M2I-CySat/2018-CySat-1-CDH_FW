@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   payload.h
  * Author: Kris
  *
@@ -10,14 +10,7 @@
 
 #include <GenericTypeDefs.h>
 
-typedef struct {
-    UINT ulData0;
-    UINT ulData1;
-    UINT ulData2;
-} payloadData;
-
 void vPayloadStartTask();
-payloadData* xPayloadGetData();
 
 #endif	/* PAYLOAD_H */
 
