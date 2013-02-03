@@ -30,6 +30,7 @@
       <itemPath>wire.h</itemPath>
       <itemPath>system.h</itemPath>
       <itemPath>payload.h</itemPath>
+      <itemPath>rtc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -57,6 +58,7 @@
       <itemPath>power.c</itemPath>
       <itemPath>wire.c</itemPath>
       <itemPath>payload.c</itemPath>
+      <itemPath>rtc.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

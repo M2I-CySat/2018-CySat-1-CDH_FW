@@ -27,6 +27,7 @@ void vUart2Putc(char cChar);
 void vUart2Puts(char* pcMessage);
 void vConsolePrint( char *pcString );
 void vConsolePuts(char* pcMessage);
+void vConsolePutx(char c);
 void vConsolePutsError(char* pcMessage);
 
 void vUartRelayMode( int mode );

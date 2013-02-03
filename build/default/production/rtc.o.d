@@ -1,5 +1,5 @@
-build/default/production/payload.o:  \
-payload.c  \
+build/default/production/rtc.o:  \
+rtc.c  \
 include/FreeRTOS/FreeRTOS.h  \
  include/FreeRTOS/projdefs.h  \
 include/FreeRTOSConfig.h  \
@@ -12,4 +12,4 @@ include/FreeRTOS/queue.h  \
 system.h  \
 uart.h  \
 wire.h  \
- payload.h 
+ rtc.h 

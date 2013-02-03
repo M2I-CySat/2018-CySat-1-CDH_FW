@@ -1,6 +1,6 @@
 /*
  * File:   payload.h
- * Author: Kris
+ * Author: Kris Scott
  *
  * Created on October 30, 2012, 2:51 PM
  */

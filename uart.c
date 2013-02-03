@@ -189,6 +189,13 @@ void vConsolePuts( char *pcString )
     vConsolePrint( "\r\n" );
 }
 
+void vConsolePutx( char c )
+{
+    char out[3];
+    sprintf( out, "%02x", 0xff & (unsigned char) c);
+    vConsolePuts( out );
+}
+
 void vConsolePutsError( char *pcString )
 {
     // TODO: Add more useful info

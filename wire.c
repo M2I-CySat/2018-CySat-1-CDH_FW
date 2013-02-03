@@ -26,20 +26,20 @@
 #define SDA1         _RG3
 #define SDA1_TRIS    _TRISG3
 
-#define SCL2         _RG2
-#define SCL2_TRIS    _TRISG2
-#define SDA2         _RG3
-#define SDA2_TRIS    _TRISG3
+#define SCL2         _RA2
+#define SCL2_TRIS    _TRISA2
+#define SDA2         _RA3
+#define SDA2_TRIS    _TRISA3
 
-#define SCL3         _RG2
-#define SCL3_TRIS    _TRISG2
-#define SDA3         _RG3
-#define SDA3_TRIS    _TRISG3
+#define SCL3         _RE6
+#define SCL3_TRIS    _TRISE6
+#define SDA3         _RE7
+#define SDA3_TRIS    _TRISE7
 
-#define SCL4         _RG2
-#define SCL4_TRIS    _TRISG2
-#define SDA4         _RG3
-#define SDA4_TRIS    _TRISG3
+#define SCL4         _RB2
+#define SCL4_TRIS    _TRISB2
+#define SDA4         _RB3
+#define SDA4_TRIS    _TRISB3
 
 #define wireLOW     0
 #define wireHIGH    1
