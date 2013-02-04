@@ -199,19 +199,20 @@ static unsigned char ucConvertToInteger( char c )
     return (unsigned char) (0x0f & (c >> 4)) * 10 + (0x0f & c);
 }
 
+/* Test I2C reading and writing by assuming the RTC is not running */
 static void vRtcTestI2C()
 {
     unsigned char i;
-    char pcDataOut[9] = {0,0,0x73,0xab,0x55,0xfb,0x0f,0x9d,0x2a};
+    char pcDataOut[9] = {0x01,0xbe,0x73,0xab,0x55,0xfb,0x0f,0x9d,0x2a};
     char pcDataIn[8];
 
     vConsolePuts( "Testing I2C" );
 
-    cWireQueueWrite( rtcBUS, rtcADDR, pcDataOut, 9 );
+    cWireQueueWrite( rtcBUS, rtcADDR, pcDataOut, 8 );
     cWireQueueWrite( rtcBUS, rtcADDR, pcDataOut, 1 );
-    cWireQueueRead( rtcBUS, rtcADDR, pcDataIn, 8 );
+    cWireQueueRead( rtcBUS, rtcADDR, pcDataIn, 7 );
 
-    for( i=1; i<8; ++i )
+    for( i=0; i<7; ++i )
     {
         vConsolePutx(pcDataIn[i]);
         vTaskDelay(100);

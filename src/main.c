@@ -33,7 +33,8 @@ int main( void )
     vWireStartTask();
     
 //    vPowerStartTask();
-//    vPayloadStartTask();
+    vPayloadStartTask();
+
 //    vRtcStartTask();
 
     /* Don't send UART Rx to radio by default */

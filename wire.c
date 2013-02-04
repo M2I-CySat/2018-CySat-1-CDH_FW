@@ -84,7 +84,7 @@ char cGetSDA(char bus);
 void vBadBusError( char bus )
 {
     char out[50];
-    sprintf( out, "Bad I2C Bus error: wireBUS%d not defined!", bus );
+    sprintf( out, "Bad I2C Bus error: bus %d not defined!", bus );
     vConsolePutsError( out );
 }
 
@@ -496,6 +496,30 @@ static void vSoftI2cScan()
         vConsolePuts(out);
     }
     addr += 2;
+}
+
+void vWireScan( char bus )
+{
+    char addr = 0x00;
+    char out[20];
+
+    vConsolePrint( "Scanning I2C bus " );
+    vTaskDelay(100);
+    sprintf( out, "%d", bus );
+    vConsolePuts( out );
+    vTaskDelay(100);
+
+    do
+    {
+        if( cWireQueueAdd( bus, addr, NULL, 0 ) )
+        {
+            sprintf( out, "Addr %02x (%02x) ACK", 0xff & addr, (0xff & addr) >> 1 );
+            vConsolePuts( out );
+            vTaskDelay(50);
+        }
+        ++addr;
+
+    } while( addr != 0x00 );
 }
 
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes )

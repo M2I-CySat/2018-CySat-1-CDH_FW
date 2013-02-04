@@ -43,6 +43,8 @@ typedef struct {
 
 void vWireStartTask();
 
+void vWireScan( char bus );
+char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueRead( char cBus, char cAddress, char *pcData, char cBytes );
 
