@@ -537,23 +537,23 @@ static void vSoftI2cScan()
     addr += 2;
 }
 
-void vWireScan( char bus )
+void vWireScan( char cBus )
 {
     char addr = 0x00;
-    char out[20];
+    char out[30];
 
     vConsolePrint( "Scanning I2C bus " );
     vTaskDelay(100);
-    sprintf( out, "%d", bus );
+    sprintf( out, "%d", cBus );
     vConsolePuts( out );
     vTaskDelay(100);
 
     do
     {
 //        if( cWireQueueAdd( bus, addr, NULL, 0 ) )
-        if( cWireRead( bus, addr, NULL, 0 ) )
+        if( cWireRead( cBus, addr, NULL, 0 ) )
         {
-            sprintf( out, "Addr %02x (%02xR) ACK", 0xff & addr, 0x7f & (addr >> 1) );
+            sprintf( out, "Bus %d Addr %02x (%02xR) ACK", cBus, 0xff & addr, 0x7f & (addr >> 1) );
             vConsolePuts( out );
             vTaskDelay(50);
         }

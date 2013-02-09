@@ -8,6 +8,8 @@
 #ifndef POWER_H
 #define	POWER_H
 
+#define powerLOCAL_PRINT
+
 typedef unsigned short ushort;
 
 typedef struct {
@@ -20,11 +22,14 @@ typedef struct {
     ushort ZVoltage : 10;
     ushort ZCurrent0 : 10;
     ushort ZCurrent1 : 10;
-    ushort Battery0BusCurrent : 10;
+    ushort BusBatteryCurrent : 10;
+    ushort Bus5VCurrent : 10;
+    ushort Bus3V3Current : 10;
+    ushort Battery0Temperature : 10;
     ushort Battery0Voltage : 10;
     ushort Battery0Direction : 1;
     ushort Battery0Current : 10;
-    ushort Battery1BusCurrent : 10;
+    ushort Battery1Temperature : 10;
     ushort Battery1Voltage : 10;
     ushort Battery1Direction : 1;
     ushort Battery1Current : 10;
