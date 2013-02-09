@@ -41,7 +41,11 @@ typedef struct {
     char* pcStatus;
 } wireMessage;
 
+void vWireInit();
 void vWireStartTask();
+
+char cWireWrite( char cBus, char cAddress, char *pcData, char cBytes );
+char cWireRead( char cBus, char cAddress, char *pcData, char cBytes );
 
 void vWireScan( char bus );
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes );

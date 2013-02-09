@@ -30,7 +30,8 @@ int main( void )
 //    vWireInit();
 
     vUartStartTask();
-    vWireStartTask();
+//    vWireStartTask();
+    vWireInit();
     
 //    vPowerStartTask();
     vPayloadStartTask();

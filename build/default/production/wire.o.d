@@ -9,6 +9,8 @@ include/FreeRTOS/portmacro.h  \
 include/FreeRTOS/queue.h  \
  include/FreeRTOS/task.h  \
 include/FreeRTOS/list.h  \
+ include/FreeRTOS/semphr.h  \
+include/FreeRTOS/queue.h  \
 system.h  \
 uart.h  \
-wire.h 
+ wire.h 
