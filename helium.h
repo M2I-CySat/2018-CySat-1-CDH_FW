@@ -10,26 +10,6 @@
 
 #include <stdint.h>
 
-#ifndef uint1_t
-typedef unsigned char uint1_t;
-#define uint1_t uint1_t
-#endif
-
-#ifndef uint2_t
-typedef unsigned char uint2_t;
-#define uint2_t uint2_t
-#endif
-
-#ifndef int2_t
-typedef signed char int2_t;
-#define int2_t int2_t
-#endif
-
-#ifndef uint4_t
-typedef unsigned char uint4_t;
-#define uint4_t uint4_t
-#endif
-
 
 /*
  * Commands which can be sent to the Helium radio
@@ -146,20 +126,20 @@ typedef unsigned char uint4_t;
  */
 #define HE_RADIO_CONFIGURATION_LENGTH	34	// The length of the configuration data structure in bytes
 typedef struct {
-	uint1_t			uart_baud_rate;			// Radio UART baud rate
-	uint1_t			amplifier_level;		// Radio power amplifier level (0-255 nonlinear)
-	uint1_t			rf_tx_baud_rate;		// Radio transmission baud rate
-	uint1_t			rf_rx_baud_rate;		// Radio receive baud rate
-	uint1_t			rf_tx_modulation;		// Radio transmit modulation
-	uint1_t			rf_rx_modulation;		// Radio receive modulation
-	uint4_t			rf_tx_frequency;		// Radio transmit frequency (in Hz)
-	uint4_t			rf_rx_frequency;		// Radio receive frequency (in Hz)
+	uint8_t			uart_baud_rate;			// Radio UART baud rate
+	uint8_t			amplifier_level;		// Radio power amplifier level (0-255 nonlinear)
+	uint8_t			rf_tx_baud_rate;		// Radio transmission baud rate
+	uint8_t			rf_rx_baud_rate;		// Radio receive baud rate
+	uint8_t			rf_tx_modulation;		// Radio transmit modulation
+	uint8_t			rf_rx_modulation;		// Radio receive modulation
+	uint32_t			rf_tx_frequency;		// Radio transmit frequency (in Hz)
+	uint32_t			rf_rx_frequency;		// Radio receive frequency (in Hz)
 	unsigned char	ax_call_source[6];		// AX.25 Source callsign
 	unsigned char	ax_call_destination[6];	// AX.25 Destination callsign
-	uint2_t			ax_tx_preamble;			// AX.25 transmission preamble
-	uint2_t			ax_tx_postamble;		// AX.25 transmission postamble
-	uint2_t			function_config1;		// Radio configuration functions 1
-	uint2_t			function_config2;		// Radio configuration functions 2
+	uint16_t			ax_tx_preamble;			// AX.25 transmission preamble
+	uint16_t			ax_tx_postamble;		// AX.25 transmission postamble
+	uint16_t			function_config1;		// Radio configuration functions 1
+	uint16_t			function_config2;		// Radio configuration functions 2
 } HE_RADIO_CONFIGURATION;
 
 /*
@@ -167,12 +147,12 @@ typedef struct {
  */
 #define HE_TELEMETRY_LENGTH		14		// The length of the telemetry data structure in bytes
  typedef struct {
-	uint2_t	op_counter;
-	int2_t	msp430_temp;
-	uint1_t	time_count[3];
-	uint1_t	rssi;
-	uint4_t	bytes_received;
-	uint4_t	bytes_transmitted;
+	uint16_t	op_counter;
+	int16_t	msp430_temp;
+	uint8_t	time_count[3];
+	uint8_t	rssi;
+	uint32_t	bytes_received;
+	uint32_t	bytes_transmitted;
 } HE_TELEMETRY;
 
 /*
@@ -180,10 +160,10 @@ typedef struct {
  */
 #define	HE_RF_CONFIGURATION_LENGTH	10	// The length of the RF configuration data structure in bytes
 typedef struct {
-	uint1_t	front_end_level;
-	uint1_t	amplifier_power;			// Radio power amplifier level (0-255 nonlinear)
-	uint4_t	tx_frequency_offset;		// Radio transmit frequency offset (up to 20kHz, in Hz)
-	uint4_t	rx_frequency_offset;		// Radio receive frequency offset (up to 20kHz, in Hz)
+	uint8_t	front_end_level;
+	uint8_t	amplifier_power;			// Radio power amplifier level (0-255 nonlinear)
+	uint32_t	tx_frequency_offset;		// Radio transmit frequency offset (up to 20kHz, in Hz)
+	uint32_t	rx_frequency_offset;		// Radio receive frequency offset (up to 20kHz, in Hz)
 } HE_RF_CONFIGURATION;
 
 /*
@@ -191,7 +171,7 @@ typedef struct {
  */
 #define HE_BEACON_CONFIGURATION_LENGTH	1	// The length of the beacon configuration in bytes
 typedef struct {
-	uint1_t	interval;						// 0=beacon off, 2.5 second delay per LSB
+	uint8_t	interval;						// 0=beacon off, 2.5 second delay per LSB
 } HE_BEACON_CONFIGURATION;
 
 /*
