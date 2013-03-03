@@ -33,12 +33,12 @@ ushort usGetChannel( char cChannel )
 {
     char pcData[2];
 
-    if( 0 == cWireWrite( powerBUS, powerADDR, &cChannel, 1 ) ){
+    if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, &cChannel, 1 ) ){
         vConsolePutsError( "Power: I2C Write Error" );
         return 0;
     }
 
-    if( 0 == cWireRead( powerBUS, powerADDR, pcData, 2 ) ){
+    if( wireSTATUS_SUCCESS != cWireReadPutsError( powerBUS, powerADDR, pcData, 2 ) ){
         vConsolePutsError( "Power: I2C Read Error" );
         return 0;
     }

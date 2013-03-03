@@ -12,6 +12,11 @@
 
 typedef unsigned short ushort;
 
+/*
+ * For internal memory management only.
+ *   Bit field order is NOT guaranteed.
+ *   Do NOT attempt to write this struct directly to disk, radio, etc.
+ */
 typedef struct {
     ushort XVoltage : 10;
     ushort XCurrent0 : 10;

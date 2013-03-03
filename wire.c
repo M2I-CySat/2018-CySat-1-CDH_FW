@@ -54,6 +54,9 @@
 #define wireCLOCKLOW   100
 #define wireACKWAITMIN 50
 
+/* Hacky way to adjust how long 1us is */
+#define wireDELAY_SCALE 10
+
 static xQueueHandle xWireQueue;
 
 xQueueHandle xMutexBus1;
@@ -198,12 +201,18 @@ static char cWrite( char cBus, char cAddress, char *pcData, char cBytes )
 {
     vStart( cBus );
 
+    /* Check if SCL is not held down */
+    if( !cGetSCL( cBus ) )
+    {
+        return wireSTATUS_HELD_LOW;
+    }
+
     /* Send Address */
     cSendByte( cBus, cAddress & 0xFE );
     if( !cGetAck( cBus ) )
     {
         vStop( cBus );
-        return 0;
+        return wireSTATUS_FAIL;
     }
 
     /* Send Data */
@@ -213,25 +222,31 @@ static char cWrite( char cBus, char cAddress, char *pcData, char cBytes )
         if( !cGetAck( cBus ) )
         {
             vStop( cBus );
-            return 0;
+            return wireSTATUS_NACK;
         }
         ++pcData;
     }
 
     vStop( cBus );
-    return 1;
+    return wireSTATUS_SUCCESS;
 }
 
 static char cRead( char cBus, char cAddress, char *pcData, char cBytes )
 {
     vStart( cBus );
 
+    /* Check if SCL is not held down */
+    if( !cGetSCL( cBus ) )
+    {
+        return wireSTATUS_HELD_LOW;
+    }
+
     /* Send Address */
     cSendByte( cBus, cAddress | 0x01 );
     if( !cGetAck( cBus ) )
     {
         vStop( cBus );
-        return 0;
+        return wireSTATUS_NACK;
     }
 
     /* Read Data */
@@ -247,7 +262,8 @@ static char cRead( char cBus, char cAddress, char *pcData, char cBytes )
     }
 
     vStop( cBus );
-    return 1;
+    
+    return wireSTATUS_SUCCESS;
 }
 
 static char cSendByte( char cBus, char cByte )
@@ -288,7 +304,7 @@ static char cSendByte( char cBus, char cByte )
 
 //    SDA_TRIS = wireHIGH;
     vSetSDA_TRIS( cBus, wireHIGH );
-    return 1;
+    return wireSTATUS_SUCCESS;
 }
 
 static char cGetByte( char cBus )
@@ -439,10 +455,11 @@ static void vSendAck( char cBus )
 static void vDelay( const char delay )
 {
     /* delay_us(delay) */
-    unsigned char c = delay;
-    while( c-- != 0 )
+    /* TODO: Implement this correctly */
+    unsigned char c, d;
+    for( c=delay; c; --c )
     {
-        continue;
+        for( d=wireDELAY_SCALE; d; --d );
     }
 }
 
@@ -540,22 +557,25 @@ static void vSoftI2cScan()
 void vWireScan( char cBus )
 {
     char addr = 0x00;
-    char out[30];
+    char out[40];
 
-    vConsolePrint( "Scanning I2C bus " );
+    vConsolePrint( "Scanning I2C\r\n" );
     vTaskDelay(100);
-    sprintf( out, "%d", cBus );
-    vConsolePuts( out );
-    vTaskDelay(100);
+//    sprintf( out, "%d", cBus );
+//    vConsolePuts( out );
 
     do
     {
 //        if( cWireQueueAdd( bus, addr, NULL, 0 ) )
-        if( cWireRead( cBus, addr, NULL, 0 ) )
+        if( wireSTATUS_SUCCESS == cWireRead( cBus, addr, NULL, 0 ) )
         {
-            sprintf( out, "Bus %d Addr %02x (%02xR) ACK", cBus, 0xff & addr, 0x7f & (addr >> 1) );
-            vConsolePuts( out );
-            vTaskDelay(50);
+//            int i;
+//            for( i=0; i<40; ++i ) out[i] = 0;
+//            sprintf( out, "Bus %d Addr %02x (%02xR) ACK", cBus, 0xff & addr, 0x7f & (addr >> 1) );
+//            vConsolePuts( out );
+//            vTaskDelay(10);
+            vConsolePutx(addr);
+            vConsolePuts( " Hit" );
         }
         addr += 2;
 
@@ -586,6 +606,55 @@ char cWireRead( char cBus, char cAddress, char *pcData, char cBytes )
     }
 
     return ret;
+}
+
+char cWirePutsStatus( char cStatus )
+{
+    switch( cStatus )
+    {
+        case wireSTATUS_SUCCESS:
+            break;
+        case wireSTATUS_DEFAULT:
+            /* Should never ever happen */
+            vConsolePutsError( wireERROR_PREFIX wireSTATUS_DEFAULT_MESSAGE );
+            break;
+        case wireSTATUS_FAIL:
+            vConsolePutsError( wireERROR_PREFIX wireSTATUS_FAIL_MESSAGE );
+            break;
+        case wireSTATUS_NACK:
+            vConsolePutsError( wireERROR_PREFIX wireSTATUS_NACK_MESSAGE  );
+            break;
+        case wireSTATUS_HELD_LOW:
+            vConsolePutsError( wireERROR_PREFIX wireSTATUS_HELD_LOW_MESSAGE  );
+            break;
+    }
+    return cStatus;
+}
+
+char cWireWritePutsError( char cBus, char cAddress, char *pcData, char cBytes )
+{
+    char status = cWireWrite( cBus, cAddress, pcData, cBytes );
+    if( wireSTATUS_SUCCESS != status )
+    {
+//        char pcError[40];
+//        sprintf( pcError, "I2C Write Error (bus %d, addr %02x)", (unsigned char) cBus, (unsigned char) cAddress );
+//        vConsolePutsError( pcError );
+        cWirePutsStatus(status);
+    }
+    return status;
+}
+
+char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes )
+{
+    char status = cWireWrite( cBus, cAddress, pcData, cBytes );
+    if( wireSTATUS_SUCCESS != status )
+    {
+//        char pcError[40];
+//        sprintf( pcError, "I2C Read Error (bus %d, addr %02x)", (unsigned char) cBus, (unsigned char) cAddress );
+//        vConsolePutsError( pcError );
+        cWirePutsStatus(status);
+    }
+    return status;
 }
 
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes )

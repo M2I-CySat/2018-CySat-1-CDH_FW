@@ -15,9 +15,19 @@
 #include <GenericTypeDefs.h>
 #include "FreeRTOS.h"
 
-#define wireSTATUS_FAIL     0
-#define wireSTATUS_SUCCESS  1
-#define wireSTATUS_DEFAULT  2
+#define DEBUG
+
+#define wireSTATUS_DEFAULT  -2
+#define wireSTATUS_FAIL     -1
+#define wireSTATUS_SUCCESS   0
+#define wireSTATUS_NACK      1
+#define wireSTATUS_HELD_LOW  2
+
+#define wireERROR_PREFIX             "I2C Error: "
+#define wireSTATUS_DEFAULT_MESSAGE   "Default status returned (bug!)"
+#define wireSTATUS_FAIL_MESSAGE      "General error"
+#define wireSTATUS_NACK_MESSAGE      "NACK"
+#define wireSTATUS_HELD_LOW_MESSAGE  "Bus held low by slave"
 
 #define wireBUS1    1
 #define wireBUS2    2
@@ -46,6 +56,11 @@ void vWireStartTask();
 
 char cWireWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireRead( char cBus, char cAddress, char *pcData, char cBytes );
+
+
+char cWirePutsStatus( char cStatus );
+char cWireWritePutsError( char cBus, char cAddress, char *pcData, char cBytes );
+char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes );
 
 void vWireScan( char bus );
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes );

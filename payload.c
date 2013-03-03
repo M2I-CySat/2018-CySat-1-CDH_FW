@@ -12,8 +12,10 @@
 
 #define payloadRADIOMETERS 3
 #define payloadCHANNELS 10
+#define payloadREGISTER 0x00
 
-#define payloadBUS_PROTOTYPE wireBUS1
+#define payloadBUS_PROTOTYPE  wireBUS1
+#define payloadADDR_PROTOTYPE ( 0xA0 )
 
 #define payloadBUS1	wireBUS2
 #define payloadBUS2	wireBUS3
@@ -58,8 +60,8 @@ static void vPayloadPrintData( char pcData[][payloadCHANNELS] )
 
 static void vPayloadPrototypePollData()
 {
-    char pcPayloadData[payloadCHANNELS];
-    char cPayloadReg = 0x00;
+    char pcPayloadData[payloadCHANNELS*5];
+    char cPayloadReg = payloadREGISTER;
     unsigned char i;
     char out[10];
 
@@ -69,21 +71,21 @@ static void vPayloadPrototypePollData()
     }
 
     vConsolePuts( "Polling Prototype Payload" );
-
-//    cWireQueueRead( payloadBUS_PROTOTYPE, payloadADDR, pcPayloadData, payloadCHANNELS );
-    if(0 == cWireQueueRead( payloadBUS_PROTOTYPE, payloadADDR, &cPayloadReg, 1 ) )
+    vTaskDelay(100);
+    
+    if(wireSTATUS_SUCCESS != cWireWritePutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, &cPayloadReg, 1 ) )
     {
         vConsolePutsError( "Payload: I2C Write Error" );
         return;
     }
-    if(0 == cWireQueueRead( payloadBUS_PROTOTYPE, payloadADDR, pcPayloadData, 1 ) )
+    if(wireSTATUS_SUCCESS != cWireReadPutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, pcPayloadData, payloadCHANNELS*5 ) )
     {
         vConsolePutsError( "Payload: I2C Read Error" );
         return;
     }
 
     vConsolePrint( "Chan\tValue\r\n" );
-    for( i=0; i<payloadCHANNELS; ++i )
+    for( i=0; i<payloadCHANNELS*5; ++i )
     {
         vTaskDelay(10);
         sprintf( out, "%d\t%x\r\n", i+1, 0xff & pcPayloadData[i] );
@@ -94,25 +96,30 @@ static void vPayloadPrototypePollData()
 static void vPayloadPollData()
 {
     char pcPayloadData[payloadRADIOMETERS][payloadCHANNELS];
+    char cPayloadReg = payloadREGISTER;
 
     vConsolePuts("Polling Payload.");
 
     /* Turn on payload and wait one second before communicating */
     payloadENABLE1_TRIS = 1;
     vTaskDelay(1000);
-    cWireQueueWrite( payloadBUS1, payloadADDR, pcPayloadData[0], payloadCHANNELS );
+    cWireWritePutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, &cPayloadReg, 1 );
+    cWireReadPutsError( payloadBUS1, payloadADDR, pcPayloadData[0], payloadCHANNELS );
     payloadENABLE1_TRIS = 0;
 
     payloadENABLE2_TRIS = 1;
     vTaskDelay(1000);
-    cWireQueueWrite( payloadBUS2, payloadADDR, pcPayloadData[1], payloadCHANNELS );
+    cWireWritePutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, &cPayloadReg, 1 );
+    cWireReadPutsError( payloadBUS2, payloadADDR, pcPayloadData[1], payloadCHANNELS );
     payloadENABLE2_TRIS = 0;
 
     payloadENABLE3_TRIS = 1;
     vTaskDelay(1000);
-    cWireQueueWrite( payloadBUS3, payloadADDR, pcPayloadData[2], payloadCHANNELS );
+    cWireWritePutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, &cPayloadReg, 1 );
+    cWireReadPutsError( payloadBUS3, payloadADDR, pcPayloadData[2], payloadCHANNELS );
     payloadENABLE3_TRIS = 0;
 
+    /* Print payload data locally */
     vPayloadPrintData( pcPayloadData );
 
     /* TODO Store data to memory */
@@ -122,9 +129,9 @@ static void vPayloadTask( void *pvParameters )
 {
     for( ;; )
     {
-        vTaskDelay(3000);
-        vWireScan( payloadBUS_PROTOTYPE );
-//        vPayloadPrototypePollData();
+        vTaskDelay(5000);
+//        vWireScan( payloadBUS_PROTOTYPE );
+        vPayloadPrototypePollData();
 //        vPayloadPollData();
     }
 }
