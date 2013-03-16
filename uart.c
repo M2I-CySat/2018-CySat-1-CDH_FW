@@ -327,7 +327,8 @@ static void vUart2RxTask( void *pvParameters )
 #if uartCONSOLE_UART != 1
                 prvConsoleRx(cRxByte);
 #else
-                vUart1Putc(cRxByte);
+//                vUart1Putc(cRxByte);
+                vHeliumUartRx(cRxByte);
 #endif
             }
         }

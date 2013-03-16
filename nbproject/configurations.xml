@@ -31,6 +31,8 @@
       <itemPath>system.h</itemPath>
       <itemPath>payload.h</itemPath>
       <itemPath>rtc.h</itemPath>
+      <itemPath>helium.h</itemPath>
+      <itemPath>comms.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -59,6 +61,8 @@
       <itemPath>wire.c</itemPath>
       <itemPath>payload.c</itemPath>
       <itemPath>rtc.c</itemPath>
+      <itemPath>helium.c</itemPath>
+      <itemPath>comms.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

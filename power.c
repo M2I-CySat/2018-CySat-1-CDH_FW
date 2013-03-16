@@ -29,7 +29,7 @@ void vPowerStartTask()
     xTaskCreate( vPowerTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_POWER, NULL );
 }
 
-ushort usGetChannel( char cChannel )
+unsigned short usGetChannel( char cChannel )
 {
     char pcData[2];
 
