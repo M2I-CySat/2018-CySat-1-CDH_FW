@@ -11,6 +11,8 @@
 #include "uart.h"
 #include "testing.h"
 
+#include "helium.h"
+
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
 #define uartCONSOLE_UART    1
 

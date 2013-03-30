@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "FreeRTOS.h"
 
-
+#if 0
 /*
  * Commands which can be sent to the Helium radio
  */
@@ -254,10 +254,84 @@ void he_send_serial(const char* data, int length);
  */
 int he_parse_serial(char* data_received, int length_received, char* data_payload, int* length_payload);
 
-
+#endif
 
 
 /* Kris's He Radio API: */
+
+#define heliumACK  0x0A0A
+#define heliumNACK 0xFFFF
+
+typedef struct {
+    /* Command type */
+    unsigned short usCommand;
+    /* Actual Payload Size (factoring out ACK, etc) */
+    unsigned short usPayloadSize;
+    /* ACK field (from overloaded payload field in packet)*/
+    unsigned short usAck;
+    /* Packet data array */
+    unsigned char *ucPayload;
+} heliumPacket;
+
+
+/*
+ * Radio telemetry data structure
+ */
+#define heliumRADIO_CONFIG_LENGTH	34	// The length of the configuration data structure in bytes
+typedef struct {
+	uint8_t         uart_baud_rate;			// Radio UART baud rate
+	uint8_t		amplifier_level;		// Radio power amplifier level (0-255 nonlinear)
+	uint8_t         rf_tx_baud_rate;		// Radio transmission baud rate
+	uint8_t		rf_rx_baud_rate;		// Radio receive baud rate
+	uint8_t		rf_tx_modulation;		// Radio transmit modulation
+	uint8_t		rf_rx_modulation;		// Radio receive modulation
+	uint32_t	rf_tx_frequency;		// Radio transmit frequency (in Hz)
+	uint32_t	rf_rx_frequency;		// Radio receive frequency (in Hz)
+	unsigned char	ax_call_source[6];		// AX.25 Source callsign
+	unsigned char	ax_call_destination[6];         // AX.25 Destination callsign
+	uint16_t	ax_tx_preamble;			// AX.25 transmission preamble
+	uint16_t	ax_tx_postamble;		// AX.25 transmission postamble
+	uint16_t	function_config1;		// Radio configuration functions 1
+	uint16_t	function_config2;		// Radio configuration functions 2
+} heliumRADIO_CONFIG;
+
+/*
+ * Radio telemetry data structure
+ */
+#define heliumTELEMETRY_LENGTH		14		// The length of the telemetry data structure in bytes
+ typedef struct {
+	uint16_t	op_counter;
+	int16_t         msp430_temp;
+	uint8_t         time_count[3];
+	uint8_t         rssi;
+	uint32_t	bytes_received;
+	uint32_t	bytes_transmitted;
+} heliumTELEMETRY;
+
+/*
+ * Radio low level RF configuration data structure
+ */
+#define	heliumRF_CONFIG_LENGTH	10	// The length of the RF configuration data structure in bytes
+typedef struct {
+	uint8_t         front_end_level;
+	uint8_t         amplifier_power;		// Radio power amplifier level (0-255 nonlinear)
+	uint32_t	tx_frequency_offset;		// Radio transmit frequency offset (up to 20kHz, in Hz)
+	uint32_t	rx_frequency_offset;		// Radio receive frequency offset (up to 20kHz, in Hz)
+} heliumRF_CONFIG;
+
+/*
+ * Radio beacon configuration
+ */
+#define heliumBEACON_CONFIG_LENGTH	1	// The length of the beacon configuration in bytes
+typedef struct {
+	uint8_t	interval;			// 0=beacon off, 2.5 second delay per LSB
+} heliumBEACON_CONFIG;
+
+
+/*
+ * Initialize RTOS elements.
+ */
+void vHeliumInit();
 
 /*
  * Retreive the configuration settings from the radio
@@ -293,16 +367,15 @@ void vHeliumSetRfConfig(heliumRF_CONFIG *pxConfig);
  * @param pvData A pointer to the data to transmit
  * @param usSize The size (in bytes) of the data
  */
-void vHeliumSendData(void *pvData, unsigned short usSize);
+void vHeliumSendPacket( heliumPacket *pxPacket );
 
 /*
  * Receive data from the radio
  * This function reads from a queue
  *
  * @param pvData Data received by the radio
- * @param pusSize The size (in bytes) of the data
  */
-void vHeliumReceiveData(void *pvData, unsigned short *pusSize, portTickType xBlockTime);
+void vHeliumReceivePacket( heliumPacket *pxPacket, portTickType xBlockTime );
 
 /*
  * The task managing the radio's UART port should call this when it receives a byte

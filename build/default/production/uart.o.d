@@ -14,4 +14,5 @@ system.h  \
  iomapping.h  \
 include/serial.h  \
 uart.h  \
-testing.h 
+testing.h  \
+helium.h 
