@@ -299,9 +299,7 @@ void vHeliumUartRx( char cByte )
     static heliumPacket xPacket;
     static unsigned i = 0;
 
-    unsigned char ucByte = (unsigned char) cByte;
-
-    pucBuffer[i] = ucByte;
+    pucBuffer[i] = (unsigned char) cByte;
 
     if( 0 == i )
     {
@@ -309,11 +307,11 @@ void vHeliumUartRx( char cByte )
     }
 
     /* Make sure we're in sync */
-    if( 0 == i && SYNC_1 != ucByte )
+    if( 0 == i && SYNC_1 != pucBuffer[i] )
     {
         return;
     }
-    if( 1 == i && SYNC_2 != ucByte )
+    if( 1 == i && SYNC_2 != pucBuffer[i] )
     {
         i = 0;
         return;
@@ -332,7 +330,7 @@ void vHeliumUartRx( char cByte )
             return;
         }
 
-        if( 0 == xPacket.usPayloadSize )
+        if( 0 != xPacket.usAck )
         {
             /* Got ACK or NACK */
             /* TODO Give packet to recieve queue */
@@ -351,7 +349,6 @@ void vHeliumUartRx( char cByte )
             if( ucSumA != pucBuffer[i-1] || ucSumB != pucBuffer[i] )
             {
                 /* Checksum failed */
-                /* TODO Send NACK? */
                 i = 0;
                 return;
             }
