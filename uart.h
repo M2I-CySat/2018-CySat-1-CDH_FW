@@ -24,6 +24,7 @@ void vUartStartTask( void );
 void vUart1Putc(char cChar);
 void vUart1Puts(char* pcMessage);
 void vUart2Putc(char cChar);
+short sUart2Putc(char cChar);
 void vUart2Puts(char* pcMessage);
 void vConsolePrint( char *pcString );
 void vConsolePuts(char* pcMessage);

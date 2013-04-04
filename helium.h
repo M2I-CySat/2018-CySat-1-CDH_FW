@@ -259,21 +259,6 @@ int he_parse_serial(char* data_received, int length_received, char* data_payload
 
 /* Kris's He Radio API: */
 
-#define heliumACK  0x0A0A
-#define heliumNACK 0xFFFF
-
-typedef struct {
-    /* Command type */
-    unsigned short usCommand;
-    /* Actual Payload Size (factoring out ACK, etc) */
-    unsigned short usPayloadSize;
-    /* ACK field (from overloaded payload field in packet)*/
-    unsigned short usAck;
-    /* Packet data array */
-    unsigned char *ucPayload;
-} heliumPacket;
-
-
 /*
  * Radio telemetry data structure
  */
@@ -362,20 +347,21 @@ void vHeliumSetAmplifier(const char* pcLevel);
 void vHeliumSetRfConfig(heliumRF_CONFIG *pxConfig);
 
 /*
- * Send data to the radio to transmit
+ * Receive raw data buffer from the Helium radio
  *
- * @param pvData A pointer to the data to transmit
- * @param usSize The size (in bytes) of the data
+ * @param pcData Buffer to store the received data
+ * @param puSize Size of the data buffer
+ * @param xBlockTime Block time allowed for the queue
  */
-void vHeliumSendPacket( heliumPacket *pxPacket );
+void vHeliumReceiveData( char *pcData, unsigned *puSize, portTickType xBlockTime );
 
 /*
- * Receive data from the radio
- * This function reads from a queue
+ * Transmit raw data buffer over the Helium radio
  *
- * @param pvData Data received by the radio
+ * @param pcData Buffer to store the received data
+ * @param uSize Size of the buffer
  */
-void vHeliumReceivePacket( heliumPacket *pxPacket, portTickType xBlockTime );
+void vHeliumSendData( char *pcData, unsigned uSize );
 
 /*
  * The task managing the radio's UART port should call this when it receives a byte

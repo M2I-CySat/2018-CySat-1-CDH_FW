@@ -151,6 +151,14 @@ void vUart2Putc( char cChar )
     xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
 #endif
 }
+short sUart2Putc( char cChar )
+{
+#ifdef serialALTERNATE_IMPLEMENTATION
+    return (short) xSerialPutChar( xUart2Handle, (signed char) cChar, uartNO_BLOCK );
+#else
+    return (short) xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+#endif
+}
 
 void vUart1Puts( char *pcString )
 {
