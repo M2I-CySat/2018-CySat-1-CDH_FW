@@ -13,10 +13,10 @@
 #include "uart.h"
 #include "wire.h"
 
-#include "heliumradio.h"
 #include "power.h"
 #include "payload.h"
-#include "rtc.h"
+#include "comms.h"
+//#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
 _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
@@ -26,15 +26,15 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
 int main( void )
 {
-    vRadioInit();
-//    vWireInit();
 
     vUartStartTask();
-//    vWireStartTask();
-    vWireInit();
+//    uart1_puts("Test!\n");
+
+    vWireStartTask();
     
 //    vPowerStartTask();
-    vPayloadStartTask();
+//    vPayloadStartTask();
+//    vCommsStartTask();
 
 //    vRtcStartTask();
 

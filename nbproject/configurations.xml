@@ -24,7 +24,6 @@
       <itemPath>uart.h</itemPath>
       <itemPath>testing.h</itemPath>
       <itemPath>iomapping.h</itemPath>
-      <itemPath>heliumradio.h</itemPath>
       <itemPath>typedef.h</itemPath>
       <itemPath>power.h</itemPath>
       <itemPath>wire.h</itemPath>
@@ -56,7 +55,6 @@
       <itemPath>uart.c</itemPath>
       <itemPath>testing.c</itemPath>
       <itemPath>iomapping.c</itemPath>
-      <itemPath>heliumradio.c</itemPath>
       <itemPath>power.c</itemPath>
       <itemPath>wire.c</itemPath>
       <itemPath>payload.c</itemPath>
@@ -109,7 +107,7 @@
       <C30>
         <property key="code-model" value="default"/>
         <property key="const-model" value="default"/>
-        <property key="data-model" value="large-data"/>
+        <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="true"/>
         <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>

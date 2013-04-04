@@ -1,3 +1,8 @@
+
+//#define TESTING
+
+#ifdef TESTING
+
 #include <string.h>
 
 #include "FreeRTOS.h"
@@ -6,7 +11,6 @@
 
 #include "pic24.h"
 
-#include "heliumradio.h"
 #include "uart.h"
 #include "testing.h"
 
@@ -87,9 +91,11 @@ void vStrip( char* pcArgs )
     
     *pcNew = '\0';
 }
+#endif
 
 void vInterpretTestingCommand( char* pcCommand )
 {
+#ifdef TESTING
     static char pcBase[uartBUFFER_SIZE];
     static char pcArgs[uartBUFFER_SIZE];
 
@@ -234,4 +240,5 @@ void vInterpretTestingCommand( char* pcCommand )
         sprintf( pcEchoCommand, "I don't understand '%s'", pcBase );
         putsError( pcEchoCommand );
     }
+#endif
 }

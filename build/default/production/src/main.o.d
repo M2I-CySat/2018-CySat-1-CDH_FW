@@ -13,8 +13,6 @@ include/FreeRTOS/queue.h  \
 include/serial.h  \
 uart.h  \
 wire.h  \
-heliumradio.h  \
- typedef.h  \
 power.h  \
-payload.h  \
-rtc.h 
+ payload.h  \
+comms.h 
