@@ -319,6 +319,11 @@ typedef struct {
 void vHeliumInit();
 
 /*
+ * Send a no-op command to the radio
+ */
+void vHeliumNoOp();
+
+/*
  * Retreive the configuration settings from the radio
  *
  * @param pxConfig The beacon configuration data structure received from the radio

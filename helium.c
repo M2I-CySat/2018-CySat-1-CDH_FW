@@ -302,6 +302,12 @@ void vHeliumInit()
     xPacketQueue = xQueueCreate( heliumQUEUE_SIZE, (unsigned portBASE_TYPE) sizeof(heliumPacket) );
 }
 
+void vHeliumNoOp()
+{
+    heliumPacket xPacket = { COMMAND_NO_OP, 0, 0, NULL };
+    vHeliumSendPacket( &xPacket );
+}
+
 void vHeliumGetConfig( heliumBEACON_CONFIG *pxConfig )
 {
 
@@ -380,25 +386,28 @@ void vHeliumSendPacket( heliumPacket *pxPacket )
 
 unsigned char ucHeliumSendUart( unsigned char ucByte )
 {
-    if( sUart2Putc( (char) ucByte ) )
-    {
-        return 1;
-    }
-    else
-    {
-        /* Retry sending byte */
-        unsigned i;
-        for( i=0; i<10; ++i )
-        {
-            vTaskDelay(10);
-            if( sUart2Putc( (char) ucByte ) )
-            {
-                return 1;
-            }
-        }
-        
-        return 0;
-    }
+    vUart2Putc( (char) ucByte );
+    return 1;
+
+//    if( sUart2Putc( (char) ucByte ) )
+//    {
+//        return 1;
+//    }
+//    else
+//    {
+//        /* Retry sending byte */
+//        unsigned i;
+//        for( i=0; i<10; ++i )
+//        {
+//            vTaskDelay(10);
+//            if( sUart2Putc( (char) ucByte ) )
+//            {
+//                return 1;
+//            }
+//        }
+//
+//        return 0;
+//    }
 }
 
 void vHeliumReceivePacket( heliumPacket *pxPacket, portTickType xBlockTime )

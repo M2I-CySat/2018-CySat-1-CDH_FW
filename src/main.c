@@ -34,7 +34,7 @@ int main( void )
     
 //    vPowerStartTask();
 //    vPayloadStartTask();
-//    vCommsStartTask();
+    vCommsStartTask();
 
 //    vRtcStartTask();
 

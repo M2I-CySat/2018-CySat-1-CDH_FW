@@ -122,10 +122,11 @@ static void vCommsTask( void *pvParameters )
 
     /* Radio transmit test (never exits) */
 //    vCommsHeliumBasicTransmitTest();
-    vCommsHeliumTransmitTest();
+//    vCommsHeliumTransmitTest();
 
     for( ;; )
     {
+//        vHeliumNoOp();
         vTaskDelay(1000);
     }
 }
