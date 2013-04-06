@@ -28,9 +28,8 @@ int main( void )
 {
 
     vUartStartTask();
-//    uart1_puts("Test!\n");
 
-    vWireStartTask();
+//    vWireStartTask();
     
 //    vPowerStartTask();
 //    vPayloadStartTask();
@@ -38,12 +37,9 @@ int main( void )
 
 //    vRtcStartTask();
 
-    /* Don't send UART Rx to radio by default */
-    vUartRelayMode( 0 );
-
-    vConsolePuts( "I am a UART!" );
-    vUart1Puts("Uart1\r\n");
-//    vUart2Puts("Uart2");
+    vConsolePrint( "\r\nI am a UART!\r\n" );
+    vUart1Print("(Uart1)\r\n");
+//    vUart2Print("Uart2\r\n");
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();
@@ -58,5 +54,4 @@ void vApplicationIdleHook( void )
 	/* Schedule the co-routines from within the idle task hook. */
 //	vCoRoutineSchedule();
 }
-/*-----------------------------------------------------------*/
 

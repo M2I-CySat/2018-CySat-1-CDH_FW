@@ -1,5 +1,6 @@
 build/default/production/rtc.o:  \
 rtc.c  \
+rtc.h  \
 include/FreeRTOS/FreeRTOS.h  \
  include/FreeRTOS/projdefs.h  \
 include/FreeRTOSConfig.h  \
@@ -11,5 +12,5 @@ include/FreeRTOS/task.h  \
 include/FreeRTOS/queue.h  \
 system.h  \
 uart.h  \
-wire.h  \
- rtc.h 
+ include/serial.h  \
+wire.h 

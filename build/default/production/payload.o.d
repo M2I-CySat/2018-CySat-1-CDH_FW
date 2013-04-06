@@ -11,5 +11,6 @@ include/FreeRTOS/task.h  \
 include/FreeRTOS/queue.h  \
 system.h  \
 uart.h  \
+ include/serial.h  \
 wire.h  \
- payload.h 
+payload.h 

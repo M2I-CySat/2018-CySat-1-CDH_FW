@@ -1,9 +1,11 @@
 
+#include "helium.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
 
-#include "helium.h"
+#include "uart.h"
 
 #if 0
 /*
@@ -386,7 +388,7 @@ void vHeliumSendPacket( heliumPacket *pxPacket )
 
 unsigned char ucHeliumSendUart( unsigned char ucByte )
 {
-    vUart2Putc( (char) ucByte );
+    vUart2Put( (char) ucByte );
     return 1;
 
 //    if( sUart2Putc( (char) ucByte ) )

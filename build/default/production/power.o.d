@@ -1,15 +1,16 @@
 build/default/production/power.o:  \
 power.c  \
-include/FreeRTOS/FreeRTOS.h  \
- include/FreeRTOS/projdefs.h  \
-include/FreeRTOSConfig.h  \
- include/FreeRTOS/portable.h  \
-include/FreeRTOS/portmacro.h  \
- include/FreeRTOS/mpu_wrappers.h  \
-include/FreeRTOS/task.h  \
- include/FreeRTOS/list.h  \
+power.h  \
+ include/FreeRTOS/FreeRTOS.h  \
+include/FreeRTOS/projdefs.h  \
+ include/FreeRTOSConfig.h  \
+include/FreeRTOS/portable.h  \
+ include/FreeRTOS/portmacro.h  \
+include/FreeRTOS/mpu_wrappers.h  \
+ include/FreeRTOS/task.h  \
+include/FreeRTOS/list.h  \
 include/FreeRTOS/queue.h  \
-system.h  \
+ system.h  \
 uart.h  \
-wire.h  \
- power.h 
+include/serial.h  \
+wire.h 

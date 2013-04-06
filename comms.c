@@ -1,4 +1,6 @@
 
+#include "comms.h"
+
 #include <stdlib.h> /* For rand() in demo */
 #include <string.h> /* For strlen() in demo */
 
@@ -9,7 +11,6 @@
 #include "system.h"
 #include "uart.h"
 #include "helium.h"
-#include "comms.h"
 
 /*
  * Communications module task
@@ -54,7 +55,7 @@ static void vCommsHeliumBasicTransmitTest()
     /* Configure radio */
     for( i=0; i<44; ++i )
     {
-        vUart2Putc( pcConfigPacket[i] );
+        vUart2Put( pcConfigPacket[i] );
     }
 
     vTaskDelay(1000);
@@ -64,7 +65,7 @@ static void vCommsHeliumBasicTransmitTest()
     {
         for( i=0; i<24; ++i )
         {
-            vUart2Putc( pcHelloPacket[i] );
+            vUart2Put( pcHelloPacket[i] );
         }
         vTaskDelay(500);
     }
@@ -119,6 +120,7 @@ static void vCommsHeliumTransmitTest()
 
 static void vCommsTask( void *pvParameters )
 {
+    int i = 0;
 
     /* Radio transmit test (never exits) */
 //    vCommsHeliumBasicTransmitTest();
@@ -126,7 +128,12 @@ static void vCommsTask( void *pvParameters )
 
     for( ;; )
     {
+        vTaskDelay(200);
 //        vHeliumNoOp();
-        vTaskDelay(1000);
+        vConsolePrintf( "Test: %d ", i );
+        vConsolePrintf( "Test: %d ", i+1 );
+        vConsolePrintf( "Test: %d\r\n", i+2 );
+//        if( 0==i%10 ) vConsoleErrorPrintf( "Arbitrary Error Code %04x\r\n", i );
+        ++i;
     }
 }

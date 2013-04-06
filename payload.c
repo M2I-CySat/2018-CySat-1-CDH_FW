@@ -63,24 +63,23 @@ static void vPayloadPrototypePollData()
     char pcPayloadData[payloadCHANNELS*5];
     char cPayloadReg = payloadREGISTER;
     unsigned char i;
-    char out[10];
 
     for( i=0; i<payloadCHANNELS; ++i )
     {
         pcPayloadData[i] = 0;
     }
 
-    vConsolePuts( "Polling Prototype Payload" );
+    vConsolePrint( "Polling Prototype Payload\r\n" );
     vTaskDelay(100);
     
     if(wireSTATUS_SUCCESS != cWireWritePutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, &cPayloadReg, 1 ) )
     {
-        vConsolePutsError( "Payload: I2C Write Error" );
+        vConsoleErrorPrintf( "Payload: I2C Write Error\r\n" );
         return;
     }
     if(wireSTATUS_SUCCESS != cWireReadPutsError( payloadBUS_PROTOTYPE, payloadADDR_PROTOTYPE, pcPayloadData, payloadCHANNELS*5 ) )
     {
-        vConsolePutsError( "Payload: I2C Read Error" );
+        vConsoleErrorPrintf( "Payload: I2C Read Error\r\n" );
         return;
     }
 
@@ -88,8 +87,7 @@ static void vPayloadPrototypePollData()
     for( i=0; i<payloadCHANNELS*5; ++i )
     {
         vTaskDelay(10);
-        sprintf( out, "%d\t%x\r\n", i+1, 0xff & pcPayloadData[i] );
-        vConsolePrint( out );
+        vConsolePrintf( "%d\t%x\r\n", i+1, 0xff & pcPayloadData[i] );
     }
 }
 
@@ -98,7 +96,7 @@ static void vPayloadPollData()
     char pcPayloadData[payloadRADIOMETERS][payloadCHANNELS];
     char cPayloadReg = payloadREGISTER;
 
-    vConsolePuts("Polling Payload.");
+    vConsolePrint( "Polling Payload." );
 
     /* Turn on payload and wait one second before communicating */
     payloadENABLE1_TRIS = 1;

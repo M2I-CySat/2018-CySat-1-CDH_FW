@@ -1,4 +1,6 @@
 
+#include "wire.h"
+
 /* Standard includes. */
 #include <stdio.h>
 
@@ -12,7 +14,6 @@
 
 #include "system.h"
 #include "uart.h"
-#include "wire.h"
 
 #define wireQUEUE_LENGTH    10
 #define wireBLOCK_TIME      ( ( portTickType ) 0xffff )
@@ -123,9 +124,7 @@ static char xMutexGiveBus( char cBus )
 
 static void vBadBusError( char bus )
 {
-    char out[50];
-    sprintf( out, "Bad I2C Bus error: bus %d not defined!", bus );
-    vConsolePutsError( out );
+    vConsoleErrorPrintf( "Bad I2C Bus error: bus %d not defined!\r\n", bus );
 }
 
 static void vSetSCL( char bus, char val )
@@ -549,9 +548,7 @@ static void vSoftI2cScan()
     static char bus = wireBUS1;
     if( cWrite( bus, addr, NULL, 0) )
     {
-        char out[30];
-        sprintf(out, "Hit addr 0x%x (0x%x Read) on bus (%d)", addr, addr>>1, bus);
-        vConsolePuts(out);
+        vConsolePrintf( "Hit addr 0x%x (0x%x Read) on bus (%d)\r\n", addr, addr>>1, bus );
     }
     addr += 2;
 }
@@ -559,12 +556,10 @@ static void vSoftI2cScan()
 void vWireScan( char cBus )
 {
     char addr = 0x00;
-    char out[40];
 
     vConsolePrint( "Scanning I2C\r\n" );
     vTaskDelay(100);
-//    sprintf( out, "%d", cBus );
-//    vConsolePuts( out );
+    vConsolePrintf( "Bus: %d", (int) cBus );
 
     do
     {
@@ -576,8 +571,7 @@ void vWireScan( char cBus )
 //            sprintf( out, "Bus %d Addr %02x (%02xR) ACK", cBus, 0xff & addr, 0x7f & (addr >> 1) );
 //            vConsolePuts( out );
 //            vTaskDelay(10);
-            vConsolePutx(addr);
-            vConsolePuts( " Hit" );
+            vConsolePrintf( "%02x Hit!\r\n" );
         }
         addr += 2;
 
@@ -618,16 +612,16 @@ char cWirePutsStatus( char cStatus )
             break;
         case wireSTATUS_DEFAULT:
             /* Should never ever happen */
-            vConsolePutsError( wireERROR_PREFIX wireSTATUS_DEFAULT_MESSAGE );
+            vConsoleErrorPrintf( wireERROR_PREFIX wireSTATUS_DEFAULT_MESSAGE "\r\n" );
             break;
         case wireSTATUS_FAIL:
-            vConsolePutsError( wireERROR_PREFIX wireSTATUS_FAIL_MESSAGE );
+            vConsoleErrorPrintf( wireERROR_PREFIX wireSTATUS_FAIL_MESSAGE "\r\n" );
             break;
         case wireSTATUS_NACK:
-            vConsolePutsError( wireERROR_PREFIX wireSTATUS_NACK_MESSAGE  );
+            vConsoleErrorPrintf( wireERROR_PREFIX wireSTATUS_NACK_MESSAGE "\r\n"  );
             break;
         case wireSTATUS_HELD_LOW:
-            vConsolePutsError( wireERROR_PREFIX wireSTATUS_HELD_LOW_MESSAGE  );
+            vConsoleErrorPrintf( wireERROR_PREFIX wireSTATUS_HELD_LOW_MESSAGE "\r\n"  );
             break;
     }
     return cStatus;

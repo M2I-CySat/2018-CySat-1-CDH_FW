@@ -12,9 +12,6 @@
 #ifndef WIRE_H
 #define	WIRE_H
 
-#include <GenericTypeDefs.h>
-#include "FreeRTOS.h"
-
 #define DEBUG
 
 #define wireSTATUS_DEFAULT  -2

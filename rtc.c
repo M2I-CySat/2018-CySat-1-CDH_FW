@@ -1,4 +1,6 @@
 
+#include "rtc.h"
+
 #include <stdio.h>
 
 #include "FreeRTOS.h"
@@ -9,7 +11,6 @@
 #include "uart.h"
 #include "wire.h"
 
-#include "rtc.h"
 
 #define rtcBUS  wireBUS1
 #define rtcADDR 0xD0
@@ -73,14 +74,11 @@ void vRtcPrintTime()
 
     if( cRtcRead( &xTime ) )
     {
-        char out[30];
-        sprintf( out, "%02u:%02u:%02u.%02u", xTime.cHours, xTime.cMinutes, xTime.cSeconds, xTime.cCentiseconds );
-        vTaskDelay(100);
-        vConsolePuts( out );
+        vConsolePrintf( "%02u:%02u:%02u.%02u\r\n", xTime.cHours, xTime.cMinutes, xTime.cSeconds, xTime.cCentiseconds );
     }
     else
     {
-        vConsolePutsError( "RTC not found" );
+        vConsoleErrorPrintf( "RTC not found\r\n" );
     }
 }
 
@@ -161,7 +159,7 @@ static char cRtcEnable()
     /* Request flags register */
     if( 0 == cRtcFlags( &cFlags ) )
     {
-        vConsolePutsError( "RTC: I2C Failed" );
+        vConsoleErrorPrintf( "RTC: I2C Failed\r\n" );
     }
 
     /* Check OF flag */
@@ -171,7 +169,7 @@ static char cRtcEnable()
         return 1;
     }
 
-    vConsolePuts( "RTC: OF flag set, restarting RTC." );
+    vConsolePrint( "RTC: OF flag set, restarting RTC.\r\n" );
 
     /* Set and clear ST flag */
     cRtcRestart();
@@ -187,7 +185,7 @@ static char cRtcEnable()
 
     if( cFlags & 0x04 )
     {
-        vConsolePutsError( "RTC: Restart failed" );
+        vConsoleErrorPrintf( "RTC: Restart failed\r\n" );
         return 0;
     }
 
@@ -206,7 +204,7 @@ static void vRtcTestI2C()
     char pcDataOut[9] = {0x01,0xbe,0x73,0xab,0x55,0xfb,0x0f,0x9d,0x2a};
     char pcDataIn[8];
 
-    vConsolePuts( "Testing I2C" );
+    vConsolePrint( "Testing I2C\r\n" );
 
     cWireQueueWrite( rtcBUS, rtcADDR, pcDataOut, 8 );
     cWireQueueWrite( rtcBUS, rtcADDR, pcDataOut, 1 );
@@ -214,11 +212,11 @@ static void vRtcTestI2C()
 
     for( i=0; i<7; ++i )
     {
-        vConsolePutx(pcDataIn[i]);
+        vConsolePrintf( "%02x", pcDataIn[i] );
         vTaskDelay(100);
         if( pcDataOut[i+1] != pcDataIn[i] )
         {
-            vConsolePutsError( "Mismatch!" );
+            vConsoleErrorPrintf( "-Mismatch!\r\n" );
         }
     }
 }

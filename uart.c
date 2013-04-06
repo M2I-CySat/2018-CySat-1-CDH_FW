@@ -1,4 +1,9 @@
 
+#include "uart.h"
+
+#include <stdlib.h>
+#include <stdarg.h>
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -8,13 +13,21 @@
 #include "system.h"
 #include "iomapping.h"
 #include "serial.h"
-#include "uart.h"
 #include "testing.h"
 
 #include "helium.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
 #define uartCONSOLE_UART    1
+
+#if uartCONSOLE_UART == 1
+#define xConsoleUartHandle xUart1Handle
+#elif uartCONSOLE_UART == 2
+#define xConsoleUartHandle xUart2Handle
+#else
+#error "Unknown uartCONSOLE_UART"
+#endif
+
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
@@ -65,15 +78,11 @@ static void vUart2RxTask( void *pvParameters );
 
 static void prvUartInit (void);
 
-static char pcBuffer[uartBUFFER_SIZE];
-
 /* Static variables */
 
-static int isUartRelay;
-
 #ifdef serialALTERNATE_IMPLEMENTATION
-static xComPortHandle xUart1Handle;
-static xComPortHandle xUart2Handle;
+xComPortHandle xUart1Handle;
+xComPortHandle xUart2Handle;
 #endif
 
 /* Implementations */
@@ -135,149 +144,180 @@ void vUartStartTask( void )
     U2TXREG = 0;
 }
 
-void vUart1Putc( char cChar )
-{
-#ifdef serialALTERNATE_IMPLEMENTATION
-    xSerialPutChar( xUart1Handle, (signed char) cChar, uartNO_BLOCK );
-#else
-    xUart1PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
+/*
+ * These functions assume serialALTERNATE_IMPLEMENTATION is defined!
+ * If you find a new serial library and removed the original definition, go 
+ * ahead and remove this check (but make sure prvUart* functions still work)
+ */
+#ifndef serialALTERNATE_IMPLEMENTATION
+#error "serialALTERNATE_IMPLEMENTATION needs to be used for prvUart* functions"
 #endif
-}
-void vUart2Putc( char cChar )
+
+inline static portBASE_TYPE prvUartPut( xComPortHandle pxPort, char c )
 {
-#ifdef serialALTERNATE_IMPLEMENTATION
-    xSerialPutChar( xUart2Handle, (signed char) cChar, uartNO_BLOCK );
-#else
-    xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
-#endif
-}
-short sUart2Putc( char cChar )
-{
-#ifdef serialALTERNATE_IMPLEMENTATION
-    return (short) xSerialPutChar( xUart2Handle, (signed char) cChar, uartNO_BLOCK );
-#else
-    return (short) xUart2PutChar( NULL, (signed char) cChar, uartNO_BLOCK );
-#endif
+//    uart1_putc(c);
+//    return 1;
+    return xSerialPutChar( pxPort, c, uartNO_BLOCK );
 }
 
-void vUart1Puts( char *pcString )
+inline static portBASE_TYPE prvUartPrint( xComPortHandle pxPort, char *s)
 {
-    while (*pcString)
+    while( *s )
     {
-        vUart1Putc(*pcString++);
+        if( pdFAIL == prvUartPut( pxPort, *(s++) ) )
+        {
+            return pdFAIL;
+        }
     }
-}
-void vUart2Puts( char *pcString )
-{
-    while (*pcString)
-    {
-        vUart2Putc(*pcString++);
-    }
+    return pdPASS;
 }
 
-void vConsolePutc( char cChar )
+inline static portBASE_TYPE prvUartVprintf( xComPortHandle pxPort, const char *fmt, va_list ap )
 {
-#if uartCONSOLE_UART == 1
-    vUart1Putc( cChar );
-#else
-    vUart2Putc( cChar );
-#endif
+    char pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE+1];
+    pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE] = 0;
+
+    vsnprintf( pcPrintfBuffer, uartSPRINTF_BUFFER_SIZE, fmt, ap );
+
+    return prvUartPrint( pxPort, pcPrintfBuffer );
 }
 
-void vConsolePrint( char *pcString )
+/* TODO Add error checking */
+
+void vUart1Put( char c )
 {
-#if uartCONSOLE_UART == 1
-    vUart1Puts( pcString );
-#else
-    vUart2Puts( pcString );
-#endif
+    prvUartPut( xUart1Handle, c );
 }
 
-void vConsolePuts( char *pcString )
+void vUart1Print( char *s )
 {
-    vConsolePrint( pcString );
-    vConsolePrint( "\r\n" );
+    prvUartPrint( xUart1Handle, s );
 }
 
-void vConsolePutx( char c )
+void vUart1Printf( const char *fmt, ... )
 {
-    char out[3];
-    sprintf( out, "%02x", 0xff & (unsigned char) c);
-    vConsolePuts( out );
+    va_list ap;
+    va_start(ap, fmt);
+    prvUartVprintf( xUart1Handle, fmt, ap );
+    va_end(ap);
 }
 
-void vConsolePutsError( char *pcString )
+void vUart2Put( char c )
 {
-    // TODO: Add more useful info
+    prvUartPut( xUart2Handle, c );
+}
+
+void vUart2Print( char *s )
+{
+    prvUartPrint( xUart2Handle, s );
+}
+
+void vUart2Printf( const char *fmt, ... )
+{
+    va_list ap;
+    va_start(ap, fmt);
+    prvUartVprintf( xUart2Handle, fmt, ap );
+    va_end(ap);
+}
+
+void vConsolePut( char c )
+{
+    prvUartPut( xConsoleUartHandle, c );
+}
+
+void vConsolePrint( char *s )
+{
+    prvUartPrint( xConsoleUartHandle, s );
+}
+
+void vConsolePrintf( const char *fmt, ... )
+{
+    va_list ap;
+    va_start(ap, fmt);
+    prvUartVprintf( xConsoleUartHandle, fmt, ap );
+    va_end(ap);
+}
+
+void vConsoleErrorPrintf( const char *fmt, ... )
+{
+    va_list ap;
     vConsolePrint( uartERROR_TEXT "[ERROR] " );
-    vConsolePrint( pcString );
-    vConsolePuts( uartDEFAULT_TEXT );
+    va_start(ap, fmt);
+    prvUartVprintf( xConsoleUartHandle, fmt, ap );
+    va_end(ap);
+    vConsolePrint( uartDEFAULT_TEXT );
 }
 
-void vUartRelayMode( int mode )
-{
-    isUartRelay = mode;
-}
+
+
+
 
 static unsigned short prvConsoleGetc( char c, char* pcCommandBuffer )
 {
+    static char pcBuffer[uartRX_BUFFER_SIZE+1];
     static unsigned int i = 0;
     unsigned short usEnter = 0;
 
+    /* Ensure pcBuffer is ALWAYS null-terminated */
+    pcBuffer[uartRX_BUFFER_SIZE] = 0;
+
     switch(c) {
-        case -1:    // Yes, it happens.
+        case -1:    /* Yes, it happens. */
             break;
-        case 1:     // ^A
-        case 2:     // ^B
-        case 3:     // ^C
-            // TODO: Interrupt command
+        case 1:     /* ^A */
+        case 2:     /* ^B */
+        case 3:     /* ^C */
+            /* TODO: Interrupt command */
             break;
-        case 8:     // Backspace
-        case 127:   // Delete
+        case 8:     /* Backspace */
+        case 127:   /* Delete */
             if (i > 0) {
-                vConsolePutc(c);
+                vConsolePut(c);
                 --i;
             }
             break;
-        case 10:    // Line feed
-        case 11:    // Vertical tab
-        case 13:    // Carriage return
-            vConsolePutc('\r');
-            vConsolePutc('\n');
+        case 10:    /* Line feed */
+        case 11:    /* Vertical tab */
+        case 13:    /* Carriage return */
+            vConsolePut('\r');
+            vConsolePut('\n');
             i = 0;
-            sprintf( pcCommandBuffer, "%s", pcBuffer );
+            snprintf( pcCommandBuffer, uartRX_BUFFER_SIZE, "%s", pcBuffer );
             usEnter = 1;
             break;
-        case 27:    // Escape
+        case 27:    /* Escape */
             break;
-        default:
-            vConsolePutc(c);
+        default:    /* All other chars */
+            vConsolePut(c);
             pcBuffer[i] = c;
             ++i;
     }
 
-    if (i >= uartBUFFER_SIZE) {
-        vConsolePuts("(OVERFLOW!)");
+    if (i >= uartRX_BUFFER_SIZE) {
+        vConsolePrint("(OVERFLOW!)\n");
         i = 0;
     }
 
-    pcBuffer[i] = '\0';
+    pcBuffer[i] = 0;
     
     return usEnter;
 }
 
 static void prvConsoleRx( signed char cRxByte )
 {
-    static char pcCommandBuffer[uartBUFFER_SIZE];
+    static char pcCommandBuffer[uartRX_BUFFER_SIZE+1];
     
     if( prvConsoleGetc( cRxByte, pcCommandBuffer ) )
     {
-        // User pressed enter
+        /* User pressed enter */
+
+        /* Ensure buffer is ALWAYS null-terminated */
+        pcCommandBuffer[uartRX_BUFFER_SIZE] = 0;
         vInterpretTestingCommand( pcCommandBuffer );
     }
     else
     {
-        // User entered key other than enter
+        /* User entered key other than enter */
     }
 }
 
@@ -297,17 +337,9 @@ static void vUart1RxTask( void *pvParameters )
         if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
 #endif
         {
-//            vConsolePuts( "Uart1Rx!" );
-            if( isUartRelay )
-            {
-                vUart2Putc(cRxByte);
-            }
-            else
-            {
 #if uartCONSOLE_UART == 1
-                prvConsoleRx(cRxByte);
+            prvConsoleRx(cRxByte);
 #endif
-            }
         }
     }
 }
@@ -327,20 +359,12 @@ static void vUart2RxTask( void *pvParameters )
         if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
 #endif
         {
-//            vConsolePuts( "Uart2Rx!" );
-            if( isUartRelay )
-            {
-                vUart1Putc(cRxByte);
-            }
-            else
-            {
-#if uartCONSOLE_UART != 1
-                prvConsoleRx(cRxByte);
+#if uartCONSOLE_UART == 2
+            prvConsoleRx(cRxByte);
 #else
-//                vUart1Putc(cRxByte);
-                vHeliumUartRx(cRxByte);
+//            vUart1Putc(cRxByte);
+            vHeliumUartRx(cRxByte);
 #endif
-            }
         }
     }
 }

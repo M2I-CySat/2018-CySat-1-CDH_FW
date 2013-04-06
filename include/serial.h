@@ -2,11 +2,13 @@
 #ifndef SERIAL_COMMS_H
 #define SERIAL_COMMS_H
 
+/*
+ * Use Tom Lafleur's library instead of the FreeRTOS demo
+ * 
+ * Use this library unless you want to take the time to fix the entire
+ * source code. The original implementation is only for reference.
+ */
 #define serialALTERNATE_IMPLEMENTATION
-
-#include "FreeRTOS.h"
-#include "queue.h"
-#include "task.h"
 
 #ifdef serialALTERNATE_IMPLEMENTATION
 
@@ -192,6 +194,10 @@ void uart2_put(char *str, int len);
     provide a safety engineered and independently SIL3 certified version under
     the SafeRTOS brand: http://www.SafeRTOS.com.
 */
+
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
 
 typedef void * xComPortHandle;
 

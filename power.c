@@ -1,4 +1,6 @@
 
+#include "power.h"
+
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -6,7 +8,6 @@
 #include "system.h"
 #include "uart.h"
 #include "wire.h"
-#include "power.h"
 
 #ifdef powerLOCAL_PRINT
 #include <stdio.h>
@@ -34,12 +35,12 @@ unsigned short usGetChannel( char cChannel )
     char pcData[2];
 
     if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, &cChannel, 1 ) ){
-        vConsolePutsError( "Power: I2C Write Error" );
+        vConsoleErrorPrintf( "Power: I2C Write Error\r\n" );
         return 0;
     }
 
     if( wireSTATUS_SUCCESS != cWireReadPutsError( powerBUS, powerADDR, pcData, 2 ) ){
-        vConsolePutsError( "Power: I2C Read Error" );
+        vConsoleErrorPrintf( "Power: I2C Read Error\r\n" );
         return 0;
     }
 
@@ -74,17 +75,7 @@ void vPowerPollHousekeepingData()
 #ifdef powerLOCAL_PRINT
 static void vPrintChannel( char* pcName, double fValue, char* pcUnit )
 {
-    char pc[15];
-
-    vConsolePrint( pcName );
-    vTaskDelay(10);
-    vConsolePrint( ": " );
-    vTaskDelay(10);
-    sprintf( pc, "%f ", fValue );
-    vConsolePrint( pc );
-    vTaskDelay(10);
-    vConsolePuts( pcUnit );
-    vTaskDelay(10);
+    vConsolePrintf( "%s: %f %s\r\n", pcName, fValue, pcUnit );
 }
 
 void vPowerPrintHousekeepingData()
@@ -106,17 +97,17 @@ void vPowerPrintHousekeepingData()
     vPrintChannel("Bat 0 Temp",xHousekeepingData.Battery0Temperature * -0.163 + 110.835,"degC");
     vPrintChannel("Bat 0 Voltage",xHousekeepingData.Battery0Voltage * -0.0939 + 9.71,"V");
     if( 0==xHousekeepingData.Battery0Voltage )
-        vConsolePuts( "Bat 0 is DISCHARGING" );
+        vConsolePrint( "Bat 0 is DISCHARGING" );
     else
-        vConsolePuts( "Bat 0 is CHARGING" );
+        vConsolePrint( "Bat 0 is CHARGING" );
     vPrintChannel("Bat 0 Current",xHousekeepingData.Battery0Current * -3.2 + 2926.22,"mA");
 
     vPrintChannel("Bat 1 Temp",xHousekeepingData.Battery1Temperature * -0.163 + 110.835,"degC");
     vPrintChannel("Bat 1 Voltage",xHousekeepingData.Battery1Voltage * -0.0939 + 9.71,"V");
     if( 0==xHousekeepingData.Battery1Voltage )
-        vConsolePuts( "Bat 1 is DISCHARGING" );
+        vConsolePrint( "Bat 1 is DISCHARGING" );
     else
-        vConsolePuts( "Bat 1 is CHARGING" );
+        vConsolePrint( "Bat 1 is CHARGING" );
     vPrintChannel("Bat 1 Current",xHousekeepingData.Battery1Current * -3.2 + 2926.22,"mA");
 }
 #endif
@@ -132,7 +123,7 @@ static void vPowerTask( void *pvParameters )
     for( ;; )
     {
         vTaskDelay(1000);
-        vConsolePuts("Power: Polling data.");
+        vConsolePrint( "Power: Polling data.\r\n" );
         vPowerPollHousekeepingData();
 #ifdef powerLOCAL_PRINT
         vTaskDelay(100);
