@@ -31,7 +31,7 @@
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
-#define uartNO_BLOCK        ( ( portTickType ) 0 )
+#define uartNO_BLOCK        ( ( portTickType ) 0xffff )
 
 /* The Rx task will block on the Rx queue for a long period. */
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -153,6 +153,62 @@ void vUartStartTask( void )
 #error "serialALTERNATE_IMPLEMENTATION needs to be used for prvUart* functions"
 #endif
 
+#define INT_BUF_SIZE 20
+
+static int printInt( char out[], int len, long n )
+{
+    char buf[INT_BUF_SIZE];
+    int i, j;
+    char isNeg = (n < 0 ? 1 : 0);
+    if (isNeg) n *= -1;
+    for (i=INT_BUF_SIZE-1; i>=1; --i)
+    {
+        buf[i] = n%10 + '0';
+        n /= 10;
+        if (0 == n) break;
+    }
+    if (isNeg) buf[--i] = '-';
+
+    for (j=0; j<len-1 && i<INT_BUF_SIZE; ++j, ++i)
+    {
+        out[j] = buf[i];
+    }
+    out[j] = 0;
+
+    return j;
+}
+
+static void alt_vsnprintf( char out[], int len, const char *fmt, va_list ap )
+{
+    int i, j;
+    for( i=0, j=0; fmt[i] && j<len-1; ++i )
+    {
+        if( '%' == fmt[i] )
+        {
+            ++i;
+            switch( fmt[i] )
+            {
+                case 'd':
+                    j += printInt( &out[j], len-j, va_arg( ap, int ) );
+                    break;
+                case 'u':
+                    j += printInt( &out[j], len-j, va_arg( ap, unsigned ) );
+                    break;
+                case 'c':
+                    out[j++] = va_arg( ap, char );
+                    break;
+                default:
+                    out[j++] = '?';
+            }
+            continue;
+        }
+
+        out[j++] = fmt[i];
+    }
+
+    out[j] = 0;
+}
+
 inline static portBASE_TYPE prvUartPut( xComPortHandle pxPort, char c )
 {
 //    uart1_putc(c);
@@ -160,26 +216,32 @@ inline static portBASE_TYPE prvUartPut( xComPortHandle pxPort, char c )
     return xSerialPutChar( pxPort, c, uartNO_BLOCK );
 }
 
-inline static portBASE_TYPE prvUartPrint( xComPortHandle pxPort, char *s)
+inline static portBASE_TYPE prvUartPrint( xComPortHandle pxPort, char s[])
 {
-    while( *s )
+    int i;
+    for( i = 0; s[i]; ++i )
     {
-        if( pdFAIL == prvUartPut( pxPort, *(s++) ) )
+        if( pdFAIL == prvUartPut( pxPort, s[i] ) )
         {
             return pdFAIL;
         }
     }
+
     return pdPASS;
 }
 
 inline static portBASE_TYPE prvUartVprintf( xComPortHandle pxPort, const char *fmt, va_list ap )
 {
-    char pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE+1];
-    pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE] = 0;
+    static char pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE+1];
+    portBASE_TYPE out;
 
-    vsnprintf( pcPrintfBuffer, uartSPRINTF_BUFFER_SIZE, fmt, ap );
+//    vsnprintf( pcPrintfBuffer, uartSPRINTF_BUFFER_SIZE, fmt, ap );
+    alt_vsnprintf( pcPrintfBuffer, uartSPRINTF_BUFFER_SIZE, fmt, ap );
+//    pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE] = 0;
 
-    return prvUartPrint( pxPort, pcPrintfBuffer );
+    out = prvUartPrint( pxPort, pcPrintfBuffer );
+
+    return out;
 }
 
 /* TODO Add error checking */

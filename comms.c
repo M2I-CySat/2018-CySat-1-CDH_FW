@@ -130,9 +130,10 @@ static void vCommsTask( void *pvParameters )
     {
         vTaskDelay(200);
 //        vHeliumNoOp();
-        vConsolePrintf( "Test: %d ", i );
-        vConsolePrintf( "Test: %d ", i+1 );
-        vConsolePrintf( "Test: %d\r\n", i+2 );
+        vConsolePrintf( "Test: %d %d %u %c (sizeof int: %d)\r\n", i, -i, i*i, i%26+'a', sizeof(int) );
+//        vConsolePrint( "Test: "); vConsolePut( i%10+'0' ); vConsolePrint( " ");
+//        vConsolePrint( "Test: "); vConsolePut( (i+1)%10+'0' ); vConsolePrint( " ");
+//        vConsolePrint( "Test: "); vConsolePut( (i+2)%10+'0' ); vConsolePrint( "\r\n");
 //        if( 0==i%10 ) vConsoleErrorPrintf( "Arbitrary Error Code %04x\r\n", i );
         ++i;
     }

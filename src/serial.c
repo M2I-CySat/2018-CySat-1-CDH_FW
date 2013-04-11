@@ -547,7 +547,7 @@ signed char *pxNext;
 *	This replaces the standard write.c routine in the C30 lib
 *
 **********************************************************************/
-
+/*
 int write(int handle, void *buffer, unsigned int len) {
 int i;
 	switch (handle)
@@ -582,6 +582,7 @@ int i;
 	}
 return(len);
 }
+*/
 
 /*-----------------------------------------------------------*/
 /**
