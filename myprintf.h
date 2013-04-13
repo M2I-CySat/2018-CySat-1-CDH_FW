@@ -6,8 +6,9 @@
  *
  * This is my own, minimalistic, implementation of any *printf functions I need
  * in this project.  The standard C lib *printf uses a lot of space on the
- * stack, and crashes when also using FreeRTOS.  This is not meant to provide
- * a full implementation of *printf, only offer a few necessary features.
+ * stack, and crashes when the PIC is using FreeRTOS.  This is not meant to
+ * provide a full implementation of *printf, only offer a few necessary
+ * features.
  *
  * A format specifier follows this prototype:
  * %[flags][width]specifier
@@ -22,7 +23,6 @@
  *   %%  literal '%'
  *
  * Flags (must be in this order if used):
- *   -   [Not implemented] Left-justify
  *   +   Add '+' to positive numbers
  *       (space) Add space in front of positive numbers (incompatable with '+')
  *   0   pad with 0
@@ -39,8 +39,10 @@
 #define	MYPRINTF_H
 
 #include <stdarg.h>
+#include <stddef.h>
 
-void myvsnprintf( char out[], int len, const char *fmt, va_list ap );
+void myvsnprintf( char out[], size_t size, const char *fmt, va_list ap );
+void mysnprintf( char *str, size_t size, const char *fmt, ... );
 
 #endif	/* MYPRINTF_H */
 

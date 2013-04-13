@@ -9,10 +9,6 @@
 #include "uart.h"
 #include "wire.h"
 
-#ifdef powerLOCAL_PRINT
-#include <stdio.h>
-#endif
-
 #define powerBLOCK_TIME         ( ( portTickType ) 0xffff )
 #define powerWIRE_BLOCK_TIME    ( ( portTickType ) 0xffff )
 

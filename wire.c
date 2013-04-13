@@ -2,7 +2,6 @@
 #include "wire.h"
 
 /* Standard includes. */
-#include <stdio.h>
 
 /* Scheduler include files. */
 #include "FreeRTOS.h"

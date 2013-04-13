@@ -1,6 +1,4 @@
 
-#include <stdio.h>
-
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -9,6 +7,7 @@
 #include "uart.h"
 #include "wire.h"
 #include "payload.h"
+#include "myprintf.h"
 
 #define payloadRADIOMETERS 3
 #define payloadCHANNELS 10
@@ -52,7 +51,7 @@ static void vPayloadPrintData( char pcData[][payloadCHANNELS] )
         for( j=0; j<payloadCHANNELS; ++j )
         {
             vTaskDelay(10);
-            sprintf( out, "%d\t%d\t%x\r\n", i+1, j+1, pcData[i][j] );
+            mysnprintf( out, 20, "%d\t%d\t%x\r\n", i+1, j+1, pcData[i][j] );
             vConsolePrint( out );
         }
     }

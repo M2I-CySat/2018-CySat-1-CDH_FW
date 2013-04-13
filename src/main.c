@@ -1,6 +1,5 @@
 
 /* Standard includes. */
-#include <stdio.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"

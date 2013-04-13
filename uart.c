@@ -289,7 +289,7 @@ static unsigned short prvConsoleGetc( char c, char* pcCommandBuffer )
             vConsolePut('\r');
             vConsolePut('\n');
             i = 0;
-            snprintf( pcCommandBuffer, uartRX_BUFFER_SIZE, "%s", pcBuffer );
+            mysnprintf( pcCommandBuffer, uartRX_BUFFER_SIZE, "%s", pcBuffer );
             usEnter = 1;
             break;
         case 27:    /* Escape */

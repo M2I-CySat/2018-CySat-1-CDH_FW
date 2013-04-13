@@ -17,14 +17,14 @@
 /**
  * Write an integer (and null-terminator) to a string buffer as a decimal
  * @param out The string buffer
- * @param len The length of the buffer
+ * @param size The length of the buffer
  * @param n The integer (cast to long to use for both int and unsigned)
  * @param n_pad The minimum number of pad characters (0 to 9)
  * @param c_pad The character to pad with
  * @param force_sign Add this char if number is positive
  * @return The size of string written (not counting null-terminator)
  */
-static int sprintInt( char out[], int len, long n, unsigned short n_pad, char c_pad, char pos_sign, char spec )
+static size_t sprintInt( char out[], size_t size, long n, unsigned short n_pad, char c_pad, char pos_sign, char spec )
 {
     char buf[INT_BUF_SIZE];
     int i = 0, j;
@@ -121,7 +121,7 @@ static int sprintInt( char out[], int len, long n, unsigned short n_pad, char c_
     }
 
     /* Write to buffer */
-    for (j=0; j<i && j<len-1; ++j)
+    for (j=0; j<i && j<size-1; ++j)
     {
         out[j] = buf[i-j-1];
     }
@@ -130,11 +130,11 @@ static int sprintInt( char out[], int len, long n, unsigned short n_pad, char c_
     return j;
 }
 
-void myvsnprintf( char out[], int len, const char *fmt, va_list ap )
+void myvsnprintf( char out[], size_t size, const char *fmt, va_list ap )
 {
     int i, j;
 
-    for( i=0, j=0; fmt[i] && j<len-1; ++i )
+    for( i=0, j=0; fmt[i] && j<size-1; ++i )
     {
         if( '%' == fmt[i] )
         {
@@ -174,17 +174,17 @@ void myvsnprintf( char out[], int len, const char *fmt, va_list ap )
                     out[j++] = '%';
                     break;
                 case 'd':
-                    j += sprintInt( &out[j], len-j, (long) va_arg( ap, int ), n_pad, c_pad, pos_sign, fmt[i] );
+                    j += sprintInt( &out[j], size-j, (long) va_arg( ap, int ), n_pad, c_pad, pos_sign, fmt[i] );
                     break;
                 case 'u': case 'x': case 'X': case 'o':
-                    j += sprintInt( &out[j], len-j, (long) va_arg( ap, unsigned ), n_pad, c_pad, pos_sign, fmt[i] );
+                    j += sprintInt( &out[j], size-j, (long) va_arg( ap, unsigned ), n_pad, c_pad, pos_sign, fmt[i] );
                     break;
                 case 'c':
                     out[j++] = va_arg( ap, char );
                     break;
                 default:
                     out[j++] = '%';
-                    if (j<len-1) out[j++] = '?';
+                    if (j<size-1) out[j++] = '?';
             }
             continue;
         }
@@ -193,4 +193,12 @@ void myvsnprintf( char out[], int len, const char *fmt, va_list ap )
     }
 
     out[j] = 0;
+}
+
+void mysnprintf( char *str, size_t size, const char *fmt, ... )
+{
+    va_list ap;
+    va_start(ap, fmt);
+    myvsnprintf( str, size, fmt, ap );
+    va_end(ap);
 }

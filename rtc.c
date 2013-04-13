@@ -1,8 +1,6 @@
 
 #include "rtc.h"
 
-#include <stdio.h>
-
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
