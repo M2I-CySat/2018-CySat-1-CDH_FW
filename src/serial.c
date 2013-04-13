@@ -985,7 +985,7 @@ void vSetupUart1( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLeng
     U1MODEbits.UARTEN	= serUART_ENABLED;
 
     U1BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
-//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
+//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TO/DO: fix this
 
     U1STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
     U1STAbits.UTXEN		= serTX_ENABLE;
@@ -1035,7 +1035,7 @@ void vSetupUart2( unsigned long ulWantedBaud, unsigned portBASE_TYPE uxQueueLeng
     U2MODEbits.UARTEN	= serUART_ENABLED;
 
     U2BRG = (unsigned short)(( (float)configCPU_CLOCK_HZ / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5);
-//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TODO: fix this
+//        U2BRG = (unsigned short)(( (float)2900000 / ( (float)16 * (float)ulWantedBaud ) ) - (float)0.5); // TO/DO: fix this
 
     U2STAbits.URXISEL	= serINTERRUPT_ON_SINGLE_CHAR;
     U2STAbits.UTXEN		= serTX_ENABLE;

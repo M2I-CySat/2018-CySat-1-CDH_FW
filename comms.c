@@ -12,18 +12,22 @@
 #include "uart.h"
 #include "helium.h"
 
-/*
+
+/* How long the comms task will wait for a radio packet */
+#define commsRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
+
+/**
  * Communications module task
  */
 static void vCommsTask( void *pvParameters );
 
-/*
+/**
  * Quick and hacky way to test transmitting using the Helium Radio
  * Uses packets created by the configuration program, copy-pasted.
  */
 static void vCommsHeliumBasicTransmitTest();
 
-/*
+/**
  * Test building packets and transmitting using the Helium Radio
  * Uses packets created by the configuration program, copy-pasted.
  */
@@ -120,20 +124,29 @@ static void vCommsHeliumTransmitTest()
 
 static void vCommsTask( void *pvParameters )
 {
-    int i = -10;
 
     /* Radio transmit test (never exits) */
 //    vCommsHeliumBasicTransmitTest();
 //    vCommsHeliumTransmitTest();
 
-    vConsolePrintf( "Test: (sizeof int: %d)\r\n", sizeof(int) );
-
     for( ;; )
     {
+        vTaskDelay( 200 );
+
+        vConsolePrint("NoOp...");
         vTaskDelay(200);
-//        vHeliumNoOp();
-        vConsolePrintf( "Test: % 5d %04x %04X %6o %c\r\n", i, i, i, i, i%26+'a' );
-        if( 0==i%10 ) vConsoleErrorPrintf( "Arbitrary Error Code %04x\r\n", i );
-        ++i;
+        vHeliumNoOp();
+//        switch( ucHeliumReceiveAck( commsRX_BLOCK_TIME ) )
+//        {
+//        case 0:
+//            vConsolePrint("ACK!\r\n");
+//            break;
+//        case 1:
+//            vConsolePrint("NACK!\r\n");
+//            break;
+//        default:
+//            vConsolePrint("No reply!\r\n");
+//            break;
+//        }
     }
 }

@@ -32,7 +32,7 @@
 
 /* We should find that each character can be queued for Tx immediately and we
 don't have to block to send. */
-#define uartNO_BLOCK        ( ( portTickType ) 0xffff )
+#define uartNO_BLOCK        ( ( portTickType ) 0 )
 
 /* The Rx task will block on the Rx queue for a long period. */
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -137,7 +137,7 @@ void vUartStartTask( void )
     xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
     xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 
-    /* TODO (Bug?): Figure out why U1TXREG must be set for UART to work. */
+    /* TO/DO (Bug?): Figure out why U1TXREG must be set for UART to work. */
     /* UxTXREG can be set to anything, as long as it's written*/
 //    while(U1STAbits.UTXBF == 1);
     U1TXREG = 0;
@@ -340,7 +340,7 @@ static void vUart1RxTask( void *pvParameters )
 #ifdef serialALTERNATE_IMPLEMENTATION
         if( xSerialGetChar( xUart1Handle, &cRxByte, uartRX_BLOCK_TIME ) )
 #else
-        U1TXREG = 0; /* TODO (bug?) why is this needed? */
+        U1TXREG = 0; /* TO/DO (bug?) why is this needed? */
         if( xUart1GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
 #endif
         {
@@ -362,7 +362,7 @@ static void vUart2RxTask( void *pvParameters )
 #ifdef serialALTERNATE_IMPLEMENTATION
         if( xSerialGetChar( xUart2Handle, &cRxByte, uartRX_BLOCK_TIME ) )
 #else
-//        U2TXREG = 0; /* TODO (bug?) why is this needed? */
+//        U2TXREG = 0; /* TO/DO (bug?) why is this needed? */
         if( xUart2GetChar( NULL, &cRxByte, uartRX_BLOCK_TIME ) )
 #endif
         {

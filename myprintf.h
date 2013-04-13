@@ -20,6 +20,7 @@
  *   %d  int
  *   %u  unsigned int
  *   %c  character
+ *   %s  string (null-terminated)
  *   %%  literal '%'
  *
  * Flags (must be in this order if used):

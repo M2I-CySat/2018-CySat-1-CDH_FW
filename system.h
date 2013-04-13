@@ -10,7 +10,7 @@
 
 #include "task.h"
 
-#define systemPRIORITY_BASE     ( tskIDLE_PRIORITY + 2 )
+#define systemPRIORITY_BASE     ( tskIDLE_PRIORITY + 3 )
 
 
 #define systemPRIORITY_UART1    ( systemPRIORITY_BASE + 0 )

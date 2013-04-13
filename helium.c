@@ -221,36 +221,27 @@ short he_calculate_checksum(const char* data, int start, int end) {
 
 typedef struct {
     /* Command type */
-    unsigned char ucCommand;
+    uint8_t ucCommand;
     /* Actual Payload Size (factoring out ACK, etc) */
-    unsigned short usPayloadSize;
+    uint16_t usPayloadSize;
     /* ACK field (from overloaded payload field in packet)*/
-    unsigned short usAck;
+    uint16_t usAck;
     /* Packet data array */
-    unsigned char *pucPayload;
+    uint8_t *pucPayload;
 } heliumPacket;
 
 static xQueueHandle xPacketQueue;
-
-/*
- * Generate the header for a packet
- *
- * @param ucCommand The command to send the radio
- * @param usPayloadSize The size (in bytes) of the data payload
- * @param pucHeader The array to store the 8 byte header in
- */
-static void vGenerateHeader( unsigned char ucCommand, unsigned short usPayloadSize, unsigned char *pucHeader );
 
 /*
  * Calculate the 8-bit Fletcher checksum for the buffer
  * Excludes the first two bytes (sync characters).
  *
  * @param pucData The data buffer to calculate over (including sync bytes)
- * @param uSize The size of the buffer (not including the last two checksum bytes)
+ * @param usSize The size of the buffer (not including the last two checksum bytes)
  * @param pucSumA The first checksum byte
  * @param pucSumB The second checksum byte
  */
-static void vCalculateChecksum( const unsigned char *pucData, unsigned uSize, unsigned char *pucSumA, unsigned char *pucSumB );
+static void vCalculateChecksum( uint8_t *pucData, uint16_t usSize, uint8_t *pucSumA, uint8_t *pucSumB );
 
 /*
  * Generate header and checksums and send packet to radio
@@ -259,7 +250,7 @@ static void vCalculateChecksum( const unsigned char *pucData, unsigned uSize, un
  * @param pvData Data to send to the radio
  * @param usSize The size (in bytes) of the data buffer
  */
-//static void vSendUart( unsigned char ucCommand, void *pvData, unsigned short usSize );
+//static void vSendUart( uint8_t ucCommand, void *pvData, uint16_t usSize );
 
 /*
  * Parse header data from packet received from radio.
@@ -269,7 +260,7 @@ static void vCalculateChecksum( const unsigned char *pucData, unsigned uSize, un
  * @param pucData Raw UART data received from the radio (must be at least 8 bytes)
  * @param xPacket The packet struct to set command and payload
  */
-static void vParseHeader( unsigned char *pucData, heliumPacket *xPacket );
+static void vParseHeader( uint8_t *pucData, heliumPacket *xPacket );
 
 /*
  * Send data to the radio to transmit
@@ -294,7 +285,7 @@ void vHeliumReceivePacket( heliumPacket *pxPacket, portTickType xBlockTime );
  * @param ucByte the byte to send
  * @return 1 on success, 0 on failure
  */
-unsigned char ucHeliumSendUart( unsigned char ucByte );
+uint8_t ucHeliumSendUart( uint8_t ucByte );
 
 
 /* Implementation */
@@ -310,17 +301,17 @@ void vHeliumNoOp()
     vHeliumSendPacket( &xPacket );
 }
 
-void vHeliumGetConfig( heliumBEACON_CONFIG *pxConfig )
+void vHeliumGetConfig( heliumRADIO_CONFIG *pxConfig )
 {
 
 }
 
-void vHeliumSetConfig( heliumBEACON_CONFIG *pxConfig )
+void vHeliumSetConfig( heliumRADIO_CONFIG *pxConfig )
 {
 
 }
 
-void vHeliumSetAmplifier( const char* pcLevel )
+void vHeliumSetAmplifier( const uint8_t pcLevel )
 {
 
 }
@@ -330,35 +321,40 @@ void vHeliumSetRfConfig( heliumRF_CONFIG *pxConfig )
 
 }
 
-void vHeliumReceiveData( char *pcData, unsigned *puSize, portTickType xBlockTime )
+void vHeliumSetBeaconConfig(heliumBEACON_CONFIG *pxConfig)
+{
+    
+}
+
+void vHeliumReceiveData( char *pcData, uint16_t *pusSize, portTickType xBlockTime )
 {
 
 }
 
-void vHeliumSendData( char *pcData, unsigned uSize )
+void vHeliumSendData( char *pcData, uint16_t usSize )
 {
     heliumPacket xPacket;
 
     xPacket.ucCommand = COMMAND_TRANSMIT;
-    xPacket.usPayloadSize = uSize;
-    xPacket.pucPayload = (unsigned char*) pcData;
+    xPacket.usPayloadSize = usSize;
+    xPacket.pucPayload = (uint8_t*) pcData;
 
-    vHeliumSendPacket( &xPacket );
+//    vHeliumSendPacket( &xPacket );
 }
 
 void vHeliumSendPacket( heliumPacket *pxPacket )
 {
-    unsigned char pucBuffer[PACKET_MAX_SIZE];
-    unsigned i, size = HEADER_SIZE;
+    uint8_t pucBuffer[PACKET_MAX_SIZE];
+    uint16_t i, size = HEADER_SIZE;
 
     pucBuffer[0] = SYNC_1;
     pucBuffer[1] = SYNC_2;
     pucBuffer[2] = MESSAGE_I;
     pucBuffer[3] = pxPacket->ucCommand;
-    pucBuffer[4] = (unsigned char) ( ( pxPacket->usPayloadSize ? pxPacket->usPayloadSize : pxPacket->usAck ) << 8 );
-    pucBuffer[5] = (unsigned char) ( ( pxPacket->usPayloadSize ? pxPacket->usPayloadSize : pxPacket->usAck ) & 0xFF );
+    pucBuffer[4] = (uint8_t) ( ( pxPacket->usPayloadSize ? pxPacket->usPayloadSize : pxPacket->usAck ) >> 8 );
+    pucBuffer[5] = (uint8_t) ( ( pxPacket->usPayloadSize ? pxPacket->usPayloadSize : pxPacket->usAck ) & 0xFF );
 
-    vCalculateChecksum( pucBuffer+2, 4, &pucBuffer[6], &pucBuffer[7] );
+    vCalculateChecksum( &pucBuffer[2], 4, &pucBuffer[6], &pucBuffer[7] );
 
     if( 0 != pxPacket->usPayloadSize )
     {
@@ -376,7 +372,7 @@ void vHeliumSendPacket( heliumPacket *pxPacket )
             pucBuffer[i+HEADER_SIZE] = pxPacket->pucPayload[i];
         }
 
-        vCalculateChecksum( pucBuffer+2, HEADER_SIZE-2 + pxPacket->usPayloadSize, &pucBuffer[size-2], &pucBuffer[size-1] );
+        vCalculateChecksum( &pucBuffer[2], HEADER_SIZE-2 + pxPacket->usPayloadSize, &pucBuffer[size-2], &pucBuffer[size-1] );
     }
 
     for( i=0; i<size; ++i )
@@ -386,9 +382,10 @@ void vHeliumSendPacket( heliumPacket *pxPacket )
     }
 }
 
-unsigned char ucHeliumSendUart( unsigned char ucByte )
+uint8_t ucHeliumSendUart( uint8_t ucByte )
 {
-    vUart2Put( (char) ucByte );
+    vConsolePrintf("%02x", ucByte);
+//    vUart2Put( (char) ucByte );
     return 1;
 
 //    if( sUart2Putc( (char) ucByte ) )
@@ -398,7 +395,7 @@ unsigned char ucHeliumSendUart( unsigned char ucByte )
 //    else
 //    {
 //        /* Retry sending byte */
-//        unsigned i;
+//        uint16_t i;
 //        for( i=0; i<10; ++i )
 //        {
 //            vTaskDelay(10);
@@ -417,13 +414,24 @@ void vHeliumReceivePacket( heliumPacket *pxPacket, portTickType xBlockTime )
     xQueueReceive( xPacketQueue, pxPacket, xBlockTime );
 }
 
+
+uint8_t ucHeliumReceiveAck( portTickType xBlockTime )
+{
+    heliumPacket xPacket;
+    vHeliumReceivePacket( &xPacket, xBlockTime );
+    if( xPacket.usAck == heliumACK ) return 0;
+    if( xPacket.usAck == heliumNACK ) return 1;
+    return 2;
+}
+
 void vHeliumUartRx( char cByte )
 {
-    static unsigned char pucBuffer[ PACKET_MAX_SIZE ];
+    return;
+    static uint8_t pucBuffer[ PACKET_MAX_SIZE ];
     static heliumPacket xPacket;
-    static unsigned i = 0;
+    static uint16_t i = 0;
 
-    pucBuffer[i] = (unsigned char) cByte;
+    pucBuffer[i] = (uint8_t) cByte;
 
     if( 0 == i )
     {
@@ -467,8 +475,8 @@ void vHeliumUartRx( char cByte )
     {
         if( HEADER_SIZE + xPacket.usPayloadSize + 1 == i )
         {
-            unsigned char ucSumA, ucSumB;
-            vCalculateChecksum( pucBuffer+2, HEADER_SIZE + xPacket.usPayloadSize, &ucSumA, &ucSumB );
+            uint8_t ucSumA, ucSumB;
+            vCalculateChecksum( &pucBuffer[2], HEADER_SIZE + xPacket.usPayloadSize, &ucSumA, &ucSumB );
 
             if( ucSumA != pucBuffer[i-1] || ucSumB != pucBuffer[i] )
             {
@@ -487,46 +495,24 @@ void vHeliumUartRx( char cByte )
 
 
 /* Private functions */
-static void vGenerateHeader( unsigned char ucCommand, unsigned short usPayloadSize, unsigned char *pucHeader )
+
+static void vCalculateChecksum( uint8_t *pucData, uint16_t usSize, uint8_t *pucSumA, uint8_t *pucSumB )
 {
-    /* Sync Characters */
-    pucHeader[0] = SYNC_1;
-    pucHeader[1] = SYNC_2;
-
-    /* Command Bytes */
-    pucHeader[2] = MESSAGE_I;
-    pucHeader[3] = ucCommand;
-
-    /* Payload Size */
-    pucHeader[4] = ( usPayloadSize & 0xFF00 ) >> 8;
-    pucHeader[5] = ( usPayloadSize & 0x00FF );
-
-    /* Checksum */
-    vCalculateChecksum( pucHeader, 6, &pucHeader[6], &pucHeader[7] );
-}
-
-static void vCalculateChecksum( const unsigned char* pucData, unsigned uSize, unsigned char* pucSumA, unsigned char* pucSumB )
-{
-    unsigned i;
+    uint16_t i;
 
     *pucSumA = 0;
     *pucSumB = 0;
 
-    for( i = 2; i < uSize; i++ )
+    for( i = 2; i < usSize; i++ )
     {
         *pucSumA += pucData[i];
         *pucSumB += *pucSumA;
     }
 }
 
-//static void vSendUart( unsigned char ucCommand, void *pvData, unsigned short usSize )
-//{
-//
-//}
-
-static void vParseHeader( unsigned char *pucData, heliumPacket *xPacket )
+static void vParseHeader( uint8_t *pucData, heliumPacket *xPacket )
 {
-    unsigned char ucSumA, ucSumB;
+    uint8_t ucSumA, ucSumB;
 
     vCalculateChecksum( pucData+2, 4, &ucSumA, &ucSumB );
     if( ucSumA != pucData[6] || ucSumB != pucData[7] )

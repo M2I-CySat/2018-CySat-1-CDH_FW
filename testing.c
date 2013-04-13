@@ -18,7 +18,7 @@
 #define puts(str)           vConsolePuts(str)
 #define putsError(str)      vConsolePutsError(str)
 
-/* TODO: Need better way to do this (Don't judge me) */
+/* TO/DO: Need better way to do this (Don't judge me) */
 #define COMMAND(str)        if((!sMatchCommand)&&(strcmp(pcBase,str)==0)&&((sMatchCommand = 1)))
 #define ARG(str)            if(strcmp(pcArgs,str)==0)
 #define HELP(str)           if(isFlagSet(pcArgs,"h",NULL)||isFlagSet(pcArgs,"-help",NULL)){puts(str);return;}

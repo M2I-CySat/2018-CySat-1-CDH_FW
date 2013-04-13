@@ -259,10 +259,9 @@ int he_parse_serial(char* data_received, int length_received, char* data_payload
 
 /* Kris's He Radio API: */
 
-/*
+/**
  * Radio telemetry data structure
  */
-#define heliumRADIO_CONFIG_LENGTH	34	// The length of the configuration data structure in bytes
 typedef struct {
 	uint8_t         uart_baud_rate;			// Radio UART baud rate
 	uint8_t		amplifier_level;		// Radio power amplifier level (0-255 nonlinear)
@@ -279,12 +278,12 @@ typedef struct {
 	uint16_t	function_config1;		// Radio configuration functions 1
 	uint16_t	function_config2;		// Radio configuration functions 2
 } heliumRADIO_CONFIG;
+#define heliumRADIO_CONFIG_LENGTH	34	// The length of the configuration data structure in bytes
 
-/*
+/**
  * Radio telemetry data structure
  */
-#define heliumTELEMETRY_LENGTH		14		// The length of the telemetry data structure in bytes
- typedef struct {
+typedef struct {
 	uint16_t	op_counter;
 	int16_t         msp430_temp;
 	uint8_t         time_count[3];
@@ -292,85 +291,95 @@ typedef struct {
 	uint32_t	bytes_received;
 	uint32_t	bytes_transmitted;
 } heliumTELEMETRY;
+#define heliumTELEMETRY_LENGTH		14		// The length of the telemetry data structure in bytes
 
-/*
+/**
  * Radio low level RF configuration data structure
  */
-#define	heliumRF_CONFIG_LENGTH	10	// The length of the RF configuration data structure in bytes
 typedef struct {
 	uint8_t         front_end_level;
 	uint8_t         amplifier_power;		// Radio power amplifier level (0-255 nonlinear)
 	uint32_t	tx_frequency_offset;		// Radio transmit frequency offset (up to 20kHz, in Hz)
 	uint32_t	rx_frequency_offset;		// Radio receive frequency offset (up to 20kHz, in Hz)
 } heliumRF_CONFIG;
+#define	heliumRF_CONFIG_LENGTH	10	// The length of the RF configuration data structure in bytes
 
-/*
+/**
  * Radio beacon configuration
  */
-#define heliumBEACON_CONFIG_LENGTH	1	// The length of the beacon configuration in bytes
 typedef struct {
 	uint8_t	interval;			// 0=beacon off, 2.5 second delay per LSB
 } heliumBEACON_CONFIG;
+#define heliumBEACON_CONFIG_LENGTH	1	// The length of the beacon configuration in bytes
 
 
-/*
+/**
  * Initialize RTOS elements.
  */
 void vHeliumInit();
 
-/*
+/**
  * Send a no-op command to the radio
  */
 void vHeliumNoOp();
 
-/*
+/**
  * Retreive the configuration settings from the radio
- *
  * @param pxConfig The beacon configuration data structure received from the radio
  */
-void vHeliumGetConfig(heliumBEACON_CONFIG *pxConfig);
+void vHeliumGetConfig(heliumRADIO_CONFIG *pxConfig);
 
-/*
+/**
  * Write configuration settings to the radio
- *
  * @param pxConfig The beacon configuration data structure to write to the radio
  */
-void vHeliumSetConfig(heliumBEACON_CONFIG *pxConfig);
+void vHeliumSetConfig(heliumRADIO_CONFIG *pxConfig);
 
-/*
+/**
  * Set the power amplifier output level
- *
  * @param pcLevel The power level to set the amplifier to (0-255 non-linear)
  */
-void vHeliumSetAmplifier(const char* pcLevel);
+void vHeliumSetAmplifier(const uint8_t pcLevel);
 
-/*
+/**
  * Write a low level RF configuration to the radio
- *
  * @param pxConfig The low level RF configuration data structure to write
  */
 void vHeliumSetRfConfig(heliumRF_CONFIG *pxConfig);
 
+/**
+ * Write beacon configuration settings to the radio
+ * @param pxConfig
+ */
+void vHeliumSetBeaconConfig(heliumBEACON_CONFIG *pxConfig);
+
 /*
- * Receive raw data buffer from the Helium radio
+ * Receive a packet from the radio
+ * This function reads from a queue
  *
+ * @param pxPacket Data received by the radio
+ * @param xBlockTime Block time allowed for the queue
+ * @return 0 for ACK, 1 for NACK, and 2 for NO REPLY
+ */
+uint8_t ucHeliumReceiveAck( portTickType xBlockTime );
+
+/**
+ * Receive raw data buffer from the Helium radio
  * @param pcData Buffer to store the received data
  * @param puSize Size of the data buffer
  * @param xBlockTime Block time allowed for the queue
  */
-void vHeliumReceiveData( char *pcData, unsigned *puSize, portTickType xBlockTime );
+void vHeliumReceiveData( char *pcData, uint16_t *pusSize, portTickType xBlockTime );
 
-/*
+/**
  * Transmit raw data buffer over the Helium radio
- *
  * @param pcData Buffer to store the received data
  * @param uSize Size of the buffer
  */
-void vHeliumSendData( char *pcData, unsigned uSize );
+void vHeliumSendData( char *pcData, uint16_t uSize );
 
-/*
+/**
  * The task managing the radio's UART port should call this when it receives a byte
- *
  * @param ucByte byte received from UART
  */
 void vHeliumUartRx(char ucByte);

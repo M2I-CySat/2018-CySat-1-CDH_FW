@@ -182,6 +182,16 @@ void myvsnprintf( char out[], size_t size, const char *fmt, va_list ap )
                 case 'c':
                     out[j++] = va_arg( ap, char );
                     break;
+                case 's':
+                {
+                    char* str;
+                    str = va_arg( ap, char* );
+                    for( ; *str && j<size-1; ++str )
+                    {
+                        out[j++] = *str;
+                    }
+                    break;
+                }
                 default:
                     out[j++] = '%';
                     if (j<size-1) out[j++] = '?';

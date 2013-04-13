@@ -8,7 +8,7 @@
 #ifndef COMMS_H
 #define	COMMS_H
 
-/*
+/**
  * Create Communications module task
  */
 void vCommsStartTask();
