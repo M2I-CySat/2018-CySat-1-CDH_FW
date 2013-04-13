@@ -120,21 +120,20 @@ static void vCommsHeliumTransmitTest()
 
 static void vCommsTask( void *pvParameters )
 {
-    int i = 0;
+    int i = -10;
 
     /* Radio transmit test (never exits) */
 //    vCommsHeliumBasicTransmitTest();
 //    vCommsHeliumTransmitTest();
 
+    vConsolePrintf( "Test: (sizeof int: %d)\r\n", sizeof(int) );
+
     for( ;; )
     {
         vTaskDelay(200);
 //        vHeliumNoOp();
-        vConsolePrintf( "Test: %d %d %u %c (sizeof int: %d)\r\n", i, -i, i*i, i%26+'a', sizeof(int) );
-//        vConsolePrint( "Test: "); vConsolePut( i%10+'0' ); vConsolePrint( " ");
-//        vConsolePrint( "Test: "); vConsolePut( (i+1)%10+'0' ); vConsolePrint( " ");
-//        vConsolePrint( "Test: "); vConsolePut( (i+2)%10+'0' ); vConsolePrint( "\r\n");
-//        if( 0==i%10 ) vConsoleErrorPrintf( "Arbitrary Error Code %04x\r\n", i );
+        vConsolePrintf( "Test: % 5d %04x %04X %6o %c\r\n", i, i, i, i, i%26+'a' );
+        if( 0==i%10 ) vConsoleErrorPrintf( "Arbitrary Error Code %04x\r\n", i );
         ++i;
     }
 }

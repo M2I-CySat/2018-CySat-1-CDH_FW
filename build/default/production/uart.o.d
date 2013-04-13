@@ -12,6 +12,7 @@ include/FreeRTOS/mpu_wrappers.h  \
 include/FreeRTOS/task.h  \
 include/FreeRTOS/list.h  \
  pic24.h  \
+myprintf.h  \
 system.h  \
 iomapping.h  \
 testing.h  \
