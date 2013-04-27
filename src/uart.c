@@ -376,3 +376,33 @@ static void vUart2RxTask( void *pvParameters )
     }
 }
 
+#ifdef uartTEST_FUNCTIONS
+
+static void vUartTestTask();
+
+void vUartTest()
+{
+    static int i = 0;
+    vConsolePrintf( "Test: %5d %+05d %04X %c\r\n", i, -i, i, i%26+'a' );
+    ++i;
+}
+
+
+void vUartStartTestTask( void )
+{
+    xTaskCreate( vUartTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL );
+}
+
+static void vUartTestTask()
+{
+    vTaskDelay(500);
+    vConsolePrintf( "sizeof(int) = %d\r\n", sizeof(int) );
+
+    for( ;; )
+    {
+        vTaskDelay(200);
+        vUartTest();
+    }
+}
+
+#endif

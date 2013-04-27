@@ -10,6 +10,9 @@
 
 #include "serial.h"
 
+// Define if you want to use test functions. e.g. vUartTest()
+#define uartTEST_FUNCTIONS
+
 #define BACKSPACE 0x8
 
 //#define BRATE       25              /* 9600 Bd (BREGH=0) */
@@ -92,6 +95,18 @@ void vConsolePrintf( const char *fmt, ... );
  * @param ... (See printf)
  */
 void vConsoleErrorPrintf( const char *fmt, ... );
+
+#ifdef uartTEST_FUNCTIONS
+/**
+ * Prints a test pattern to Console's UART
+ */
+void vUartTest();
+
+/**
+ * Create the task that will run a UART test.
+ */
+void vUartStartTestTask( void );
+#endif
 
 
 #endif	/* UART_H */
