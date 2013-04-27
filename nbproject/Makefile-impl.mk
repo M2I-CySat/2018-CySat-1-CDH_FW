@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=CySat.X
+PROJECTNAME=cysat
 
 # Active Configuration
 DEFAULTCONF=default
