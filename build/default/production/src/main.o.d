@@ -15,4 +15,5 @@ uart.h  \
 wire.h  \
 power.h  \
  payload.h  \
-comms.h 
+comms.h  \
+nichrome.h 

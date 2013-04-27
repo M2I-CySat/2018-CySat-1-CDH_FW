@@ -33,6 +33,7 @@
       <itemPath>helium.h</itemPath>
       <itemPath>comms.h</itemPath>
       <itemPath>myprintf.h</itemPath>
+      <itemPath>nichrome.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -63,6 +64,7 @@
       <itemPath>helium.c</itemPath>
       <itemPath>comms.c</itemPath>
       <itemPath>myprintf.c</itemPath>
+      <itemPath>nichrome.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

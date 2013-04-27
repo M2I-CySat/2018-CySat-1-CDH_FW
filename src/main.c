@@ -15,6 +15,7 @@
 #include "power.h"
 #include "payload.h"
 #include "comms.h"
+#include "nichrome.h"
 //#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
@@ -33,6 +34,8 @@ int main( void )
 //    vPowerStartTask();
 //    vPayloadStartTask();
     vCommsStartTask();
+    
+    vNichromeStartTask();
 
 //    vRtcStartTask();
 
