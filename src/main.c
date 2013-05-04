@@ -15,6 +15,7 @@
 #include "power.h"
 #include "payload.h"
 #include "comms.h"
+#include "nichrome.h"
 //#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
@@ -25,16 +26,19 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
 int main( void )
 {
-
+    /* Enable UART */
     vUartStartTask();
 
-//    vWireStartTask();
+    /* Enable Wire (I2C) */
+    vWireInit();
+//    vWireStartTask(); // Don't use anymore
     
 //    vPowerStartTask();
 //    vPayloadStartTask();
 //    vCommsStartTask();
+    vNichromeStartTask();
 
-    vUartStartTestTask();
+//    vUartStartTestTask();
 
     vConsolePrint( "\r\nI am a UART!\r\n" );
     vUart1Print("(Uart1)\r\n");
