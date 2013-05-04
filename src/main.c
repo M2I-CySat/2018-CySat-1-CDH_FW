@@ -36,9 +36,9 @@ int main( void )
 //    vPowerStartTask();
 //    vPayloadStartTask();
 //    vCommsStartTask();
-    vNichromeStartTask();
+//    vNichromeStartTask();
 
-//    vUartStartTestTask();
+    vUartStartTestTask();
 
     vConsolePrint( "\r\nI am a UART!\r\n" );
     vUart1Print("(Uart1)\r\n");

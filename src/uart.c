@@ -383,7 +383,14 @@ static void vUartTestTask();
 void vUartTest()
 {
     static int i = 0;
-    vConsolePrintf( "Test: %5d %+05d %04X %c\r\n", i, -i, i, i%26+'a' );
+#ifdef myprintfDOUBLE
+    static double d = 0.0;
+//    vConsolePrintf( "Test: %5d %04X %f %c\r\n", i, i, d, i%26+'a' );
+    vConsolePrintf( "Test: %5d %+2.2f\r\n", i, 1.0-d);
+    d += 0.05;
+#else
+    vConsolePrintf( "%s: %5d %04X %c\r\n", "Test", i, i, i%26+'a' );
+#endif
     ++i;
 }
 
@@ -400,7 +407,7 @@ static void vUartTestTask()
 
     for( ;; )
     {
-        vTaskDelay(200);
+        vTaskDelay(400);
         vUartTest();
     }
 }

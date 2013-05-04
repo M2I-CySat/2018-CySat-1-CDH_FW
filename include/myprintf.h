@@ -42,6 +42,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+/* Are doubles allowed? (%f) */
+//#define myprintfDOUBLE
+
 void myvsnprintf( char out[], size_t size, const char *fmt, va_list ap );
 void mysnprintf( char *str, size_t size, const char *fmt, ... );
 

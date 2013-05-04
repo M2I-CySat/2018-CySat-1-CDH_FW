@@ -93,6 +93,8 @@ static char cGetSDA(char bus);
 static char xMutexTakeBus( char cBus );
 static char xMutexGiveBus( char cBus );
 
+/* TODO: Change switch's cBus = 1,2,3,4 to the defined values wireBUS1, etc. */
+
 static char xMutexTakeBus( char cBus )
 {
     switch( cBus )
@@ -471,10 +473,14 @@ void vWireStartTask()
 
 void vWireInit()
 {
-    xMutexBus1 = xSemaphoreCreateMutex();
-    xMutexBus2 = xSemaphoreCreateMutex();
-    xMutexBus3 = xSemaphoreCreateMutex();
-    xMutexBus4 = xSemaphoreCreateMutex();
+    static char isInitialized = 0;
+    if( 0 == isInitialized ) {
+        xMutexBus1 = xSemaphoreCreateMutex();
+        xMutexBus2 = xSemaphoreCreateMutex();
+        xMutexBus3 = xSemaphoreCreateMutex();
+        xMutexBus4 = xSemaphoreCreateMutex();
+        isInitialized = 1;
+    }
 }
 
 #ifdef TEST_9DOF

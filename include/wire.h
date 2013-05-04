@@ -49,11 +49,9 @@ typedef struct {
 } wireMessage;
 
 void vWireInit();
-void vWireStartTask();
 
 char cWireWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireRead( char cBus, char cAddress, char *pcData, char cBytes );
-
 
 char cWirePutsStatus( char cStatus );
 char cWireWritePutsError( char cBus, char cAddress, char *pcData, char cBytes );
@@ -62,6 +60,7 @@ char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes );
 void vWireScan( char bus );
 
 /* TODO WireQueue should no longer be used, remove it */
+void vWireStartTask();
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueRead( char cBus, char cAddress, char *pcData, char cBytes );
