@@ -53,3 +53,13 @@ void vSetupMem() {
 
 //TODO Define all FRAM opcodes
 
+#define FRAM_WREN 0b00000110
+#define FRAM_WRDI 0b00000100
+#define FRAM_RDSR 0b00000101
+#define FRAM_READ 0b00000011
+#define FRAM_FSTRD 0b00001011
+#define FRAM_WRITE 0b00000010
+#define FRAM_SLEEP 0b10111001
+#define FRAM_RDID 0b10011111
+#define FRAM_SNR 0b11000011
+
