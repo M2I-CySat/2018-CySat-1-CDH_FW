@@ -45,3 +45,11 @@ void vSetupMem() {
 
     iPPSInput(IN_FN_PPS_SDI1, IN_PIN_PPS_RP26);
 }
+
+
+/**********************************
+ * FRAM SPI OPCODES
+***********************************/
+
+//TODO Define all FRAM opcodes
+
