@@ -6,6 +6,7 @@
 #include "task.h"
 #include "queue.h"
 #include "croutine.h"
+#include "mem.h"
 
 /* Application includes */
 #include "serial.h"
@@ -38,10 +39,10 @@ int main( void )
 //    vCommsStartTask();
 //    vNichromeStartTask();
 
-    vUartStartTestTask();
+    //vUartStartTestTask();
 
-    vConsolePrint( "\r\nI am a UART!\r\n" );
-    vUart1Print("(Uart1)\r\n");
+    //vConsolePrint( "\r\nI am a UART!\r\n" );
+    //vUart1Print("(Uart1)\r\n");
 //    vUart2Print("(Uart2)\r\n");
 
     /* Finally start the scheduler. */

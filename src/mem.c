@@ -12,7 +12,9 @@
 
 
 #include <PPS.h>
-
+#include <mem.h>
+#include <pic24.h>
+#include <spi.h>
 /**********************************
  *
  * Register Defines
@@ -26,15 +28,38 @@
  *
  ***********************************/
 
+//NOTE: THESE ARE WEIRD. I NEED TO DO POINTER STUFFS FOR THEM TO WORK
+//OR MAKE MACROS. PROBABLY THE MACROS
+
 #define FRAM_SPI_BUF = SPI1BUF
 #define FRAM_SPI_CON1 = SPI1CON1
 #define FRAM_SPI_CON2 = SPI1CON2
 #define FRAM_PI_STAT = SPI1STAT
 
-#define FLASH_SPI_BUF = SPI2BUF
-#define FLASH_SPI_CON1 = SPI2CON1
-#define FLASH_SPI_CON2 = SPI2CON2
-#define FLASH_PI_STAT = SPI2STAT
+#define LOAD_FLASH_BUF(x) SPI3BUF = x
+#define LOAD_FLASH_CON1(x) SPI3CON1 = x
+#define LOAD_FLASH_CON2(x) SPI3CON2 = x
+#define LOAD_FLASH_STAT(x) SPI3STAT = x
+#define GET_FLASH_BUF() SPI3BUF
+
+#define FLASH_SPIEN(x) SPI3STATbits.SPIEN = x
+// #define FLASH_SPI_BUF = SPI3BUF
+// #define FLASH_SPI_CON1 = SPI3CON1
+// #define FLASH_SPI_CON2 = SPI3CON2
+// #define FLASH_PI_STAT = SPI3STAT
+
+
+/********************************
+ * Control Pin Defines
+ *
+ * These set the /CS pins etc.
+ *    - FLASH /CS on RD13
+ *    - FLASH /WP on RD6
+ */
+#define FLASH_CS_TRIS TRISDbits.TRISD13
+#define FLASH_CS LATDbits.LATD13
+#define FLASH_WP_TRIS TRISDbits.TRISD6
+#define FLASH_WP LATDbits.LATD6
 
 /********************************
  * PPS Mapping
@@ -57,6 +82,20 @@ void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP11, OUT_FN_PPS_SDO3);
     iPPSOutput(OUT_PIN_PPS_RP12, OUT_FN_PPS_SCK3OUT);
     iPPSInput(IN_FN_PPS_SDI3, IN_PIN_PPS_RP3);
+
+
+    FLASH_WP_TRIS = 0;
+    FLASH_CS_TRIS = 0;
+    FLASH_WP = 1;
+    FLASH_CS = 1;
+    FLASH_SPIEN(0); //disable
+    LOAD_FLASH_CON1(SEC_PRESCAL_1_1     & //docs say |, I say &
+                    PRI_PRESCAL_4_1     &
+                    CLK_POL_ACTIVE_HIGH &
+                    SPI_CKE_ON          &
+                    SPI_MODE8_ON        &
+                    MASTER_ENABLE_ON); //configure
+    FLASH_SPIEN(1);
 }
 
 
@@ -82,6 +121,46 @@ void vSetupMem() {
 #define FLASH_READ_DB0 0b00000011
 #define FLASH_READ FLASH_READ_DB0 //use 0 dummy bytes as default read
 #define FLASH_FSTRD FLASH_READ_DB1
-//write-erase looks to be a bit of a bitch, we'll hold off on those for a while
+#define FLASH_WRITE FRAM_WRITE
+#define FLASH_ERASE_4KB 0b00100000
+#define FLASH_ERASE_32KB 0b01010010
+#define FLASH_ERASE_64KB 0b11011000
+#define FLASH_ERASE FLASH_ERASE_4KB
 #define FLASH_RDID FRAM_RDID
 #define FLASH_SNR FRAM_SNR
+
+void vFlashErase(char * address) {
+    FLASH_CS = 0;
+    LOAD_FLASH_BUF(FLASH_ERASE);
+    LOAD_FLASH_BUF(address[0]);
+    LOAD_FLASH_BUF(address[1]);
+    LOAD_FLASH_BUF(address[2]);
+    FLASH_CS = 1;
+}
+
+void vFlashWrite(char * address, int length, unsigned char * bytes) {
+    FLASH_CS = 0;
+    LOAD_FLASH_BUF(FLASH_WRITE);
+    LOAD_FLASH_BUF(address[0]);
+    LOAD_FLASH_BUF(address[1]);
+    LOAD_FLASH_BUF(address[2]);
+    int i;
+    for (i = 0; i < length; i++) {
+        LOAD_FLASH_BUF(bytes[i]);
+    }
+    FLASH_CS = 1;
+}
+
+void vFlashRead(char * address, int length, unsigned char * buffer) {
+    FLASH_CS = 0;
+    LOAD_FLASH_BUF(FLASH_READ);
+    LOAD_FLASH_BUF(address[0]);
+    LOAD_FLASH_BUF(address[1]);
+    LOAD_FLASH_BUF(address[2]);
+    int i;
+    for (i = 0; i < length; i++) {
+        LOAD_FLASH_BUF(0); //send dummy byte to trigger transaction
+        buffer[i] = GET_FLASH_BUF();
+    }
+    FLASH_CS = 1;
+}

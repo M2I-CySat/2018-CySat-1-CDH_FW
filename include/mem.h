@@ -20,6 +20,15 @@ extern "C" {
     void vSetupMem();
 
 
+    //NOT RTOS-SAFE
+    //Addresses will be 3 byte arrays. [MSB, 2SB, LSB]. Terrible.
+    void vFlashErase(char * address);  //terrible and destructive. Nukes everything
+                                    //within the 4KB boundary containing the
+                                    //given address
+    void vFlashWrite(char * address, int length, unsigned char * bytes);
+    void vFlashRead(char * address, int length, unsigned char * buffer);
+
+
 #ifdef	__cplusplus
 }
 #endif

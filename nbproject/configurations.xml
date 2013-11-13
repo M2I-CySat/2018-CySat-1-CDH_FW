@@ -32,6 +32,7 @@
       <itemPath>include/nichrome.h</itemPath>
       <itemPath>include/pic24.h</itemPath>
       <itemPath>include/testing.h</itemPath>
+      <itemPath>include/mem.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -62,6 +63,7 @@
       <itemPath>src/serial.c</itemPath>
       <itemPath>src/nichrome.c</itemPath>
       <itemPath>src/testing.c</itemPath>
+      <itemPath>src/mem.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -84,7 +86,7 @@
         <platformTool>ICD3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.11</languageToolchainVersion>
-        <platform>3</platform>
+        <platform>2</platform>
       </toolsSet>
       <compileType>
         <linkerTool>
@@ -120,7 +122,7 @@
         <property key="enable-symbols" value="true"/>
         <property key="enable-unroll-loops" value="false"/>
         <property key="extra-include-directories"
-                  value=".;.\include;.\include\FreeRTOS"/>
+                  value=".;.\include;.\include\FreeRTOS;include;include/FreeRTOS"/>
         <property key="isolate-each-function" value="false"/>
         <property key="keep-inline" value="false"/>
         <property key="oXC16gcc-align-arr" value="false"/>
@@ -143,6 +145,7 @@
         <property key="preprocessor-macros" value="MPLAB_PIC24_PORT"/>
         <property key="scalar-model" value="default"/>
         <property key="use-cci" value="false"/>
+        <property key="use-iar" value="false"/>
       </C30>
       <C30-AS>
         <property key="assembler-symbols" value=""/>
@@ -166,6 +169,7 @@
         <property key="warning-level" value="emit-warnings"/>
       </C30-AS>
       <C30-LD>
+        <property key="additional-options-use-response-files" value="false"/>
         <property key="boot-eeprom" value="no_eeprom"/>
         <property key="boot-flash" value="no_flash"/>
         <property key="boot-ram" value="no_ram"/>
@@ -207,6 +211,7 @@
         <property key="legacy-libc" value="false"/>
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
+        <property key="save-temps" value="false"/>
       </C30Global>
       <ICD3PlatformTool>
         <property key="ADC 1" value="true"/>
@@ -271,6 +276,7 @@
         <property key="programoptions.preserveprogramrange.end" value="0x2abf7"/>
         <property key="programoptions.preserveprogramrange.start" value="0x0"/>
         <property key="programoptions.preserveuserid" value="false"/>
+        <property key="programoptions.testmodeentrymethod" value="VPPFirst"/>
         <property key="programoptions.usehighvoltageonmclr" value="false"/>
         <property key="programoptions.uselvpprogramming" value="false"/>
         <property key="voltagevalue" value="3.25"/>
