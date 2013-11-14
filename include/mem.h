@@ -27,6 +27,7 @@ extern "C" {
                                     //given address
     void vFlashWrite(char * address, int length, unsigned char * bytes);
     void vFlashRead(char * address, int length, unsigned char * buffer);
+    void vStartFlashTestTask();
 
 
 #ifdef	__cplusplus

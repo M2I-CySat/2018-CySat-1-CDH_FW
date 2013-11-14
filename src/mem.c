@@ -15,6 +15,8 @@
 #include <mem.h>
 #include <pic24.h>
 #include <spi.h>
+#include <uart.h>
+#include <system.h>
 /**********************************
  *
  * Register Defines
@@ -74,6 +76,13 @@
  *    - SDI3 is on RP3
  *    - SCK3OUT is on RP12
  */
+#define FLASH_SDO LATDbits.LATD0
+#define FLASH_SDI PORTDbits.RD10
+#define FLASH_SCK LATDbits.LATD11
+#define FLASH_SDO_TRIS TRISDbits.TRISD0
+#define FLASH_SDI_TRIS TRISDbits.TRISD10
+#define FLASH_SCK_TRIS TRISDbits.TRISD11
+
 void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
     iPPSOutput(OUT_PIN_PPS_RP21, OUT_FN_PPS_SCK1OUT);
@@ -163,4 +172,50 @@ void vFlashRead(char * address, int length, unsigned char * buffer) {
         buffer[i] = GET_FLASH_BUF();
     }
     FLASH_CS = 1;
+}
+static void prvSendByte(char byte, char * retByte);
+static void vFlashTestTask () {
+    //ghetto setup...
+    FLASH_SDO_TRIS = 0;
+    FLASH_SDI_TRIS = 1;
+    FLASH_SCK_TRIS = 0;
+    FLASH_CS_TRIS = 0;
+    FLASH_CS = 1;
+    FLASH_SCK = 0;
+
+    //do tests
+    vConsolePrint("Flash test task beginning...\r\n");
+    char buffer[10] = {0,0,0,0,0,0,0,0,0,0};
+    char address[3] = {0,0,0};
+    //vFlashRead(address, 5, buffer);
+    //vFlashErase(address);
+    FLASH_CS = 0;
+    prvSendByte(FLASH_READ, buffer);
+    prvSendByte(address[0], buffer);
+    prvSendByte(address[0], buffer);
+    prvSendByte(address[0], buffer);
+    prvSendByte(0, buffer);
+    FLASH_CS = 1;
+
+    vConsolePrintf("Buffer[0]: %d\r\n", buffer[0]);
+    for (;;) {}
+}
+
+void vStartFlashTestTask() {
+    //vSetupMem(); Just gonna use manual...
+    xTaskCreate(vFlashTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL );
+}
+
+static void prvSendByte(char byte, char * retByte) {
+    *retByte = 0;
+    FLASH_SCK = 0;
+    int i;
+    for (i = 0; i < 8; i++) {
+        FLASH_SDO = byte & 1;
+        byte >> 1;
+        FLASH_SCK = 1;
+        FLASH_SCK = 0;
+        *retByte = *retByte & (FLASH_SDI & 1);
+        *retByte << 1;
+    }
 }
