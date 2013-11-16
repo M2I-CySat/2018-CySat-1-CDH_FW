@@ -100,6 +100,9 @@ void vSetupMem() {
     TRISDbits.TRISD0 = 0; // SDO3
     TRISDbits.TRISD11 = 0;// SCK3OUT
 
+    TRISGbits.TRISG8 = 0; //SDO1
+    TRISGbits.TRISG6 = 0; //SCK1OUT
+
 
     FLASH_WP_TRIS = 0;
     FLASH_CS_TRIS = 0;
@@ -108,6 +111,14 @@ void vSetupMem() {
     FLASH_SPI_STATbits.SPIEN = 0;
     FLASH_SPI_CON1 = SPI_MASTER;
     FLASH_SPI_STATbits.SPIEN = 1;
+
+    FRAM1_WP_TRIS = 0;
+    FRAM1_CS_TRIS = 0;
+    FRAM1_WP = 1;
+    FRAM1_CS = 1;
+    FRAM_SPI_STATbits.SPIEN = 0;
+    FRAM_SPI_CON1 = SPI_MASTER;
+    FRAM_SPI_STATbits.SPIEN = 1;
 }
 
 
@@ -161,6 +172,16 @@ static void prvFlashWREN() {
 static void prvFlashWRDI() {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_WRDI);
+    FLASH_CS = 1;
+}
+static void prvFRAMWREN() {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FRAM_WREN);
+    FLASH_CS = 1;
+}
+static void prvFRAMWRDI() {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FRAM_WRDI);
     FLASH_CS = 1;
 }
 static void prvFlashProtect(unsigned char * address) {
@@ -227,6 +248,42 @@ void vFlashReadId(unsigned char * buffer) {
     FLASH_CS = 1;
 }
 
+void vFRAMReadId(unsigned char * buffer) {
+    FRAM1_CS = 0;
+    prvWriteFRAMByte(FRAM_RDID);
+    int i;
+    for (i = 0; i < 4; i++){
+        buffer[i] = prvWriteFRAMByte(0xff);
+    }
+    FRAM1_CS = 1;
+}
+void vFRAMRead(unsigned char * address, int length, unsigned char * buffer) {
+    FRAM1_CS = 0;
+    prvWriteFlashByte(FRAM_READ);
+    prvWriteFlashByte(address[0]);
+    prvWriteFlashByte(address[1]);
+    prvWriteFlashByte(address[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        buffer[i] = prvWriteFRAMByte(0xff);
+    }
+    FRAM1_CS = 1;
+}
+void vFRAMWrite(unsigned char * address, int length, unsigned char * bytes) {
+    prvFRAMWREN();
+    FRAM1_CS = 0;
+    prvWriteFRAMByte(FLASH_WRITE);
+    prvWriteFRAMByte(address[0]);
+    prvWriteFRAMByte(address[1]);
+    prvWriteFRAMByte(address[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        prvWriteFRAMByte(bytes[i]);
+    }
+    FRAM1_CS = 1;
+    prvFRAMWRDI();
+}
+
 static void vTestTask() {
     vConsolePrint("Memory Test Task Started!\r\n");
 
@@ -234,12 +291,13 @@ static void vTestTask() {
     LATDbits.LATD0 = 1;
     unsigned char buffer[4] = {0,0,0,0};
     vFlashReadId(buffer);
-    vConsolePrintf("MFG Id: %d\r\n", buffer[0]);
+    vConsolePrintf("Flash MFG Id: %d\r\n", buffer[0]);
     unsigned char address[3] = {0,0,0};
-    //vFlashWrite(address, 4, "abcs");
     vFlashRead(address, 4, buffer);
     vConsolePrintf("The first 4 Bytes in Flash: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+    vConsolePrintf("Looping RDID Command to FRAM1...\r\n");
     for(;;) {
+        vFRAMReadId(buffer);
     }
 }
 
