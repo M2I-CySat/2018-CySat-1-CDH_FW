@@ -18,6 +18,7 @@ extern "C" {
 #endif
 
     void vSetupMem();
+    void vStartMemTestTask();
 
 
     //NOT RTOS-SAFE

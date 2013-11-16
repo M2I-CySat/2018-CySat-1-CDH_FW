@@ -11,10 +11,15 @@
  */
 
 
+
+#include <FreeRTOS.h>
+#include <task.h>
+#include <system.h>
 #include <PPS.h>
 #include <mem.h>
 #include <pic24.h>
 #include <spi.h>
+#include <uart.h>
 /**********************************
  *
  * Register Defines
@@ -31,23 +36,23 @@
 //NOTE: THESE ARE WEIRD. I NEED TO DO POINTER STUFFS FOR THEM TO WORK
 //OR MAKE MACROS. PROBABLY THE MACROS
 
-#define FRAM_SPI_BUF = SPI1BUF
-#define FRAM_SPI_CON1 = SPI1CON1
-#define FRAM_SPI_CON2 = SPI1CON2
-#define FRAM_PI_STAT = SPI1STAT
+#define FRAM_SPI_BUF SPI1BUF
+#define FRAM_SPI_CON1 SPI1CON1
+#define FRAM_SPI_CON2 SPI1CON2
+#define FRAM_SPI_STAT SPI1STAT
 
-#define LOAD_FLASH_BUF(x) SPI3BUF = x
-#define LOAD_FLASH_CON1(x) SPI3CON1 = x
-#define LOAD_FLASH_CON2(x) SPI3CON2 = x
-#define LOAD_FLASH_STAT(x) SPI3STAT = x
-#define GET_FLASH_BUF() SPI3BUF
+#define FRAM_SPI_STATbits SPI1STATbits
+#define FRAM_SPI_CON1bits SPI1CON1bits
+#define FRAM_SPI_CON2bits SPI1CON2bits
 
-#define FLASH_SPIEN(x) SPI3STATbits.SPIEN = x
-// #define FLASH_SPI_BUF = SPI3BUF
-// #define FLASH_SPI_CON1 = SPI3CON1
-// #define FLASH_SPI_CON2 = SPI3CON2
-// #define FLASH_PI_STAT = SPI3STAT
+#define FLASH_SPI_BUF SPI3BUF
+#define FLASH_SPI_CON1 SPI3CON1
+#define FLASH_SPI_CON2 SPI3CON2
+#define FLASH_PI_STAT SPI3STAT
 
+#define FLASH_SPI_STATbits SPI3STATbits
+#define FLASH_SPI_CON1bits SPI3CON1bits
+#define FLASH_SPI_CON2bits SPI3CON2bits
 
 /********************************
  * Control Pin Defines
@@ -55,11 +60,19 @@
  * These set the /CS pins etc.
  *    - FLASH /CS on RD13
  *    - FLASH /WP on RD6
+ *
+ *    - FRAM1 /CS on RP22 = RD3
+ *    - FRAM1 /WP on RP2  = RD8
  */
 #define FLASH_CS_TRIS TRISDbits.TRISD13
 #define FLASH_CS LATDbits.LATD13
 #define FLASH_WP_TRIS TRISDbits.TRISD6
 #define FLASH_WP LATDbits.LATD6
+
+#define FRAM1_CS_TRIS TRISDbits.TRISD3
+#define FRAM1_CS LATDbits.LATD3
+#define FRAM1_WP_TRIS TRISDbits.TRISD8
+#define FRAM1_WP LATDbits.LATD8
 
 /********************************
  * PPS Mapping
@@ -88,14 +101,14 @@ void vSetupMem() {
     FLASH_CS_TRIS = 0;
     FLASH_WP = 1;
     FLASH_CS = 1;
-    FLASH_SPIEN(0); //disable
-    LOAD_FLASH_CON1(SEC_PRESCAL_1_1     & //docs say |, I say &
+    FLASH_SPI_STATbits.SPIEN = 0;
+    FLASH_SPI_CON1 = SEC_PRESCAL_1_1    &
                     PRI_PRESCAL_4_1     &
                     CLK_POL_ACTIVE_HIGH &
                     SPI_CKE_ON          &
                     SPI_MODE8_ON        &
-                    MASTER_ENABLE_ON); //configure
-    FLASH_SPIEN(1);
+                    MASTER_ENABLE_ON; //configure. Docs say |, I say &
+    FLASH_SPI_STATbits.SPIEN = 1;
 }
 
 
@@ -131,36 +144,42 @@ void vSetupMem() {
 
 void vFlashErase(char * address) {
     FLASH_CS = 0;
-    LOAD_FLASH_BUF(FLASH_ERASE);
-    LOAD_FLASH_BUF(address[0]);
-    LOAD_FLASH_BUF(address[1]);
-    LOAD_FLASH_BUF(address[2]);
     FLASH_CS = 1;
 }
 
 void vFlashWrite(char * address, int length, unsigned char * bytes) {
     FLASH_CS = 0;
-    LOAD_FLASH_BUF(FLASH_WRITE);
-    LOAD_FLASH_BUF(address[0]);
-    LOAD_FLASH_BUF(address[1]);
-    LOAD_FLASH_BUF(address[2]);
-    int i;
-    for (i = 0; i < length; i++) {
-        LOAD_FLASH_BUF(bytes[i]);
-    }
     FLASH_CS = 1;
 }
 
 void vFlashRead(char * address, int length, unsigned char * buffer) {
     FLASH_CS = 0;
-    LOAD_FLASH_BUF(FLASH_READ);
-    LOAD_FLASH_BUF(address[0]);
-    LOAD_FLASH_BUF(address[1]);
-    LOAD_FLASH_BUF(address[2]);
-    int i;
-    for (i = 0; i < length; i++) {
-        LOAD_FLASH_BUF(0); //send dummy byte to trigger transaction
-        buffer[i] = GET_FLASH_BUF();
+    FLASH_CS = 1;
+}
+
+void vFlashReadId(unsigned char * buffer) {
+    FLASH_CS = 0;
+    FLASH_SPI_BUF = FLASH_RDID;
+    int i = 0;
+    for (i = 0; i < 4; i++){
+        FLASH_SPI_BUF = 0xff;
+        buffer[i] = FLASH_SPI_BUF;
     }
     FLASH_CS = 1;
+}
+
+static void vTestTask() {
+    vConsolePrint("Memory Test Task Started!\r\n");
+
+    unsigned char buffer[4] = {0,0,0,0};
+    vFlashReadId(buffer);
+    vConsolePrintf("MFG Id: %d\r\n", buffer[0]);
+    for(;;) {
+        vFlashReadId(buffer);
+    }
+}
+
+void vStartMemTestTask() {
+    vSetupMem();
+    xTaskCreate( vTestTask, NULL, 150, NULL, systemPRIORITY_UART2, NULL );
 }

@@ -45,6 +45,9 @@ int main( void )
     //vUart1Print("(Uart1)\r\n");
 //    vUart2Print("(Uart2)\r\n");
 
+    vStartMemTestTask();
+
+
     /* Finally start the scheduler. */
     vTaskStartScheduler();
 
