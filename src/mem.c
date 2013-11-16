@@ -48,12 +48,13 @@
 #define FLASH_SPI_BUF SPI3BUF
 #define FLASH_SPI_CON1 SPI3CON1
 #define FLASH_SPI_CON2 SPI3CON2
-#define FLASH_PI_STAT SPI3STAT
+#define FLASH_SPI_STAT SPI3STAT
 
 #define FLASH_SPI_STATbits SPI3STATbits
 #define FLASH_SPI_CON1bits SPI3CON1bits
 #define FLASH_SPI_CON2bits SPI3CON2bits
 
+#define SPI_MASTER 0x0120	// select 8-bit master mode, CKE=1, CKP=0
 /********************************
  * Control Pin Defines
  *
@@ -83,9 +84,9 @@
  *    - SDI1 is on SP26
  *    - SCK1OUT is on RP21
  *
- *    - SDO3 is on RP11
+ *    - SDO3 is on RP11 = = RD0
  *    - SDI3 is on RP3
- *    - SCK3OUT is on RP12
+ *    - SCK3OUT is on RP12 = RD11
  */
 void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
@@ -96,18 +97,16 @@ void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP12, OUT_FN_PPS_SCK3OUT);
     iPPSInput(IN_FN_PPS_SDI3, IN_PIN_PPS_RP3);
 
+    TRISDbits.TRISD0 = 0; // SDO3
+    TRISDbits.TRISD11 = 0;// SCK3OUT
+
 
     FLASH_WP_TRIS = 0;
     FLASH_CS_TRIS = 0;
     FLASH_WP = 1;
     FLASH_CS = 1;
     FLASH_SPI_STATbits.SPIEN = 0;
-    FLASH_SPI_CON1 = SEC_PRESCAL_1_1    &
-                    PRI_PRESCAL_4_1     &
-                    CLK_POL_ACTIVE_HIGH &
-                    SPI_CKE_ON          &
-                    SPI_MODE8_ON        &
-                    MASTER_ENABLE_ON; //configure. Docs say |, I say &
+    FLASH_SPI_CON1 = SPI_MASTER;
     FLASH_SPI_STATbits.SPIEN = 1;
 }
 
@@ -171,6 +170,8 @@ void vFlashReadId(unsigned char * buffer) {
 static void vTestTask() {
     vConsolePrint("Memory Test Task Started!\r\n");
 
+    LATDbits.LATD11 = 1;
+    LATDbits.LATD0 = 1;
     unsigned char buffer[4] = {0,0,0,0};
     vFlashReadId(buffer);
     vConsolePrintf("MFG Id: %d\r\n", buffer[0]);
