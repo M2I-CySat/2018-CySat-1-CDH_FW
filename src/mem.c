@@ -140,11 +140,46 @@ void vSetupMem() {
 #define FLASH_ERASE FLASH_ERASE_4KB
 #define FLASH_RDID FRAM_RDID
 #define FLASH_SNR FRAM_SNR
+#define FLASH_PROTECT 0x36
+#define FLASH_UNPROTECT 0x39
 
 static unsigned char prvWriteFlashByte(unsigned char byte) {
     FLASH_SPI_BUF = byte;
     while (!FLASH_SPI_STATbits.SPIRBF);
     return FLASH_SPI_BUF;
+}
+static unsigned char prvWriteFRAMByte(unsigned char byte) {
+    FRAM_SPI_BUF = byte;
+    while (!FRAM_SPI_STATbits.SPIRBF);
+    return FRAM_SPI_BUF;
+}
+static void prvFlashWREN() {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_WREN);
+    FLASH_CS = 1;
+}
+static void prvFlashWRDI() {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_WRDI);
+    FLASH_CS = 1;
+}
+static void prvFlashProtect(unsigned char * address) {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_PROTECT);
+    int i;
+    for (i = 0; i < 3; i++) {
+        prvWriteFlashByte(address[i]);
+    }
+    FLASH_CS = 1;
+}
+static void prvFlashUnprotect(unsigned char * address) {
+    FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_UNPROTECT);
+    int i;
+    for (i = 0; i < 3; i++) {
+        prvWriteFlashByte(address[i]);
+    }
+    FLASH_CS = 1;
 }
 
 void vFlashErase(char * address) {
@@ -152,20 +187,40 @@ void vFlashErase(char * address) {
     FLASH_CS = 1;
 }
 
-void vFlashWrite(char * address, int length, unsigned char * bytes) {
+void vFlashWrite(unsigned char * address, int length, unsigned char * bytes) {
+    prvFlashWREN();
+    prvFlashUnprotect(address);
     FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_WRITE);
+    prvWriteFlashByte(address[0]);
+    prvWriteFlashByte(address[1]);
+    prvWriteFlashByte(address[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        prvWriteFlashByte(bytes[i]);
+    }
     FLASH_CS = 1;
+    prvFlashProtect(address);
+    prvFlashWRDI();
 }
 
-void vFlashRead(char * address, int length, unsigned char * buffer) {
+void vFlashRead(unsigned char * address, int length, unsigned char * buffer) {
     FLASH_CS = 0;
+    prvWriteFlashByte(FLASH_READ);
+    prvWriteFlashByte(address[0]);
+    prvWriteFlashByte(address[1]);
+    prvWriteFlashByte(address[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        buffer[i] = prvWriteFlashByte(0xff);
+    }
     FLASH_CS = 1;
 }
 
 void vFlashReadId(unsigned char * buffer) {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_RDID);
-    int i = 0;
+    int i;
     for (i = 0; i < 4; i++){
         buffer[i] = prvWriteFlashByte(0xff);
     }
@@ -180,8 +235,11 @@ static void vTestTask() {
     unsigned char buffer[4] = {0,0,0,0};
     vFlashReadId(buffer);
     vConsolePrintf("MFG Id: %d\r\n", buffer[0]);
+    unsigned char address[3] = {0,0,0};
+    //vFlashWrite(address, 4, "abcs");
+    vFlashRead(address, 4, buffer);
+    vConsolePrintf("The first 4 Bytes in Flash: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
     for(;;) {
-        vFlashReadId(buffer);
     }
 }
 
