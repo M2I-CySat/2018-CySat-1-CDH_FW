@@ -65,8 +65,8 @@
  *    - FRAM1 /CS on RP22 = RD3
  *    - FRAM1 /WP on RP2  = RD8
  */
-#define FLASH_CS_TRIS TRISDbits.TRISD13
-#define FLASH_CS LATDbits.LATD13
+#define FLASH_CS_TRIS TRISGbits.TRISG7
+#define FLASH_CS LATGbits.LATG7
 #define FLASH_WP_TRIS TRISDbits.TRISD6
 #define FLASH_WP LATDbits.LATD6
 
@@ -89,16 +89,19 @@
  *    - SCK3OUT is on RP12 = RD11
  */
 void vSetupMem() {
-    iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
-    iPPSOutput(OUT_PIN_PPS_RP21, OUT_FN_PPS_SCK1OUT);
-    iPPSInput(IN_FN_PPS_SDI1, IN_PIN_PPS_RP26);
+    //iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
+    //iPPSOutput(OUT_PIN_PPS_RP21, OUT_FN_PPS_SCK1OUT);
+    //iPPSInput(IN_FN_PPS_SDI1, IN_PIN_PPS_RP26);
 
-    iPPSOutput(OUT_PIN_PPS_RP11, OUT_FN_PPS_SDO3);
-    iPPSOutput(OUT_PIN_PPS_RP12, OUT_FN_PPS_SCK3OUT);
+    iPPSOutput(OUT_PIN_PPS_RP27, OUT_FN_PPS_SDO3);
+    iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SCK3OUT);
     iPPSInput(IN_FN_PPS_SDI3, IN_PIN_PPS_RP3);
 
     TRISDbits.TRISD0 = 0; // SDO3
     TRISDbits.TRISD11 = 0;// SCK3OUT
+
+    TRISGbits.TRISG9 = 0;
+    TRISGbits.TRISG8 = 0;
 
 
     FLASH_WP_TRIS = 0;
@@ -141,6 +144,12 @@ void vSetupMem() {
 #define FLASH_RDID FRAM_RDID
 #define FLASH_SNR FRAM_SNR
 
+static unsigned char prvWriteFlashByte(unsigned char byte) {
+    FLASH_SPI_BUF = byte;
+    while (!FLASH_SPI_STATbits.SPIRBF);
+    return FLASH_SPI_BUF;
+}
+
 void vFlashErase(char * address) {
     FLASH_CS = 0;
     FLASH_CS = 1;
@@ -158,11 +167,10 @@ void vFlashRead(char * address, int length, unsigned char * buffer) {
 
 void vFlashReadId(unsigned char * buffer) {
     FLASH_CS = 0;
-    FLASH_SPI_BUF = FLASH_RDID;
+    prvWriteFlashByte(FLASH_RDID);
     int i = 0;
     for (i = 0; i < 4; i++){
-        FLASH_SPI_BUF = 0xff;
-        buffer[i] = FLASH_SPI_BUF;
+        buffer[i] = prvWriteFlashByte(0xff);
     }
     FLASH_CS = 1;
 }
