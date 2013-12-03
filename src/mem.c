@@ -81,12 +81,12 @@
  *
  * Make any changes at top of vSetupMem
  *      These are assuming "5th Board Mem" refers to the Aux. Board FRAM
- *    - SDO1 is on RP19
- *    - SDI1 is on SP26
- *    - SCK1OUT is on RP21
+ *    - SDO1 is on RP19 = RG8
+ *    - SDI1 is on RP26 = RG7
+ *    - SCK1OUT is on RP21 = RG6
  *
- *    - SDO3 is on RP11 = = RD0
- *    - SDI3 is on RP3
+ *    - SDO3 is on RP11 = RD0
+ *    - SDI3 is on RP3 = RD10
  *    - SCK3OUT is on RP12 = RD11
  */
 #define FLASH_SDO LATDbits.LATD0
@@ -95,6 +95,13 @@
 #define FLASH_SDO_TRIS TRISDbits.TRISD0
 #define FLASH_SDI_TRIS TRISDbits.TRISD10
 #define FLASH_SCK_TRIS TRISDbits.TRISD11
+
+#define FRAM_SDO LATGbits.LATG8
+#define FRAM_SDI PORTGbits.RG7
+#define FRAM_SCK LATGbits.LATG6
+#define FRAM_SDO_TRIS TRISGbits.TRISG8
+#define FRAM_SDI_TRIS TRISGbits.TRISG7
+#define FRAM_SCK_TRIS TRISGbits.TRISG6
 
 void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
@@ -112,18 +119,30 @@ void vSetupMem() {
     TRISGbits.TRISG6 = 0; //SCK1OUT
 
 
+    FLASH_SDO_TRIS = 0;
+    FLASH_SDI_TRIS = 1;
+    FLASH_SCK_TRIS = 0;
+    FLASH_SCK = 0;
+
     FLASH_WP_TRIS = 0;
     FLASH_CS_TRIS = 0;
     FLASH_WP = 1;
     FLASH_CS = 1;
+
     FLASH_SPI_STATbits.SPIEN = 0;
     FLASH_SPI_CON1 = SPI_MASTER;
     FLASH_SPI_STATbits.SPIEN = 1;
 
+    FRAM_SDO_TRIS = 0;
+    FRAM_SDI_TRIS = 1;
+    FRAM_SCK_TRIS = 0;
+    FRAM_SCK = 0;
+
     FRAM1_WP_TRIS = 0;
     FRAM1_CS_TRIS = 0;
     FRAM1_WP = 1;
-    FRAM1_CS = 1;
+    FRAM1_CS = 1;\
+
     FRAM_SPI_STATbits.SPIEN = 0;
     FRAM_SPI_CON1 = SPI_MASTER;
     FRAM_SPI_STATbits.SPIEN = 1;
@@ -162,32 +181,32 @@ void vSetupMem() {
 #define FLASH_PROTECT 0x36
 #define FLASH_UNPROTECT 0x39
 
-static unsigned char prvWriteFlashByte(unsigned char byte) {
+inline static unsigned char prvWriteFlashByte(unsigned char byte) {
     FLASH_SPI_BUF = byte;
     while (!FLASH_SPI_STATbits.SPIRBF);
     return FLASH_SPI_BUF;
 }
-static unsigned char prvWriteFRAMByte(unsigned char byte) {
+inline static unsigned char prvWriteFRAMByte(unsigned char byte) {
     FRAM_SPI_BUF = byte;
     while (!FRAM_SPI_STATbits.SPIRBF);
     return FRAM_SPI_BUF;
 }
-static void prvFlashWREN() {
+inline static void prvFlashWREN() {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_WREN);
     FLASH_CS = 1;
 }
-static void prvFlashWRDI() {
+inline static void prvFlashWRDI() {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_WRDI);
     FLASH_CS = 1;
 }
-static void prvFRAMWREN() {
+inline static void prvFRAMWREN() {
     FLASH_CS = 0;
     prvWriteFlashByte(FRAM_WREN);
     FLASH_CS = 1;
 }
-static void prvFRAMWRDI() {
+inline static void prvFRAMWRDI() {
     FLASH_CS = 0;
     prvWriteFlashByte(FRAM_WRDI);
     FLASH_CS = 1;
@@ -213,6 +232,7 @@ static void prvFlashUnprotect(unsigned char * address) {
 
 void vFlashErase(char * address) {
     FLASH_CS = 0;
+    //TODO implement this if needed. Right now Flash is probably not used
     FLASH_CS = 1;
 }
 
@@ -245,54 +265,6 @@ void vFlashRead(unsigned char * address, int length, unsigned char * buffer) {
     }
     FLASH_CS = 1;
 }
-<<<<<<< HEAD
-static void prvSendByte(char byte, char * retByte);
-static void vFlashTestTask () {
-    //ghetto setup...
-    FLASH_SDO_TRIS = 0;
-    FLASH_SDI_TRIS = 1;
-    FLASH_SCK_TRIS = 0;
-    FLASH_CS_TRIS = 0;
-    FLASH_CS = 1;
-    FLASH_SCK = 0;
-
-    //do tests
-    vConsolePrint("Flash test task beginning...\r\n");
-    char buffer[10] = {0,0,0,0,0,0,0,0,0,0};
-    char address[3] = {0,0,0};
-    //vFlashRead(address, 5, buffer);
-    //vFlashErase(address);
-    FLASH_CS = 0;
-    prvSendByte(FLASH_READ, buffer);
-    prvSendByte(address[0], buffer);
-    prvSendByte(address[0], buffer);
-    prvSendByte(address[0], buffer);
-    prvSendByte(0, buffer);
-    FLASH_CS = 1;
-
-    vConsolePrintf("Buffer[0]: %d\r\n", buffer[0]);
-    for (;;) {}
-}
-
-void vStartFlashTestTask() {
-    //vSetupMem(); Just gonna use manual...
-    xTaskCreate(vFlashTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL );
-}
-
-static void prvSendByte(char byte, char * retByte) {
-    *retByte = 0;
-    FLASH_SCK = 0;
-    int i;
-    for (i = 0; i < 8; i++) {
-        FLASH_SDO = byte & 1;
-        byte >> 1;
-        FLASH_SCK = 1;
-        FLASH_SCK = 0;
-        *retByte = *retByte & (FLASH_SDI & 1);
-        *retByte << 1;
-    }
-=======
-
 void vFlashReadId(unsigned char * buffer) {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_RDID);
@@ -339,11 +311,9 @@ void vFRAMWrite(unsigned char * address, int length, unsigned char * bytes) {
     prvFRAMWRDI();
 }
 
-static void vTestTask() {
-    vConsolePrint("Memory Test Task Started!\r\n");
+static void prvTestTask() {
+    vConsolePrint("Flash Test Task Started!\r\n");
 
-    LATDbits.LATD11 = 1;
-    LATDbits.LATD0 = 1;
     unsigned char buffer[4] = {0,0,0,0};
     vFlashReadId(buffer);
     vConsolePrintf("Flash MFG Id: %d\r\n", buffer[0]);
@@ -357,7 +327,5 @@ static void vTestTask() {
 }
 
 void vStartMemTestTask() {
-    vSetupMem();
-    xTaskCreate( vTestTask, NULL, 150, NULL, systemPRIORITY_UART2, NULL );
->>>>>>> origin/mem-dev
+    xTaskCreate(prvTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL);
 }
