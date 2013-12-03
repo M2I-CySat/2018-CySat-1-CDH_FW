@@ -44,7 +44,9 @@ int main( void )
     //vConsolePrint( "\r\nI am a UART!\r\n" );
     //vUart1Print("(Uart1)\r\n");
 //    vUart2Print("(Uart2)\r\n");
-    vStartFlashTestTask();
+
+    vStartMemTestTask();
+
     /* Finally start the scheduler. */
     vTaskStartScheduler();
 
