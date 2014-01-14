@@ -1,5 +1,4 @@
 
-#include "uart.h"
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -17,6 +16,8 @@
 #include "testing.h"
 
 #include "helium.h"
+#include "command.h"
+#include "uart.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
 #define uartCONSOLE_UART    1
@@ -134,8 +135,13 @@ void vUartStartTask( void )
     /* Initialise the hardware. */
     prvUartInit();
 
-    xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
-    xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
+    //old private tasks
+    //xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
+    //xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
+
+    //mine have a capital X, so what
+    //xTaskCreate( vUart2RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
+    xTaskCreate( vUart1RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 
     /* TO/DO (Bug?): Figure out why U1TXREG must be set for UART to work. */
     /* UxTXREG can be set to anything, as long as it's written*/
