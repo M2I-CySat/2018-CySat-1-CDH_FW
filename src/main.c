@@ -16,6 +16,7 @@
 #include "payload.h"
 #include "comms.h"
 #include "nichrome.h"
+#include "command.h"
 //#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
@@ -40,9 +41,14 @@ int main( void )
 
 //    vUartStartTestTask();
 
- //   vConsolePrint( "\r\nI am a UART!\r\n" );
+//   vConsolePrint( "\r\nI am a UART!\r\n" );
 //    vUart1Print("(Uart1)\r\n");
 //    vUart2Print("(Uart2)\r\n");
+
+    //For some reason it totally wigs out if we start command handling from main.
+    //This same thing is just taken care of in vUartStartTask()
+//    vConsolePrint("Starting command handling on UART1\r\n");
+//    xStartUart1CommandHandling();
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();

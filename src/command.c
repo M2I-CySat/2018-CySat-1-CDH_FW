@@ -115,8 +115,6 @@ static void vUart1RXTask( void * params) {
 	char commandBuffer[MAX_COMMAND_LENGTH];
 	memset(commandBuffer, 0, MAX_COMMAND_LENGTH);
 
-        vConsolePrintf("Console RX Task Started!\r\n");
-
 	int byteIndex = 0;
 	char byte;
 

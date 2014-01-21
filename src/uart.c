@@ -16,8 +16,8 @@
 #include "testing.h"
 
 #include "helium.h"
-#include "command.h"
 #include "uart.h"
+#include "command.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
 #define uartCONSOLE_UART    1
@@ -139,9 +139,8 @@ void vUartStartTask( void )
     //xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
     //xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 
+    vConsolePrint("Starting command handling on UART1\r\n");
     xStartUart1CommandHandling();
-
-
     /* TO/DO (Bug?): Figure out why U1TXREG must be set for UART to work. */
     /* UxTXREG can be set to anything, as long as it's written*/
 //    while(U1STAbits.UTXBF == 1);
