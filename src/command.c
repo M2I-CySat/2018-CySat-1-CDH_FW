@@ -84,27 +84,36 @@ static void prvConsoleHandleCommand(char * command) {
 	command[len - 1] = 0;  	// replace stop character with ascii null.
 							// The command buffer now holds just \0 separated fields. Each field is pointed to by fields[]
 
-	if ((strcmp("QUERY", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
+	if ((strncmp("QUERY", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
 		prvConsoleHandleQuery(fields, fieldCount);
 
 }
 
 static char rxByte() {
-	char byte = 0;
+	signed char byte = 0;
 
-	while (!xSerialGetChar(xUart2Handle, &byte, uartRX_BLOCK_TIME));
+	while (!xSerialGetChar(xUart1Handle, &byte, uartRX_BLOCK_TIME));
 	return byte;
 }
+
+#define UART1_ECHO
 
 static void vUart1RXTask( void * params) {
 	char commandBuffer[MAX_COMMAND_LENGTH];
 	memset(commandBuffer, 0, MAX_COMMAND_LENGTH);
+
+        vConsolePrintf("Console RX Task Started!\r\n");
 
 	int byteIndex = 0;
 	char byte;
 
 	for (;;) {
 		byte = rxByte();
+
+#ifdef UART1_ECHO
+                vConsolePut(byte);
+#endif
+
 		if ((byteIndex == MAX_COMMAND_LENGTH) || (byte == '!')) {
 			byteIndex = 0;
 			memset(commandBuffer, 0, MAX_COMMAND_LENGTH);
