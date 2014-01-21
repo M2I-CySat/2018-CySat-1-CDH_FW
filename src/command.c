@@ -45,13 +45,26 @@
  *
  */
 
+static void prvDoQueryTime() {
+        vConsolePrintf("!RESULT,TIME,It's been many, many seconds since 1970,C2D3$");
+}
+
+static void prvDoQueryMtime() {
+        vConsolePrintf("!RESULT,MTIME,Long time in space...,E4F5$");
+}
+
 static void prvDoQueryHello() {
-	vConsolePrintf("!RESULT,HELLO,Hello World,A0B1\r\n");
+        vConsolePrintf("!RESULT,HELLO,Hello World,A0B1$");
 }
 
 static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
-	if((strncmp("HELLO", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
+        if((strncmp("HELLO", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
 		prvDoQueryHello();
+        if((strncmp("TIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
+		prvDoQueryTime();
+        if((strncmp("MTIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
+		prvDoQueryMtime();
+
 }
 
 static void prvConsoleHandleCommand(char * command) {
