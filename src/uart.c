@@ -139,9 +139,8 @@ void vUartStartTask( void )
     //xTaskCreate( vUart2RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
     //xTaskCreate( vUart1RxTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 
-    //mine have a capital X, so what
-    //xTaskCreate( vUart2RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART2, NULL );
-    xTaskCreate( vUart1RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
+    xStartUart1CommandHandling();
+
 
     /* TO/DO (Bug?): Figure out why U1TXREG must be set for UART to work. */
     /* UxTXREG can be set to anything, as long as it's written*/
