@@ -46,7 +46,7 @@
  */
 
 static void prvDoQueryTime() {
-        vConsolePrintf("!RESULT,TIME,It's been many, many seconds since 1970,C2D3$");
+        vConsolePrintf("!RESULT,TIME,It's been many seconds since 1970,C2D3$");
 }
 
 static void prvDoQueryMtime() {
@@ -64,7 +64,6 @@ static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
 		prvDoQueryTime();
         if((strncmp("MTIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
 		prvDoQueryMtime();
-
 }
 
 static void prvConsoleHandleCommand(char * command) {
@@ -95,7 +94,8 @@ static void prvConsoleHandleCommand(char * command) {
 	}
 
 	command[len - 1] = 0;  	// replace stop character with ascii null.
-							// The command buffer now holds just \0 separated fields. Each field is pointed to by fields[]
+		// The command buffer now holds just \0 separated fields.
+                //Each field is pointed to by fields[]
 
 	if ((strncmp("QUERY", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
 		prvConsoleHandleQuery(fields, fieldCount);
@@ -139,17 +139,6 @@ static void vUart1RXTask( void * params) {
 			prvConsoleHandleCommand(commandBuffer);
 		}
 	}
-/*	for(;;) {
-		if (xSerialGetChar(xUart2Handle, &rxByte, uartRX_BLOCK_TIME)) {
-			commandBuffer[i] = rxByte;
-			i++;
-			if (rxByte == '\n') {
-				prvConsoleHandleCommand(commandBuffer);
-				memset(commandBuffer, 0, 100);
-				i = 0;
-			}
-		}
-	} */
 }
 
 void xStartUart1CommandHandling() {
