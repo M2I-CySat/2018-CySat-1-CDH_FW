@@ -18,10 +18,13 @@
 #include <command.h>
 
 #include <stdio.h>
+#include <system.h>
 #include <string.h>
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
 #define MAX_COMMAND_LENGTH 100
+#define MAX_QUERY_SUBTYPE_LENGTH 12
+#define MAX_TYPE_LENGTH 12
 
 /* Command Format
  *
@@ -42,8 +45,48 @@
  *
  */
 
+static void prvDoQueryHello() {
+	vConsolePrintf("!RESULT,HELLO,Hello World,A0B1\r\n");
+}
+
+static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
+	if((strncmp("HELLO", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
+		prvDoQueryHello();
+}
+
 static void prvConsoleHandleCommand(char * command) {
-	vConsolePrintf("Command received: %s\r\n", command);
+	if (!command[0] == '!') return; //invalid command
+
+	//VALIDATE CHECKSUM HERE -- ANY LATER AND IT WILL GET TRASHED BY PARSING
+
+
+	int fieldCount = 1;
+	int currentField = 0;
+	int len = strlen(command);
+	int i;
+	for(i = 0; i < len; i++) {
+		if (command[i] == ',') fieldCount++;
+	}
+
+	if (fieldCount < 3) return; //invalid command
+
+	char * fields[fieldCount]; 	//pointer to beginning of each field
+
+	fields[currentField] = command + 1; //first field begins at command[1]
+
+	for(i = 0; i < len; i++) {
+		if (command[i] == ',') {
+			command[i] = 0; //set the , to an ascii null to let strcmp work
+			fields[++currentField] = ((command + i) + 1); //the next field begins at comma + 1
+		}
+	}
+
+	command[len - 1] = 0;  	// replace stop character with ascii null.
+							// The command buffer now holds just \0 separated fields. Each field is pointed to by fields[]
+
+	if ((strcmp("QUERY", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
+		prvConsoleHandleQuery(fields, fieldCount);
+
 }
 
 static char rxByte() {
