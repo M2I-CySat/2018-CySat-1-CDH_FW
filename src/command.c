@@ -17,9 +17,11 @@
 
 #include <command.h>
 
+#include <power.h>
 #include <stdio.h>
 #include <system.h>
 #include <string.h>
+
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
 #define MAX_COMMAND_LENGTH 100
@@ -45,6 +47,8 @@
  *
  */
 
+void vPowerPrintHousekeepingData();
+
 static void prvDoQueryTime() {
         vConsolePrintf("!RESULT,TIME,It's been many seconds since 1970,C2D3$");
 }
@@ -64,6 +68,10 @@ static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
 		prvDoQueryTime();
         if((strncmp("MTIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
 		prvDoQueryMtime();
+        if((strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3)) {
+            vPowerPollHousekeepingData();
+            vPowerPrintHousekeepingData();
+        }
 }
 
 static void prvConsoleHandleCommand(char * command) {

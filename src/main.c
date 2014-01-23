@@ -31,7 +31,7 @@ int main( void )
     vUartStartTask();
 
     /* Enable Wire (I2C) */
-    vWireInit();
+    //vWireInit();
 //    vWireStartTask(); // Don't use anymore
     
 //    vPowerStartTask();
@@ -51,6 +51,9 @@ int main( void )
 //    xStartUart1CommandHandling();
 
     /* Finally start the scheduler. */
+
+    //vPowerStartTask();
+
     vTaskStartScheduler();
 
     /* Will only reach here if there is insufficient heap available to start
