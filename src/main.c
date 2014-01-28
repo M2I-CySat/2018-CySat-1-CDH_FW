@@ -31,9 +31,13 @@ int main( void )
     vUartStartTask();
 
     /* Enable Wire (I2C) */
-    vWireInit();
+//    vWireInit();
 //    vWireStartTask(); // Don't use anymore
     
+
+    vConsolePrint("Starting command handling on UART1\r\n");
+    xStartUart1CommandHandling();
+
 //    vPowerStartTask();
 //    vPayloadStartTask();
 //    vCommsStartTask();
