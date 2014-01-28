@@ -39,6 +39,8 @@ typedef struct {
         Battery1Current : 10;
 } powerData;
 
+void vPowerPrintHousekeepingData();
+void vPowerPollHousekeepingData();
 void vPowerStartTask();
 powerData* xPowerGetHousekeepingData();
 

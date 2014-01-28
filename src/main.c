@@ -30,7 +30,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enUart              1
 #define enConsoleCommand    1
 #define enRadioCommand      0
-#define enWire              0
+#define enWire              1
 #define enPowerTest         0
 #define enUartTest          0
 #define enPayload           0

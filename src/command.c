@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <system.h>
 #include <string.h>
+#include <power.h>
 #include <nichrome.h>
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -69,6 +70,11 @@ static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
 		prvDoQueryTime();
         if((strncmp("MTIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3))
 		prvDoQueryMtime();
+        if((strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) && (fieldCount == 3)) {
+            vPowerPollHousekeepingData();
+            vPowerPrintHousekeepingData();
+        }
+
 }
 
 static void prvHandleCommand(char * command) {
