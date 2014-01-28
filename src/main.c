@@ -25,34 +25,46 @@ _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 // Oscillator in HS mode, Use primary oscillator (no PLL)
 _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
+
+//feature defines. 0 to disable
+#define enUart              1
+#define enConsoleCommand    1
+#define enRadioCommand      0
+#define enWire              0
+#define enPowerTest         0
+#define enUartTest          0
+#define enPayload           0
+
 int main( void )
 {
-    /* Enable UART */
+
+#if enUart
     vUartStartTask();
+#endif
 
-    /* Enable Wire (I2C) */
-//    vWireInit();
-//    vWireStartTask(); // Don't use anymore
-    
+#if enWire
+    vWireInit();
+#endif
 
-    vConsolePrint("Starting command handling on UART1\r\n");
+#if enConsoleCommand
     xStartUart1CommandHandling();
+#endif
 
-//    vPowerStartTask();
-//    vPayloadStartTask();
+#if enPowerTest
+    vPowerStartTask();
+#endif
+
+#if enPayload
+    vPayloadStartTask();
+#endif
+
+#if enPayload
+    vUartStartTestTask();
+#endif
+
+
+    /* No idea about this one*/
 //    vCommsStartTask();
-//    vNichromeStartTask();
-
-//    vUartStartTestTask();
-
-//   vConsolePrint( "\r\nI am a UART!\r\n" );
-//    vUart1Print("(Uart1)\r\n");
-//    vUart2Print("(Uart2)\r\n");
-
-    //For some reason it totally wigs out if we start command handling from main.
-    //This same thing is just taken care of in vUartStartTask()
-//    vConsolePrint("Starting command handling on UART1\r\n");
-//    xStartUart1CommandHandling();
 
     /* Finally start the scheduler. */
     vTaskStartScheduler();

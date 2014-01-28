@@ -20,11 +20,16 @@
 #include <stdio.h>
 #include <system.h>
 #include <string.h>
+#include <nichrome.h>
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
 #define MAX_COMMAND_LENGTH 100
 #define MAX_QUERY_SUBTYPE_LENGTH 12
 #define MAX_TYPE_LENGTH 12
+
+
+#define UART1_ECHO 1
+#define UART2_ECHO 0
 
 /* Command Format
  *
@@ -46,15 +51,15 @@
  */
 
 static void prvDoQueryTime() {
-        vConsolePrintf("!RESULT,TIME,It's been many seconds since 1970,C2D3$");
+        vConsolePrintf("!RESULT,TIME,It's been many seconds since 1970,C3$");
 }
 
 static void prvDoQueryMtime() {
-        vConsolePrintf("!RESULT,MTIME,Long time in space...,E4F5$");
+        vConsolePrintf("!RESULT,MTIME,Long time in space...,E4$");
 }
 
 static void prvDoQueryHello() {
-        vConsolePrintf("!RESULT,HELLO,Hello World,A0B1$");
+        vConsolePrintf("!RESULT,HELLO,Hello World,A1$");
 }
 
 static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
@@ -66,7 +71,7 @@ static void prvConsoleHandleQuery(char * fields[], int fieldCount) {
 		prvDoQueryMtime();
 }
 
-static void prvConsoleHandleCommand(char * command) {
+static void prvHandleCommand(char * command) {
 	if (!command[0] == '!') return; //invalid command
 
 	//VALIDATE CHECKSUM HERE -- ANY LATER AND IT WILL GET TRASHED BY PARSING
@@ -99,6 +104,9 @@ static void prvConsoleHandleCommand(char * command) {
 
 	if ((strncmp("QUERY", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
 		prvConsoleHandleQuery(fields, fieldCount);
+        //TODO: THIS MUST BE MADE TO FIT THE PROTOCOL DOCUMENT.
+	if ((strncmp("BURN", fields[0], MAX_TYPE_LENGTH) == 0) && (fieldCount >= 3))
+            vNichromeStartTask();
 
 }
 
@@ -109,7 +117,6 @@ static char rxByte() {
 	return byte;
 }
 
-#define UART1_ECHO
 
 static void vUart1RXTask( void * params) {
 	char commandBuffer[MAX_COMMAND_LENGTH];
@@ -121,7 +128,7 @@ static void vUart1RXTask( void * params) {
 	for (;;) {
 		byte = rxByte();
 
-#ifdef UART1_ECHO
+#if UART1_ECHO
                 vConsolePut(byte);
 #endif
 
@@ -134,11 +141,44 @@ static void vUart1RXTask( void * params) {
 		byteIndex ++;
 
 		if (byte == '$') {
-			prvConsoleHandleCommand(commandBuffer);
+			prvHandleCommand(commandBuffer);
+		}
+	}
+}
+static void vUart2RXTask( void * params) {
+	char commandBuffer[MAX_COMMAND_LENGTH];
+	memset(commandBuffer, 0, MAX_COMMAND_LENGTH);
+
+	int byteIndex = 0;
+	char byte;
+
+	for (;;) {
+		byte = rxByte();
+
+#if UART2_ECHO
+                vConsolePut(byte);
+#endif
+
+		if ((byteIndex == MAX_COMMAND_LENGTH) || (byte == '!')) {
+			byteIndex = 0;
+			memset(commandBuffer, 0, MAX_COMMAND_LENGTH);
+		}
+
+		commandBuffer[byteIndex] = byte;
+		byteIndex ++;
+
+		if (byte == '$') {
+			prvHandleCommand(commandBuffer);
 		}
 	}
 }
 
 void xStartUart1CommandHandling() {
+    vConsolePrint("Starting command handling on UART1\r\n");
     xTaskCreate( vUart1RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
+}
+
+void xStartUart2CommandHandling() {
+    vConsolePrint("Starting command handling on UART2\r\n");
+    xTaskCreate( vUart2RXTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_UART1, NULL );
 }

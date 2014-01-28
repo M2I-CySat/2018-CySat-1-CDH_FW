@@ -11,5 +11,6 @@
 
 
 void xStartUart1CommandHandling();
+void xStartUart2CommandHandling();
 
 #endif /* COMMAND_H_ */
