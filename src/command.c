@@ -63,12 +63,9 @@ static inline void nackLength() {
 
 static void sendMessage(char * body) {
     char * checksum = "a1";
-
 #if CHECKSUM_MESSAGES
     //calculate an actual checksum
 #endif
-
-
 #if CONSOLE_MESSAGES
     vConsolePrintf("!%s,%s$", body, checksum);
 #endif
@@ -76,7 +73,6 @@ static void sendMessage(char * body) {
     //TODO Sprintf the message, then heliumSendData
     //vHeliumSendData("!%s,%s$", body, checksum);
 #endif
-
 }
 
 /*Message subtype handling*/
@@ -133,6 +129,7 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
     }
     else if(strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND")
             vPowerPollHousekeepingData();
             vPowerPrintHousekeepingData();
         }
