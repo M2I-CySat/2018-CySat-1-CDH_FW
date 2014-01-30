@@ -129,7 +129,7 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
     }
     else if(strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
-            sendMessage("ACK_COMMAND")
+            sendMessage("ACK_COMMAND");
             vPowerPollHousekeepingData();
             vPowerPrintHousekeepingData();
         }
