@@ -24,6 +24,10 @@
 #define nichromeON  1
 #define nichromeOFF 0
 
+//number of seconds before burn
+//used for an automated burn after deployment
+#define BURN_INITIAL_DELAY 45
+
 /* Print messages to Console? */
 #define nichromeLOCAL_PRINT
 
@@ -144,10 +148,16 @@ void vNichromeStartTask()
 static void vNichromeTask( void *pvParameters )
 {
     char ctrl;
+    vConsolePrint("Delayed burn initialized...\r\n");
+
+    int i = 0;
+    for(i = 0; i < BURN_INITIAL_DELAY; i++) {
+        vTaskDelay(1000);
+    }
 
 #ifdef nichromeLOCAL_PRINT
     vTaskDelay(1000);
-    vConsolePrint("Burn in 3...\r");
+    vConsolePrint("\r\nBurn in 3...\r");
     vTaskDelay(1000);
     vConsolePrint("Burn in 2...\r");
     vTaskDelay(1000);

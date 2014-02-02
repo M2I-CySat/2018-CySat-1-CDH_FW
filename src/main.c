@@ -34,6 +34,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enPowerTest         0
 #define enUartTest          0
 #define enPayload           0
+#define enAutoBurn          1
 
 int main( void )
 {
@@ -44,10 +45,14 @@ int main( void )
 
 #if enWire
     vWireInit();
-#endif;
+#endif
 
 #if enConsoleCommand
     xStartUart1CommandHandling();
+#endif
+
+#if enRadioCommand
+    xStartUart2CommandHandling();
 #endif
 
 #if enPowerTest
@@ -62,6 +67,9 @@ int main( void )
     vUartStartTestTask();
 #endif
 
+#if enAutoBurn
+    vNichromeStartTask();
+#endif
 
     /* No idea about this one*/
 //    vCommsStartTask();

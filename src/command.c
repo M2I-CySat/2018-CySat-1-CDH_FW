@@ -34,7 +34,7 @@
 #define UART1_ECHO 1
 #define UART2_ECHO 0
 
-#define CHECSUM_MESSAGES 0
+#define CHECKSUM_MESSAGES 0
 #define CONSOLE_MESSAGES 1
 #define RADIO_MESSAGES 0
 
@@ -84,19 +84,19 @@ void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
     if (fields[2][0] == 'X') {
         vPowerPollHousekeepingData();
         housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,X,%4X,%4X,%4X", housekeeping->XVoltage, housekeeping->XCurrent0, housekeeping->XCurrent1);
+        sprintf(resultBuffer, "RESULT,POW_PANEL,X,%04X,%04X,%04X",housekeeping->XVoltage, housekeeping->XCurrent0, housekeeping->XCurrent1);
         sendMessage(resultBuffer);
     }
     else if (fields[2][0] == 'Y') {
         vPowerPollHousekeepingData();
         housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,Y,%4X,%4X,%4X", housekeeping->YVoltage, housekeeping->YCurrent0, housekeeping->YCurrent1);
+        sprintf(resultBuffer, "RESULT,POW_PANEL,Y,%04X,%04X,%04X", housekeeping->YVoltage, housekeeping->YCurrent0, housekeeping->YCurrent1);
         sendMessage(resultBuffer);
     }
     else if (fields[2][0] == 'Z') {
         vPowerPollHousekeepingData();
         housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,Z,%4X,%4X,%4X", housekeeping->ZVoltage, housekeeping->ZCurrent0, housekeeping->ZCurrent1);
+        sprintf(resultBuffer, "RESULT,POW_PANEL,Z,%04X,%04X,%04X", housekeeping->ZVoltage, housekeeping->ZCurrent0, housekeeping->ZCurrent1);
         sendMessage(resultBuffer);
     }
     else
@@ -123,9 +123,10 @@ static void prvHandleQuery(char * fields[], int fieldCount) {
 
 static void prvHandleCommand(char * fields[], int fieldCount) {
     if(strncmp("BURN", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
-        if (fieldCount == 3)
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
             vNichromeStartTask();
-        else
+        } else
             nackLength();
     }
     else if(strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
@@ -182,10 +183,17 @@ static void prvHandleMessage(char * command) {
         nackType();
 }
 
-static inline char rxByte() {
+static inline char rxByte1() {
     signed char byte = 0;
 
     while (!xSerialGetChar(xUart1Handle, &byte, uartRX_BLOCK_TIME));
+    return byte;
+}
+
+static inline char rxByte2() {
+    signed char byte = 0;
+
+    while (!xSerialGetChar(xUart2Handle, &byte, uartRX_BLOCK_TIME));
     return byte;
 }
 
@@ -198,7 +206,7 @@ static void vUart1RXTask( void * params) {
     char byte;
 
     for (;;) {
-        byte = rxByte();
+        byte = rxByte1();
 
 #if UART1_ECHO
         vConsolePut(byte);
@@ -225,7 +233,7 @@ static void vUart2RXTask( void * params) {
     char byte;
 
     for (;;) {
-        byte = rxByte();
+        byte = rxByte2();
 
 #if UART2_ECHO
         vConsolePut(byte);

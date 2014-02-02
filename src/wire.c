@@ -466,7 +466,7 @@ static void vDelay( const char delay )
 void vWireStartTask()
 {
     xWireQueue = xQueueCreate( wireQUEUE_LENGTH, ( unsigned portBASE_TYPE ) sizeof( wireMessage ) );
-    xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_WIRE, NULL );
+    xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE + 100, NULL, systemPRIORITY_WIRE, NULL );
 
     vWireInit();
 }
