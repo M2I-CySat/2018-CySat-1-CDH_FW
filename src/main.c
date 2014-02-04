@@ -34,7 +34,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enPowerTest         0
 #define enUartTest          0
 #define enPayload           0
-#define enAutoBurn          1
+#define enAutoBurn          0
 
 int main( void )
 {

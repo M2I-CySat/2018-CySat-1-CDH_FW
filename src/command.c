@@ -46,6 +46,7 @@ static void prvHandleQuery(char **, int);
 static void prvHandleCommand(char **, int);
 static void prvHandleMessage(char *);
 static void prvHandlePowerPanelQuery(char **, int);
+static void prvHandlePowerBattQuery(char **, int);
 
 
 /* FUNCTION BODIES */
@@ -79,6 +80,7 @@ static void sendMessage(char * body) {
 /*Message subtype handling*/
 void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
     powerData * housekeeping;
+
     char resultBuffer[50];
     memset(resultBuffer, 0, 50);
     if (fields[2][0] == 'X') {
@@ -103,6 +105,51 @@ void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
         sendMessage("NACK_ERROR,PARAM,Invalid Axis");
 }
 
+void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
+    powerData * housekeeping;
+
+    char resultBuffer[50];
+    memset(resultBuffer, 0, 50);
+
+    if (fields[2][0] == '0') {
+        vPowerPollHousekeepingData();
+        housekeeping = xPowerGetHousekeepingData();
+
+        //housekeeping->Battery0Temperature = 0x02bc;
+
+        char * dir;
+        if (housekeeping->Battery0Direction)
+            dir = "C";
+        else
+            dir = "D";
+
+        sprintf(resultBuffer, "RESULT,POW_BATTERY,0,%04X,%04X,%s,%04X",
+                housekeeping->Battery0Temperature,
+                housekeeping->Battery0Voltage,
+                dir,
+                housekeeping->Battery0Current);
+        sendMessage(resultBuffer);
+    }
+    else if (fields[2][0] == '1') {
+        vPowerPollHousekeepingData();
+        housekeeping = xPowerGetHousekeepingData();
+        char * dir;
+        if (housekeeping->Battery1Direction)
+            dir = "C";
+        else
+            dir = "D";
+
+        sprintf(resultBuffer, "RESULT,POW_BATTERY,1,%04X,%04X,%s,%04X",
+                housekeeping->Battery1Temperature,
+                housekeeping->Battery1Voltage,
+                dir,
+                housekeeping->Battery1Current);
+        sendMessage(resultBuffer);
+    }
+    else
+        sendMessage("NACK_ERROR,PARAM,Invalid battery");
+}
+
 /*Message Type Handling*/
 static void prvHandleQuery(char * fields[], int fieldCount) {
     if(strncmp("HELLO", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
@@ -114,6 +161,12 @@ static void prvHandleQuery(char * fields[], int fieldCount) {
     else if (strncmp("POW_PANEL", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 4)
             prvHandlePowerPanelQuery(fields, fieldCount);
+        else
+            nackLength();
+    }
+    else if (strncmp("POW_BATTERY", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 4)
+            prvHandlePowerBattQuery(fields, fieldCount);
         else
             nackLength();
     }

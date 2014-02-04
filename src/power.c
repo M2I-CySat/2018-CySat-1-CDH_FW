@@ -1,6 +1,6 @@
 
 #include "power.h"
-
+#include <string.h>
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
@@ -29,12 +29,15 @@ void vPowerStartTask()
 unsigned short usGetChannel( char cChannel )
 {
     char pcData[2];
+    char channel[2] = {0, cChannel};
 
-    if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, &cChannel, 1 ) ){
+    if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, channel, 2 ) ){
         vConsoleErrorPrintf( "Power: I2C Write Error\r\n" );
         return 0;
     }
 
+    vTaskDelay(2); //delay for power board read
+    
     if( wireSTATUS_SUCCESS != cWireReadPutsError( powerBUS, powerADDR, pcData, 2 ) ){
         vConsoleErrorPrintf( "Power: I2C Read Error\r\n" );
         return 0;
@@ -46,6 +49,8 @@ unsigned short usGetChannel( char cChannel )
 
 void vPowerPollHousekeepingData()
 {
+    memset(&xHousekeepingData, 0, sizeof(powerData));
+
     xHousekeepingData.XVoltage              = usGetChannel(  6 );
     xHousekeepingData.XCurrent0             = usGetChannel(  4 );
     xHousekeepingData.XCurrent1             = usGetChannel(  7 );

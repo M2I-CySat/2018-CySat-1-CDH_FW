@@ -24,9 +24,11 @@
 #define nichromeON  1
 #define nichromeOFF 0
 
+#define BURN_TIME 4000
+
 //number of seconds before burn
 //used for an automated burn after deployment
-#define BURN_INITIAL_DELAY 45
+#define BURN_INITIAL_DELAY 0
 
 /* Print messages to Console? */
 #define nichromeLOCAL_PRINT
@@ -170,7 +172,7 @@ static void vNichromeTask( void *pvParameters )
     /* Burn all 6 wires, 1 at a time */
     for (ctrl = 1; ctrl <= 6; ++ctrl)
     {
-        vNichromeBurn(ctrl, 3000);
+        vNichromeBurn(ctrl, BURN_TIME);
     }
 
     /* End task */

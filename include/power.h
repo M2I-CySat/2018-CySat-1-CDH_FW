@@ -10,6 +10,7 @@
 
 #define powerLOCAL_PRINT
 
+#if 0
 /*
  * For internal memory management only.
  *   Bit field order is NOT guaranteed.
@@ -37,6 +38,31 @@ typedef struct {
         Battery1Voltage : 10,
         Battery1Direction : 1,
         Battery1Current : 10;
+} powerData;
+#endif
+
+typedef struct {
+    unsigned short
+        XVoltage,
+        XCurrent0,
+        XCurrent1,
+        YVoltage,
+        YCurrent0,
+        YCurrent1,
+        ZVoltage,
+        ZCurrent0,
+        ZCurrent1,
+        BusBatteryCurrent,
+        Bus5VCurrent,
+        Bus3V3Current,
+        Battery0Temperature,
+        Battery0Voltage,
+        Battery0Direction,
+        Battery0Current,
+        Battery1Temperature,
+        Battery1Voltage,
+        Battery1Direction,
+        Battery1Current;
 } powerData;
 
 void vPowerPrintHousekeepingData();

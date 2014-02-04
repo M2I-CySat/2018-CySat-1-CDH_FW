@@ -60,10 +60,12 @@ char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes );
 void vWireScan( char bus );
 
 /* TODO WireQueue should no longer be used, remove it */
+#if 0
 void vWireStartTask();
 char cWireQueueAdd( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueWrite( char cBus, char cAddress, char *pcData, char cBytes );
 char cWireQueueRead( char cBus, char cAddress, char *pcData, char cBytes );
+#endif
 
 #endif	/* WIRE_H */
 

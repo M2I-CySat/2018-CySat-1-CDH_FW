@@ -9,13 +9,17 @@
 #include "task.h"
 #include "semphr.h"
 
-#include <i2c.h>
+//#include <i2c.h>
 
 #include "system.h"
 #include "uart.h"
 
 #define wireQUEUE_LENGTH    10
 #define wireBLOCK_TIME      ( ( portTickType ) 0xffff )
+
+#ifndef NULL
+#define NULL 0 //wtf
+#endif
 
 /* SCL*:        The SCL output pin */
 /* SCL*_TRIS:   The SCL Direction Register Bit */
