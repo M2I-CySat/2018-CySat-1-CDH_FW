@@ -20,7 +20,7 @@
 #include "command.h"
 
 /* The UART we use for the console (Dev Board: 1, Explorer16: 2) */
-#define uartCONSOLE_UART    2
+#define uartCONSOLE_UART    1
 
 #if uartCONSOLE_UART == 1
 #define xConsoleUartHandle xUart1Handle
