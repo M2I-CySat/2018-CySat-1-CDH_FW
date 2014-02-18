@@ -41,6 +41,7 @@ typedef struct {
 } powerData;
 #endif
 
+#if 1
 typedef struct {
     unsigned short
         XVoltage,
@@ -64,6 +65,7 @@ typedef struct {
         Battery1Direction,
         Battery1Current;
 } powerData;
+#endif
 
 void vPowerPrintHousekeepingData();
 void vPowerPollHousekeepingData();

@@ -28,7 +28,8 @@ void vPowerStartTask()
 
 unsigned short usGetChannel( char cChannel )
 {
-    char pcData[2];
+    char pcData[2] = {0,0};
+    int data[2] = {0,0};
     char channel[2] = {0, cChannel};
 
     if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, channel, 2 ) ){
@@ -36,15 +37,18 @@ unsigned short usGetChannel( char cChannel )
         return 0;
     }
 
-    vTaskDelay(2); //delay for power board read
+    vTaskDelay(3); //delay for power board read
     
     if( wireSTATUS_SUCCESS != cWireReadPutsError( powerBUS, powerADDR, pcData, 2 ) ){
         vConsoleErrorPrintf( "Power: I2C Read Error\r\n" );
         return 0;
     }
 
+    data[0] = pcData[0] & 0xFF;
+    data[1] = pcData[1] & 0xFF;
+    vConsolePrintf("Channel %d read: %02X %02X\r\n", cChannel, data[0], data[1]);
     /* If the EPS is not ready, it will send 0xf000, and we return 0 */
-    return ( ( pcData[0] << 8 ) | ( 0xff & pcData[1] ) ) & 0x03ff;
+    return ( ( data[0] << 8 ) | ( 0xff & data[1] ) ) & 0x03ff;
 }
 
 void vPowerPollHousekeepingData()
@@ -96,7 +100,7 @@ void vPowerPrintHousekeepingData()
     vPrintChannel("3.3V Bus Current",xHousekeepingData.Bus3V3Current * -4.039 + 4155.271,"mA");
 
     vPrintChannel("Bat 0 Temp",xHousekeepingData.Battery0Temperature * -0.163 + 110.835,"degC");
-    vPrintChannel("Bat 0 Voltage",xHousekeepingData.Battery0Voltage * -0.0939 + 9.71,"V");
+    vPrintChannel("Bat 0 Voltage",xHousekeepingData.Battery0Voltage * -0.00939 + 9.71,"V");
     if( 0==xHousekeepingData.Battery0Voltage )
         vConsolePrint( "Bat 0 is DISCHARGING\r\n" );
     else
@@ -104,7 +108,7 @@ void vPowerPrintHousekeepingData()
     vPrintChannel("Bat 0 Current",xHousekeepingData.Battery0Current * -3.2 + 2926.22,"mA");
 
     vPrintChannel("Bat 1 Temp",xHousekeepingData.Battery1Temperature * -0.163 + 110.835,"degC");
-    vPrintChannel("Bat 1 Voltage",xHousekeepingData.Battery1Voltage * -0.0939 + 9.71,"V");
+    vPrintChannel("Bat 1 Voltage",xHousekeepingData.Battery1Voltage * -0.00939 + 9.71,"V");
     if( 0==xHousekeepingData.Battery1Voltage )
         vConsolePrint( "Bat 1 is DISCHARGING\r\n" );
     else

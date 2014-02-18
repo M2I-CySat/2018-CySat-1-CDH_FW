@@ -94,6 +94,8 @@ static void vSetSDA_TRIS(char bus, char val);
 static char cGetSCL(char bus);
 static char cGetSDA(char bus);
 
+static void vSendNack(char bus);
+
 static char xMutexTakeBus( char cBus );
 static char xMutexGiveBus( char cBus );
 
@@ -265,6 +267,7 @@ static char cRead( char cBus, char cAddress, char *pcData, char cBytes )
         }
     }
 
+    vSendNack(cBus);
     vStop( cBus );
     
     return wireSTATUS_SUCCESS;
@@ -372,6 +375,19 @@ static void vStop( char cBus )
     vDelay(wireSTOPDELAY);
 //    SDA_TRIS = wireHIGH;
     vSetSDA_TRIS( cBus, wireHIGH );
+
+}
+
+static void vSendNack( char cBus )
+{
+//    SDA = 0;
+    vSetSDA( cBus, wireLOW );
+//    SDA_TRIS = wireLOW;
+    vSetSDA_TRIS( cBus, wireHIGH );
+    vDelay( wireDATASETTLE );
+    vClock( cBus );
+//    SDA_TRIS = wireHIGH;
+    vDelay( wireDATASETTLE );
 }
 
 static void vClock( char cBus )
@@ -651,7 +667,7 @@ char cWireWritePutsError( char cBus, char cAddress, char *pcData, char cBytes )
 
 char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes )
 {
-    char status = cWireWrite( cBus, cAddress, pcData, cBytes );
+    char status = cWireRead( cBus, cAddress, pcData, cBytes );
     if( wireSTATUS_SUCCESS != status )
     {
 //        char pcError[40];

@@ -38,7 +38,6 @@
 #define CONSOLE_MESSAGES 1
 #define RADIO_MESSAGES 0
 
-
 /* FUNCTION PROTOTYPES */
 
 static void sendMessage(char *);
@@ -119,9 +118,9 @@ void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
 
         char * dir;
         if (housekeeping->Battery0Direction)
-            dir = "C";
-        else
             dir = "D";
+        else
+            dir = "C";
 
         sprintf(resultBuffer, "RESULT,POW_BATTERY,0,%04X,%04X,%s,%04X",
                 housekeeping->Battery0Temperature,
@@ -135,9 +134,9 @@ void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
         housekeeping = xPowerGetHousekeepingData();
         char * dir;
         if (housekeeping->Battery1Direction)
-            dir = "C";
-        else
             dir = "D";
+        else
+            dir = "C";
 
         sprintf(resultBuffer, "RESULT,POW_BATTERY,1,%04X,%04X,%s,%04X",
                 housekeeping->Battery1Temperature,
