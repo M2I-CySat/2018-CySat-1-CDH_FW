@@ -17,6 +17,7 @@
 #include "payload.h"
 #include "comms.h"
 #include "nichrome.h"
+#include "command.h"
 //#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
@@ -25,30 +26,62 @@ _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 // Oscillator in HS mode, Use primary oscillator (no PLL)
 _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
+
+//feature defines. 0 to disable
+#define enUart              1
+#define enConsoleCommand    1
+#define enRadioCommand      0
+#define enWire              1
+#define enPowerTest         0
+#define enUartTest          0
+#define enPayload           0
+#define enAutoBurn          0
+
 int main( void )
 {
-    /* Enable UART */
+
+#if enUart
     vUartStartTask();
+#endif
 
-    /* Enable Wire (I2C) */
+#if enWire
     vWireInit();
-//    vWireStartTask(); // Don't use anymore
-    
-//    vPowerStartTask();
-//    vPayloadStartTask();
+#endif
+
+#if enConsoleCommand
+    xStartUart1CommandHandling();
+#endif
+
+#if enRadioCommand
+    xStartUart2CommandHandling();
+#endif
+
+#if enPowerTest
+    vPowerStartTask();
+#endif
+
+#if enPayload
+    vPayloadStartTask();
+#endif
+
+#if enPayload
+    vUartStartTestTask();
+#endif
+
+#if enAutoBurn
+    vNichromeStartTask();
+#endif
+
+    /* No idea about this one*/
 //    vCommsStartTask();
-//    vNichromeStartTask();
-
-    //vUartStartTestTask();
-
-    //vConsolePrint( "\r\nI am a UART!\r\n" );
-    //vUart1Print("(Uart1)\r\n");
-//    vUart2Print("(Uart2)\r\n");
 
     vSetupMem();
     vStartMemTestTask();
 
     /* Finally start the scheduler. */
+
+    //vPowerStartTask();
+
     vTaskStartScheduler();
 
     /* Will only reach here if there is insufficient heap available to start

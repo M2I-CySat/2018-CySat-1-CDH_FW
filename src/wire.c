@@ -9,13 +9,17 @@
 #include "task.h"
 #include "semphr.h"
 
-#include <i2c.h>
+//#include <i2c.h>
 
 #include "system.h"
 #include "uart.h"
 
 #define wireQUEUE_LENGTH    10
 #define wireBLOCK_TIME      ( ( portTickType ) 0xffff )
+
+#ifndef NULL
+#define NULL 0 //wtf
+#endif
 
 /* SCL*:        The SCL output pin */
 /* SCL*_TRIS:   The SCL Direction Register Bit */
@@ -89,6 +93,8 @@ static void vSetSCL_TRIS(char bus, char val);
 static void vSetSDA_TRIS(char bus, char val);
 static char cGetSCL(char bus);
 static char cGetSDA(char bus);
+
+static void vSendNack(char bus);
 
 static char xMutexTakeBus( char cBus );
 static char xMutexGiveBus( char cBus );
@@ -261,6 +267,7 @@ static char cRead( char cBus, char cAddress, char *pcData, char cBytes )
         }
     }
 
+    vSendNack(cBus);
     vStop( cBus );
     
     return wireSTATUS_SUCCESS;
@@ -368,6 +375,19 @@ static void vStop( char cBus )
     vDelay(wireSTOPDELAY);
 //    SDA_TRIS = wireHIGH;
     vSetSDA_TRIS( cBus, wireHIGH );
+
+}
+
+static void vSendNack( char cBus )
+{
+//    SDA = 0;
+    vSetSDA( cBus, wireLOW );
+//    SDA_TRIS = wireLOW;
+    vSetSDA_TRIS( cBus, wireHIGH );
+    vDelay( wireDATASETTLE );
+    vClock( cBus );
+//    SDA_TRIS = wireHIGH;
+    vDelay( wireDATASETTLE );
 }
 
 static void vClock( char cBus )
@@ -466,7 +486,7 @@ static void vDelay( const char delay )
 void vWireStartTask()
 {
     xWireQueue = xQueueCreate( wireQUEUE_LENGTH, ( unsigned portBASE_TYPE ) sizeof( wireMessage ) );
-    xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_WIRE, NULL );
+    xTaskCreate( vWireTask, NULL, configMINIMAL_STACK_SIZE + 100, NULL, systemPRIORITY_WIRE, NULL );
 
     vWireInit();
 }
@@ -647,7 +667,7 @@ char cWireWritePutsError( char cBus, char cAddress, char *pcData, char cBytes )
 
 char cWireReadPutsError( char cBus, char cAddress, char *pcData, char cBytes )
 {
-    char status = cWireWrite( cBus, cAddress, pcData, cBytes );
+    char status = cWireRead( cBus, cAddress, pcData, cBytes );
     if( wireSTATUS_SUCCESS != status )
     {
 //        char pcError[40];
