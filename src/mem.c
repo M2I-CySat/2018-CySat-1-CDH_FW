@@ -12,9 +12,6 @@
 
 
 
-#include <FreeRTOS.h>
-#include <task.h>
-#include <system.h>
 #include <PPS.h>
 #include <mem.h>
 #include <pic24.h>
@@ -22,6 +19,14 @@
 #include <uart.h>
 #include <system.h>
 
+
+/**********************************
+ *MASKS
+ **********************************/
+
+#define FULL_MASK 0xFFFFFF
+#define CHIP_MASK 0xFE0000
+#define ADDRESS_MASK 0x1FFFF
 
 /**********************************
  * SPI OPCODES
@@ -147,7 +152,8 @@
 #define FRAM_SDI_TRIS TRISGbits.TRISG7
 #define FRAM_SCK_TRIS TRISGbits.TRISG6
 
-static unsigned char prvWriteFRAM1Byte(unsigned char byte);
+static unsigned char prvWriteFRAMByte(unsigned char byte);
+static void vFRAM1Unprotect();
 
 void vSetupMem() {
     iPPSOutput(OUT_PIN_PPS_RP19, OUT_FN_PPS_SDO1);
@@ -189,21 +195,167 @@ void vSetupMem() {
     FRAM1_WP = 1;
     FRAM1_CS = 1;
 
+    FRAM2_WP_TRIS = 0;
+    FRAM2_CS_TRIS = 0;
+    FRAM2_WP = 1;
+    FRAM2_CS = 1;
+
     FRAM_SPI_STATbits.SPIEN = 0;
     FRAM_SPI_CON1 = SPI_MASTER;
     FRAM_SPI_STATbits.SPIEN = 1;
+
+    vFRAM1Unprotect();
 }
 
+static unsigned char prvWriteFRAMByte(unsigned char byte) {
+    FRAM_SPI_BUF = byte;
+    while (!FRAM_SPI_STATbits.SPIRBF);
+    return FRAM_SPI_BUF;
+}
+inline static void prvFRAM1WREN() {
+    FRAM1_CS = 0;
+    prvWriteFRAMByte(FRAM_WREN);
+    FRAM1_CS = 1;
+}
+inline static void prvFRAM1WRDI() {
+    FRAM1_CS = 0;
+    prvWriteFRAMByte(FRAM_WRDI);
+    FRAM1_CS = 1;
+}
+static void vFRAM1Unprotect() {
+    prvFRAM1WREN();
+    FRAM1_CS = 0;
+    prvWriteFRAMByte(FRAM_WRSR);
+    prvWriteFRAMByte(0);
+    FRAM1_CS = 1;
+    prvFRAM1WRDI();
+}
 
+void vFRAMWrite(unsigned long address, int length, unsigned char * buffer) {
+    unsigned char addrArray[3];
+    int chip = (address & CHIP_MASK) >> 17;
+
+    address = address & ADDRESS_MASK;
+    
+    addrArray[2] = (address & 0xff);
+    address = address >> 8;
+    addrArray[1] = (address & 0xff);
+    address = address >> 8;
+    addrArray[0] = (address & 0xff);
+
+    //switch to enable and set CS
+    switch(chip) {
+        case 0:
+            prvFRAM1WREN();
+            FRAM1_CS = 0;
+            break;
+    }
+
+    prvWriteFRAMByte(FRAM_WRITE);
+    prvWriteFRAMByte(addrArray[0]);
+    prvWriteFRAMByte(addrArray[1]);
+    prvWriteFRAMByte(addrArray[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        prvWriteFRAMByte(buffer[i]);
+    }
+
+    //switch to disable and reset CS
+    switch(chip) {
+        case 0:
+            FRAM1_CS = 1;
+            prvFRAM1WRDI();
+            break;
+    }
+}
+void vFRAMRead(unsigned long address, int length, unsigned char * buffer) {
+    unsigned char addrArray[3];
+    int chip = (address & CHIP_MASK) >> 17;
+
+    address = address & ADDRESS_MASK;
+    addrArray[2] = address & 0xff;
+    address = address >> 8;
+    addrArray[1] = address & 0xff;
+    address = address >> 8;
+    addrArray[0] = address & 0xff;
+
+    switch(chip) {
+        case 0:
+            FRAM1_CS = 0;
+            break;
+    }
+
+    prvWriteFRAMByte(FRAM_READ);
+    prvWriteFRAMByte(addrArray[0]);
+    prvWriteFRAMByte(addrArray[1]);
+    prvWriteFRAMByte(addrArray[2]);
+    int i;
+    for (i = 0; i< length; i++) {
+        buffer[i] = prvWriteFRAMByte(0xff);
+    }
+
+    switch(chip) {
+        case 0:
+            FRAM1_CS = 1;
+            break;
+    }
+}
+#if 0
+static void prvTestTask() {
+    vFRAM1Unprotect();
+
+    vConsolePrint("\r\n\nFlash Test Task Started!\r\n");
+
+    unsigned char buffer[4] = {0,0,0,0};
+    vConsolePrintf("Flash MFG Id: %d\r\n", buffer[0]);
+    unsigned char address[3] = {0,0,0};
+    vConsolePrintf("The first 4 Bytes in Flash: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+    vFRAMReadId(buffer);
+    vConsolePrintf("FRAM Id: %d\r\n", buffer[0]);
+    buffer[0] = 0;
+    buffer[1] = 0;
+    vFRAMRead(address, 4, buffer);
+    vConsolePrintf("The first 4 Bytes in FRAM: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+    vConsolePrintf("Loading FRAM with new data...\r\n");
+    buffer[0] = 127;
+    buffer[1] = 65;
+    buffer[2] = 22;
+    buffer[3] = 69;
+    vFRAMWrite(address, 4, buffer);
+    buffer[0] = 0;
+    buffer[1] = 0;
+    buffer[2] = 0;
+    buffer[3] = 0;
+    vFRAMRead(address, 4, buffer);
+    vConsolePrintf("The first 4 Bytes in FRAM: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+    vConsolePrintf("Looping READ Command to FRAM1...\r\n");
+    for(;;) {
+        //vFRAMReadId(buffer);
+        vFRAMRead(address, 4, buffer);
+    }
+}
+
+void vStartMemTestTask() {
+    xTaskCreate(prvTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL);
+}
+#endif
+#if 0
+static void vFRAM1ReadId(unsigned char * buffer) {
+    FRAM1_CS = 0;
+    prvWriteFRAM1Byte(FRAM_RDID);
+    int i;
+    for (i = 0; i < 4; i++){
+        buffer[i] = prvWriteFRAM1Byte(0xff);
+    }
+    FRAM1_CS = 1;
+}
+#endif
+
+#if 0
 static unsigned char prvWriteFlashByte(unsigned char byte) {
     FLASH_SPI_BUF = byte;
     while (!FLASH_SPI_STATbits.SPIRBF);
     return FLASH_SPI_BUF;
-}
-static unsigned char prvWriteFRAM1Byte(unsigned char byte) {
-    FRAM_SPI_BUF = byte;
-    while (!FRAM_SPI_STATbits.SPIRBF);
-    return FRAM_SPI_BUF;
 }
 inline static void prvFlashWREN() {
     FLASH_CS = 0;
@@ -214,16 +366,6 @@ inline static void prvFlashWRDI() {
     FLASH_CS = 0;
     prvWriteFlashByte(FLASH_WRDI);
     FLASH_CS = 1;
-}
-inline static void prvFRAMWREN() {
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_WREN);
-    FRAM1_CS = 1;
-}
-inline static void prvFRAMWRDI() {
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_WRDI);
-    FRAM1_CS = 1;
 }
 static void prvFlashProtect(unsigned char * address) {
     FLASH_CS = 0;
@@ -288,91 +430,4 @@ void vFlashReadId(unsigned char * buffer) {
     }
     FLASH_CS = 1;
 }
-
-void vFRAMReadId(unsigned char * buffer) {
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_RDID);
-    int i;
-    for (i = 0; i < 4; i++){
-        buffer[i] = prvWriteFRAM1Byte(0xff);
-    }
-    FRAM1_CS = 1;
-}
-void vFRAMRead(unsigned char * address, int length, unsigned char * buffer) {
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_READ);
-    prvWriteFRAM1Byte(address[0]);
-    prvWriteFRAM1Byte(address[1]);
-    prvWriteFRAM1Byte(address[2]);
-    int i;
-    for (i = 0; i< length; i++) {
-        buffer[i] = prvWriteFRAM1Byte(0xff);
-    }
-    FRAM1_CS = 1;
-}
-void vFRAMWrite(unsigned char * address, int length, unsigned char * bytes) {
-    prvFRAMWREN();
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FLASH_WRITE);
-    prvWriteFRAM1Byte(address[0]);
-    prvWriteFRAM1Byte(address[1]);
-    prvWriteFRAM1Byte(address[2]);
-    int i;
-    for (i = 0; i< length; i++) {
-        prvWriteFRAM1Byte(bytes[i]);
-    }
-    FRAM1_CS = 1;
-    prvFRAMWRDI();
-}
-void vFRAMUnprotect() {
-    prvFRAMWREN();
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_WRSR);
-    prvWriteFRAM1Byte(0);
-    FRAM1_CS = 1;
-    prvFRAMWRDI();
-}
-static void prvFRAM1ReadSR(unsigned char * buffer) {
-    FRAM1_CS = 0;
-    prvWriteFRAM1Byte(FRAM_RDSR);
-    buffer[0] = prvWriteFRAM1Byte(0xff);
-}
-static void prvTestTask() {
-    vFRAMUnprotect();
-
-    vConsolePrint("\r\n\nFlash Test Task Started!\r\n");
-
-    unsigned char buffer[4] = {0,0,0,0};
-    vFlashReadId(buffer);
-    vConsolePrintf("Flash MFG Id: %d\r\n", buffer[0]);
-    unsigned char address[3] = {0,0,0};
-    vFlashRead(address, 4, buffer);
-    vConsolePrintf("The first 4 Bytes in Flash: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-    vFRAMReadId(buffer);
-    vConsolePrintf("FRAM Id: %d\r\n", buffer[0]);
-    buffer[0] = 0;
-    buffer[1] = 0;
-    vFRAMRead(address, 4, buffer);
-    vConsolePrintf("The first 4 Bytes in FRAM: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-    vConsolePrintf("Loading FRAM with new data...\r\n");
-    buffer[0] = 127;
-    buffer[1] = 65;
-    buffer[2] = 22;
-    buffer[3] = 69;
-    vFRAMWrite(address, 4, buffer);
-    buffer[0] = 0;
-    buffer[1] = 0;
-    buffer[2] = 0;
-    buffer[3] = 0;
-    vFRAMRead(address, 4, buffer);
-    vConsolePrintf("The first 4 Bytes in FRAM: %d %d %d %d\r\n", buffer[0], buffer[1], buffer[2], buffer[3]);
-    vConsolePrintf("Looping READ Command to FRAM1...\r\n");
-    for(;;) {
-        //vFRAMReadId(buffer);
-        vFRAMRead(address, 4, buffer);
-    }
-}
-
-void vStartMemTestTask() {
-    xTaskCreate(prvTestTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_TEST, NULL);
-}
+#endif

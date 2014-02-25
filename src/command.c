@@ -24,6 +24,7 @@
 #include <power.h>
 #include <helium.h>
 #include <nichrome.h>
+#include <mem.h>
 
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -37,6 +38,10 @@
 #define CHECKSUM_MESSAGES 0
 #define CONSOLE_MESSAGES 1
 #define RADIO_MESSAGES 0
+
+//Enable usage of non-standard commands for raw memory access
+//Very unsafe
+#define RAW_MEM 1
 
 /* FUNCTION PROTOTYPES */
 
@@ -173,6 +178,30 @@ static void prvHandleQuery(char * fields[], int fieldCount) {
         nackSubtype();
 }
 
+#if RAW_MEM
+static void framRead(char ** fields) {
+    unsigned char dataBuffer[10] = {0,0,0,0,0,0,0,0,0,0};
+    int length;
+    unsigned long addr;
+    sscanf(fields[3], "%d", &length);
+    sscanf(fields[2], "%ld", &addr);
+
+    vFRAMRead(addr, length, dataBuffer);
+
+    vConsolePrint(dataBuffer);
+    vConsolePrint("\r\n");
+}
+
+static void framWrite(char ** fields) {
+    int length;
+    unsigned long addr;
+    sscanf(fields[3], "%d", &length);
+    sscanf(fields[2], "%ld", &addr);
+
+    vFRAMWrite(addr, length, fields[4]);
+}
+#endif
+
 static void prvHandleCommand(char * fields[], int fieldCount) {
     if(strncmp("BURN", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
@@ -190,6 +219,24 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
         else
             nackLength();
     }
+#if RAW_MEM
+    else if(strncmp("READ", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 5) {
+            framRead(fields);
+            sendMessage("ACK_COMMAND");
+        }
+        else
+            nackLength();
+    }
+    else if(strncmp("WRITE", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 6) {
+            framWrite(fields);
+            sendMessage("ACK_COMMAND");
+        }
+        else
+            nackLength();
+    }
+#endif
     else
         nackSubtype();
 }

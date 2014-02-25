@@ -33,6 +33,7 @@
       <itemPath>include/pic24.h</itemPath>
       <itemPath>include/testing.h</itemPath>
       <itemPath>include/command.h</itemPath>
+      <itemPath>include/mem.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

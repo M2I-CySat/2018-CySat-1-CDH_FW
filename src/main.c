@@ -36,6 +36,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enUartTest          0
 #define enPayload           0
 #define enAutoBurn          0
+#define enMem               1
 
 int main( void )
 {
@@ -72,15 +73,17 @@ int main( void )
     vNichromeStartTask();
 #endif
 
+#if enMem
+    vSetupMem();
+#endif
+
     /* No idea about this one*/
 //    vCommsStartTask();
 
-    vSetupMem();
-    vStartMemTestTask();
+   // vSetupMem();
+   // vStartMemTestTask();
 
     /* Finally start the scheduler. */
-
-    //vPowerStartTask();
 
     vTaskStartScheduler();
 

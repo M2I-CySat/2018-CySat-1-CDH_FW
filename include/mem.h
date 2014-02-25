@@ -25,16 +25,18 @@ extern "C" {
 
     //NOT RTOS-SAFE
     //Addresses will be 3 byte arrays. [MSB, 2SB, LSB]. Terrible.
+#if 0
     void vFlashErase(char * address);  //terrible and destructive. Nukes everything
                                     //within the 4KB boundary containing the
                                     //given address.
     void vFlashWrite(unsigned char * address, int length, unsigned char * bytes);
     void vFlashRead(unsigned char * address, int length, unsigned char * buffer);
     void vFlashReadId(unsigned char * buffer);
+#endif
 
-    void vFRAMRead(unsigned char * address, int length, unsigned char * buffer);
-    void vFRAMWrite(unsigned char * address, int length, unsigned char * buffer);
-    void vFRAMReadId(unsigned char * buffer);
+    void vFRAMRead(unsigned long address, int length, unsigned char * buffer);
+    void vFRAMWrite(unsigned long address, int length, unsigned char * buffer);
+   // void vFRAMReadId(unsigned char * buffer);
 
 
 #ifdef	__cplusplus
