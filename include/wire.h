@@ -30,6 +30,7 @@
 #define wireBUS2    2
 #define wireBUS3    3
 #define wireBUS4    4
+#define wireBUS5    5
 
 typedef struct {
     /* Which I2C bus to use, wireBUS* */

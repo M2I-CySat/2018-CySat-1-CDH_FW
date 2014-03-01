@@ -19,6 +19,7 @@
 #define systemPRIORITY_POWER    ( systemPRIORITY_BASE + 3 )
 #define systemPRIORITY_COMMS    ( systemPRIORITY_BASE + 4 )
 #define systemPRIORITY_PAYLOAD  ( systemPRIORITY_BASE + 5 )
+#define systemPRIORITY_CLOCK    ( systemPRIORITY_BASE + 6 )
 
 #define systemPRIORITY_NICHROME ( systemPRIORITY_BASE + 7 )
 #define systemPRIORITY_TEST     ( systemPRIORITY_BASE + 8 )
