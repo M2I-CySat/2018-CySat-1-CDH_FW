@@ -12,13 +12,12 @@
 
 long currentTime;
 static void prvClockTask();
-static void zeroRTC();
 static void startRTC();
 static void readRTC();
 
 #define CLOCK_ADDR 0xD0
 
-long getCurrentTime() {
+long getMissionTime() {
     return currentTime;
 }
 
@@ -26,16 +25,21 @@ static void prvClockTask() {
     /*Read current time from RTC
       Loop and update time    */
 
-    currentTime = 0;
 
     vConsolePrintf("ClockTask started\r\n");
 
-    zeroRTC();
     startRTC();
+    readRTC();
+    int i = 0;
     for(;;) {
-        readRTC();
         //vConsolePrintf("Current time: %d\r\n");
         vTaskDelay(1000);
+        currentTime++;
+        if (i == 120) {
+            readRTC();
+            i = 0;
+        }
+        i++;
     }
 }
 
@@ -45,8 +49,6 @@ static void readRTC(){
 
     cWireWrite(wireBUS5, CLOCK_ADDR, &addr, 1);
     cWireRead( wireBUS5, CLOCK_ADDR, buffer, 4 );
-
-    vConsolePrintf("Seconds field: %x\r\n", (buffer[2] & 0x00ff));
 
     int seconds = buffer[1] & 0x0f;
 
@@ -61,9 +63,10 @@ static void startRTC() {
     cWireWrite(wireBUS5, CLOCK_ADDR, writeBuffer, 2);
 }
 
-static void zeroRTC() {
+void zeroRTC() {
     char writeBuffer[10] = {0x0c, 0,0,0,0,0,0,0,0,0};
     cWireWrite(wireBUS5, CLOCK_ADDR, writeBuffer, 9);
+    currentTime = 0;
 }
 
 void vStartClockTask() {

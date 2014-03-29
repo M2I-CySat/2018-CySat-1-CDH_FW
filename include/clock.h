@@ -12,5 +12,7 @@
 
 void vStartClockTask();
 long getMissionTime();
+void zeroRTC();
+
 
 #endif

@@ -25,6 +25,7 @@
 #include <helium.h>
 #include <nichrome.h>
 #include <mem.h>
+#include <clock.h>
 
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -109,6 +110,14 @@ void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
         sendMessage("NACK_ERROR,PARAM,Invalid Axis");
 }
 
+void prvHandleTimeQuery() {
+    char resultBuffer[20];
+
+    memset(resultBuffer, 0, 20);
+    sprintf(resultBuffer, "RESULT,TIME,%lX", getMissionTime());
+    sendMessage(resultBuffer);
+}
+
 void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
     powerData * housekeeping;
 
@@ -174,6 +183,12 @@ static void prvHandleQuery(char * fields[], int fieldCount) {
         else
             nackLength();
     }
+    else if (strncmp("TIME", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3)
+            prvHandleTimeQuery();
+        else
+            nackLength();
+    }
     else
         nackSubtype();
 }
@@ -207,6 +222,13 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
             vNichromeStartTask();
+        } else
+            nackLength();
+    }
+    else if(strncmp("RESET_CLOCK", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
+            zeroRTC();
         } else
             nackLength();
     }
