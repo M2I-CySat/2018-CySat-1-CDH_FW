@@ -162,8 +162,15 @@ static void initTask(void * params) {
     }
 
     vConsolePrintf("Past first boot check\r\n");
+
     vStartClockTask();
+    vTaskDelay(1500);
+
+    char timeBuffer[15];
+    sprintf(timeBuffer, "Time: %ld\r\n", getMissionTime());
+    vConsolePrintf(timeBuffer);
     vConsolePrintf("Clock Started - Waiting for Burn\r\n");
+
     while(getMissionTime() <= BURN_DELAY) {
         vTaskDelay(500);
     }

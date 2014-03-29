@@ -32,7 +32,7 @@ static void prvClockTask() {
         //vConsolePrintf("Current time: %d\r\n");
         vTaskDelay(1000);
         currentTime++;
-        if (i == 120) {
+        if (i == 15) {
             readRTC();
             i = 0;
         }
@@ -47,7 +47,12 @@ static void readRTC(){
     cWireWrite(wireBUS5, CLOCK_ADDR, &addr, 1);
     cWireRead( wireBUS5, CLOCK_ADDR, buffer, 4 );
 
-    int seconds = buffer[1] & 0x0f;
+    long seconds = buffer[1] & 0x0f;
+    seconds += ((buffer[1] & 0x70) >> 4) * 10;
+    seconds += (buffer[2] & 0x0f) * 60;
+    seconds += ((buffer[2] & 0x70) >> 4) * 600;
+    seconds += (buffer[3] & 0x0f) * 3600;
+    seconds += ((buffer[3] & 0x30) >> 4) * 36000;*/
 
     currentTime = seconds;
 }
@@ -63,7 +68,8 @@ static void startRTC() {
 void zeroRTC() {
     char writeBuffer[10] = {0x0c, 0,0,0,0,0,0,0,0,0};
     cWireWrite(wireBUS5, CLOCK_ADDR, writeBuffer, 9);
-    currentTime = 0;
+    cWireWrite(wireBUS5, CLOCK_ADDR, writeBuffer + 1, 8);
+    readRTC();
 }
 
 void vStartClockTask() {
