@@ -25,9 +25,6 @@ static void prvClockTask() {
     /*Read current time from RTC
       Loop and update time    */
 
-
-    vConsolePrintf("ClockTask started\r\n");
-
     startRTC();
     readRTC();
     int i = 0;
