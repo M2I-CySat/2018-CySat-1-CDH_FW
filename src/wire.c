@@ -46,6 +46,11 @@
 #define SDA4         _RB3
 #define SDA4_TRIS    _TRISB3
 
+#define SCL5         _RG2
+#define SCL5_TRIS    _TRISG2
+#define SDA5         _RG3
+#define SDA5_TRIS    _TRISG3
+
 #define wireLOW     0
 #define wireHIGH    1
 
@@ -67,6 +72,7 @@ xQueueHandle xMutexBus1;
 xQueueHandle xMutexBus2;
 xQueueHandle xMutexBus3;
 xQueueHandle xMutexBus4;
+xQueueHandle xMutexBus5;
 
 static void vWireTask( void *pvParameters );
 
@@ -109,6 +115,7 @@ static char xMutexTakeBus( char cBus )
         case 2: return xSemaphoreTake( xMutexBus2, wireBLOCK_TIME );
         case 3: return xSemaphoreTake( xMutexBus3, wireBLOCK_TIME );
         case 4: return xSemaphoreTake( xMutexBus4, wireBLOCK_TIME );
+        case 5: return xSemaphoreTake( xMutexBus5, wireBLOCK_TIME );
         default: vBadBusError( cBus );
     }
 
@@ -123,6 +130,7 @@ static char xMutexGiveBus( char cBus )
         case 2: return xSemaphoreGive( xMutexBus2 );
         case 3: return xSemaphoreGive( xMutexBus3 );
         case 4: return xSemaphoreGive( xMutexBus4 );
+        case 5: return xSemaphoreGive( xMutexBus5 );
         default: vBadBusError( cBus );
     }
 
@@ -142,6 +150,7 @@ static void vSetSCL( char bus, char val )
         case 2: SCL2 = val; return;
         case 3: SCL3 = val; return;
         case 4: SCL4 = val; return;
+        case 5: SCL5 = val; return;
         default: vBadBusError( bus );
     }
 }
@@ -153,6 +162,7 @@ static void vSetSDA( char bus, char val )
         case 2: SDA2 = val; return;
         case 3: SDA3 = val; return;
         case 4: SDA4 = val; return;
+        case 5: SDA5 = val; return;
         default: vBadBusError( bus );
     }
 }
@@ -164,6 +174,7 @@ static void vSetSCL_TRIS( char bus, char val )
         case 2: SCL2_TRIS = val; return;
         case 3: SCL3_TRIS = val; return;
         case 4: SCL4_TRIS = val; return;
+        case 5: SCL5_TRIS = val; return;
         default: vBadBusError( bus );
     }
 }
@@ -175,6 +186,7 @@ static void vSetSDA_TRIS( char bus, char val )
         case 2: SDA2_TRIS = val; return;
         case 3: SDA3_TRIS = val; return;
         case 4: SDA4_TRIS = val; return;
+        case 5: SDA5_TRIS = val; return;
         default: vBadBusError( bus );
     }
 }
@@ -186,6 +198,7 @@ static char cGetSCL( char bus )
         case 2: return SCL2;
         case 3: return SCL3;
         case 4: return SCL4;
+        case 5: return SCL5;
         default: vBadBusError( bus );
     }
     return wireHIGH;
@@ -198,6 +211,7 @@ static char cGetSDA( char bus )
         case 2: return SDA2;
         case 3: return SDA3;
         case 4: return SDA4;
+        case 5: return SDA5;
         default: vBadBusError( bus );
     }
     return wireHIGH;
@@ -499,6 +513,7 @@ void vWireInit()
         xMutexBus2 = xSemaphoreCreateMutex();
         xMutexBus3 = xSemaphoreCreateMutex();
         xMutexBus4 = xSemaphoreCreateMutex();
+        xMutexBus5 = xSemaphoreCreateMutex();
         isInitialized = 1;
     }
 }

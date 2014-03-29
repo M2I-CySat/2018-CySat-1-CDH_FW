@@ -18,6 +18,7 @@
 #include "comms.h"
 #include "nichrome.h"
 #include "command.h"
+#include "clock.h"
 //#include "rtc.h"
 
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
@@ -37,6 +38,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enPayload           0
 #define enAutoBurn          0
 #define enMem               1
+#define enClock             1
 
 int main( void )
 {
@@ -75,6 +77,10 @@ int main( void )
 
 #if enMem
     vSetupMem();
+#endif
+
+#if enClock
+    vStartClockTask();
 #endif
 
     /* No idea about this one*/
