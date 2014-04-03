@@ -52,7 +52,7 @@ static void readRTC(){
     seconds += (buffer[2] & 0x0f) * 60;
     seconds += ((buffer[2] & 0x70) >> 4) * 600;
     seconds += (buffer[3] & 0x0f) * 3600;
-    seconds += ((buffer[3] & 0x30) >> 4) * 36000;*/
+    seconds += ((buffer[3] & 0x30) >> 4) * 36000;
 
     currentTime = seconds;
 }

@@ -62,7 +62,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 
 /*Init system config*/
 
-#define BURN_DELAY          5 /*Seconds until antenna burn*/
+#define BURN_DELAY          120 /*Seconds until antenna burn*/
 
 
 
