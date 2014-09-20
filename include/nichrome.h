@@ -13,5 +13,11 @@
  */
 void vNichromeStartTask();
 
+/**
+ * RTOS task to control nichrome burn.
+ * @param pvParameters
+ */
+void vNichromeTask( void *pvParameters );
+
 #endif	/* NICHROME_H */
 

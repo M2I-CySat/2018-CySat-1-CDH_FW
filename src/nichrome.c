@@ -49,11 +49,6 @@ static void vNichromeBurn(char ctrl, unsigned ms);
  */
 static void vNichromeInit();
 
-/**
- * RTOS task to control nichrome burn.
- * @param pvParameters
- */
-static void vNichromeTask( void *pvParameters );
 
 /**
  * Set a nichrome control
@@ -147,7 +142,7 @@ void vNichromeStartTask()
     xTaskCreate( vNichromeTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_NICHROME, NULL );
 }
 
-static void vNichromeTask( void *pvParameters )
+void vNichromeTask( void *pvParameters )
 {
     char ctrl;
     vConsolePrint("Delayed burn initialized...\r\n");
@@ -179,9 +174,11 @@ static void vNichromeTask( void *pvParameters )
 #if INCLUDE_vTaskDelete == 1
     vTaskDelete(NULL);
 #else
+#if 0
     for( ;; )
     {
         vTaskDelay(10000);
     }
+#endif
 #endif
 }

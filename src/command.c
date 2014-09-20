@@ -114,7 +114,7 @@ void prvHandleTimeQuery() {
     char resultBuffer[20];
 
     memset(resultBuffer, 0, 20);
-    sprintf(resultBuffer, "RESULT,TIME,%lX", getMissionTime());
+    sprintf(resultBuffer, "RESULT,TIME,%ld", getMissionTime());
     sendMessage(resultBuffer);
 }
 
@@ -222,6 +222,30 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
             vNichromeStartTask();
+        } else
+            nackLength();
+    }
+    else if(strncmp("REBOOT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
+            vTaskDelay(1000);
+            __asm__ volatile ("reset");
+        } else
+            nackLength();
+    }
+    else if(strncmp("SET_FIRSTBOOT_0", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
+            unsigned char buffer = 0;
+            vFRAMWrite(0, 1, &buffer);
+        } else
+            nackLength();
+    }
+    else if(strncmp("SET_FIRSTBOOT_1", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
+            unsigned char buffer = 1;
+            vFRAMWrite(0, 1, &buffer);
         } else
             nackLength();
     }
