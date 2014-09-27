@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=src/FreeRTOS/croutine.c src/FreeRTOS/heap_1.c src/FreeRTOS/list.c src/FreeRTOS/port.c src/FreeRTOS/queue.c src/FreeRTOS/tasks.c src/FreeRTOS/timers.c src/FreeRTOS/portasm_PIC24.S src/comms.c src/helium.c src/iomapping.c src/myprintf.c src/payload.c src/power.c src/uart.c src/wire.c src/main.c src/serial.c src/nichrome.c src/testing.c src/command.c src/mem.c src/clock.c
+SOURCEFILES_QUOTED_IF_SPACED=src/FreeRTOS/croutine.c src/FreeRTOS/heap_1.c src/FreeRTOS/list.c src/FreeRTOS/port.c src/FreeRTOS/queue.c src/FreeRTOS/tasks.c src/FreeRTOS/timers.c src/FreeRTOS/portasm_PIC24.S src/comms.c src/helium.c src/iomapping.c src/myprintf.c src/payload.c src/power.c src/uart.c src/wire.c src/main.c src/serial.c src/nichrome.c src/testing.c src/command.c src/mem.c src/clock.c src/storage.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/comms.o ${OBJECTDIR}/src/helium.o ${OBJECTDIR}/src/iomapping.o ${OBJECTDIR}/src/myprintf.o ${OBJECTDIR}/src/payload.o ${OBJECTDIR}/src/power.o ${OBJECTDIR}/src/uart.o ${OBJECTDIR}/src/wire.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/nichrome.o ${OBJECTDIR}/src/testing.o ${OBJECTDIR}/src/command.o ${OBJECTDIR}/src/mem.o ${OBJECTDIR}/src/clock.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/comms.o.d ${OBJECTDIR}/src/helium.o.d ${OBJECTDIR}/src/iomapping.o.d ${OBJECTDIR}/src/myprintf.o.d ${OBJECTDIR}/src/payload.o.d ${OBJECTDIR}/src/power.o.d ${OBJECTDIR}/src/uart.o.d ${OBJECTDIR}/src/wire.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/src/nichrome.o.d ${OBJECTDIR}/src/testing.o.d ${OBJECTDIR}/src/command.o.d ${OBJECTDIR}/src/mem.o.d ${OBJECTDIR}/src/clock.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/comms.o ${OBJECTDIR}/src/helium.o ${OBJECTDIR}/src/iomapping.o ${OBJECTDIR}/src/myprintf.o ${OBJECTDIR}/src/payload.o ${OBJECTDIR}/src/power.o ${OBJECTDIR}/src/uart.o ${OBJECTDIR}/src/wire.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/nichrome.o ${OBJECTDIR}/src/testing.o ${OBJECTDIR}/src/command.o ${OBJECTDIR}/src/mem.o ${OBJECTDIR}/src/clock.o ${OBJECTDIR}/src/storage.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o.d ${OBJECTDIR}/src/FreeRTOS/heap_1.o.d ${OBJECTDIR}/src/FreeRTOS/list.o.d ${OBJECTDIR}/src/FreeRTOS/port.o.d ${OBJECTDIR}/src/FreeRTOS/queue.o.d ${OBJECTDIR}/src/FreeRTOS/tasks.o.d ${OBJECTDIR}/src/FreeRTOS/timers.o.d ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o.d ${OBJECTDIR}/src/comms.o.d ${OBJECTDIR}/src/helium.o.d ${OBJECTDIR}/src/iomapping.o.d ${OBJECTDIR}/src/myprintf.o.d ${OBJECTDIR}/src/payload.o.d ${OBJECTDIR}/src/power.o.d ${OBJECTDIR}/src/uart.o.d ${OBJECTDIR}/src/wire.o.d ${OBJECTDIR}/src/main.o.d ${OBJECTDIR}/src/serial.o.d ${OBJECTDIR}/src/nichrome.o.d ${OBJECTDIR}/src/testing.o.d ${OBJECTDIR}/src/command.o.d ${OBJECTDIR}/src/mem.o.d ${OBJECTDIR}/src/clock.o.d ${OBJECTDIR}/src/storage.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/comms.o ${OBJECTDIR}/src/helium.o ${OBJECTDIR}/src/iomapping.o ${OBJECTDIR}/src/myprintf.o ${OBJECTDIR}/src/payload.o ${OBJECTDIR}/src/power.o ${OBJECTDIR}/src/uart.o ${OBJECTDIR}/src/wire.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/nichrome.o ${OBJECTDIR}/src/testing.o ${OBJECTDIR}/src/command.o ${OBJECTDIR}/src/mem.o ${OBJECTDIR}/src/clock.o
+OBJECTFILES=${OBJECTDIR}/src/FreeRTOS/croutine.o ${OBJECTDIR}/src/FreeRTOS/heap_1.o ${OBJECTDIR}/src/FreeRTOS/list.o ${OBJECTDIR}/src/FreeRTOS/port.o ${OBJECTDIR}/src/FreeRTOS/queue.o ${OBJECTDIR}/src/FreeRTOS/tasks.o ${OBJECTDIR}/src/FreeRTOS/timers.o ${OBJECTDIR}/src/FreeRTOS/portasm_PIC24.o ${OBJECTDIR}/src/comms.o ${OBJECTDIR}/src/helium.o ${OBJECTDIR}/src/iomapping.o ${OBJECTDIR}/src/myprintf.o ${OBJECTDIR}/src/payload.o ${OBJECTDIR}/src/power.o ${OBJECTDIR}/src/uart.o ${OBJECTDIR}/src/wire.o ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/serial.o ${OBJECTDIR}/src/nichrome.o ${OBJECTDIR}/src/testing.o ${OBJECTDIR}/src/command.o ${OBJECTDIR}/src/mem.o ${OBJECTDIR}/src/clock.o ${OBJECTDIR}/src/storage.o
 
 # Source Files
-SOURCEFILES=src/FreeRTOS/croutine.c src/FreeRTOS/heap_1.c src/FreeRTOS/list.c src/FreeRTOS/port.c src/FreeRTOS/queue.c src/FreeRTOS/tasks.c src/FreeRTOS/timers.c src/FreeRTOS/portasm_PIC24.S src/comms.c src/helium.c src/iomapping.c src/myprintf.c src/payload.c src/power.c src/uart.c src/wire.c src/main.c src/serial.c src/nichrome.c src/testing.c src/command.c src/mem.c src/clock.c
+SOURCEFILES=src/FreeRTOS/croutine.c src/FreeRTOS/heap_1.c src/FreeRTOS/list.c src/FreeRTOS/port.c src/FreeRTOS/queue.c src/FreeRTOS/tasks.c src/FreeRTOS/timers.c src/FreeRTOS/portasm_PIC24.S src/comms.c src/helium.c src/iomapping.c src/myprintf.c src/payload.c src/power.c src/uart.c src/wire.c src/main.c src/serial.c src/nichrome.c src/testing.c src/command.c src/mem.c src/clock.c src/storage.c
 
 
 CFLAGS=
@@ -211,6 +211,12 @@ ${OBJECTDIR}/src/clock.o: src/clock.c  nbproject/Makefile-${CND_CONF}.mk
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/clock.c  -o ${OBJECTDIR}/src/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/clock.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I"./include" -I"./include/FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/src/clock.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
+${OBJECTDIR}/src/storage.o: src/storage.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/src 
+	@${RM} ${OBJECTDIR}/src/storage.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  src/storage.c  -o ${OBJECTDIR}/src/storage.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/storage.o.d"      -g -D__DEBUG -D__MPLAB_DEBUGGER_ICD3=1  -omf=elf -O0 -I"." -I"./include" -I"./include/FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/src/storage.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
 else
 ${OBJECTDIR}/src/FreeRTOS/croutine.o: src/FreeRTOS/croutine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} ${OBJECTDIR}/src/FreeRTOS 
@@ -343,6 +349,12 @@ ${OBJECTDIR}/src/clock.o: src/clock.c  nbproject/Makefile-${CND_CONF}.mk
 	@${RM} ${OBJECTDIR}/src/clock.o.d 
 	${MP_CC} $(MP_EXTRA_CC_PRE)  src/clock.c  -o ${OBJECTDIR}/src/clock.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/clock.o.d"      -g -omf=elf -O0 -I"." -I"./include" -I"./include/FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off
 	@${FIXDEPS} "${OBJECTDIR}/src/clock.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
+	
+${OBJECTDIR}/src/storage.o: src/storage.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} ${OBJECTDIR}/src 
+	@${RM} ${OBJECTDIR}/src/storage.o.d 
+	${MP_CC} $(MP_EXTRA_CC_PRE)  src/storage.c  -o ${OBJECTDIR}/src/storage.o  -c -mcpu=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/src/storage.o.d"      -g -omf=elf -O0 -I"." -I"./include" -I"./include/FreeRTOS" -DMPLAB_PIC24_PORT -msmart-io=1 -Wall -msfr-warn=off
+	@${FIXDEPS} "${OBJECTDIR}/src/storage.o.d" $(SILENT)  -rsi ${MP_CC_DIR}../ 
 	
 endif
 

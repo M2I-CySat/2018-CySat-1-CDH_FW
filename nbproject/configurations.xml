@@ -35,6 +35,7 @@
       <itemPath>include/command.h</itemPath>
       <itemPath>include/mem.h</itemPath>
       <itemPath>include/clock.h</itemPath>
+      <itemPath>include/storage.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -68,6 +69,7 @@
       <itemPath>src/command.c</itemPath>
       <itemPath>src/mem.c</itemPath>
       <itemPath>src/clock.c</itemPath>
+      <itemPath>src/storage.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
