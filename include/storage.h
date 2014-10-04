@@ -26,10 +26,10 @@ extern "C" {
         WRITE_CONFIG,       //copy LENGTH from OPERAND to OFFSET
         READ_CONFIG,        //copy LENGTH from OFFSET to OPERAND
         CLEAR_HEAP,         //Clear the heap
-    } storageDriverCommandTypes;
+    } storageDriverCommandType;
 
     typedef struct {
-        storageDriverCommandTypes command;
+        storageDriverCommandType command;
         unsigned char * operand;
         unsigned int offset;
         unsigned int length;
@@ -40,16 +40,16 @@ extern "C" {
     void unpackHousekeeping(unsigned char *, powerData *);
 
     /*queue up a command*/
-    void sendStorageDriverCommand(storageDriverCommand, unsigned char *, unsigned int, unsigned int, unsigned char *);
+    int sendStorageDriverCommand(storageDriverCommandType, unsigned char *, unsigned int, unsigned int, unsigned char *);
 
     void startStorageDriverTask();
 
 #define HOUSEKEEPING_LENGTH 32 /*length of packed housekeeping*/
-#define pushHousekeepingHeap(src) sendStorageDriverCommand(PUSH_HEAP, src, 0, HOUSEKEEPING_LENGTH)
+#define pushHousekeepingHeap(src) sendStorageDriverCommand(PUSH_HEAP, src, 0, HOUSEKEEPING_LENGTH, flag)
 #define popHousekeepingHeap(dest, flag) sendStorageDriverCommand(PUSH_HEAP, dest, 0, HOUSEKEEPING_LENGTH, flag)
 
-#define writeConfig(src, offset, length) sendStorageDriverCommand(WRITE_CONFIG, src, offset, length)
-#define readConfig(dest, offset, length, flag) sendStorageDriverCommand(READ_CONFIG, src, offset, length, flag)
+#define writeConfig(src, offset, length, flag) sendStorageDriverCommand(WRITE_CONFIG, src, offset, length, flag)
+#define readConfig(dest, offset, length, flag) sendStorageDriverCommand(READ_CONFIG, dest, offset, length, flag)
 
     /*Data sizes and offsets*/
 

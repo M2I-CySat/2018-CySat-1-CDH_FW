@@ -29,7 +29,7 @@
 
 #define systemPRIORITY_INIT     ( systemPRIORITY_BASE + 40 )
 
-#define systemPRIORITY_STORAGE  ( systemPRIORITY_BASE + 45 )
+#define systemPRIORITY_STORAGE  ( systemPRIORITY_BASE + 4 )
 
 #define systemPRIORITY_NICHROME ( systemPRIORITY_BASE + 50 )
 

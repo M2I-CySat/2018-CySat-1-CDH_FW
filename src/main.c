@@ -19,6 +19,7 @@
 #include "nichrome.h"
 #include "command.h"
 #include "clock.h"
+#include "storage.h"
 #include "system.h"
 //#include "rtc.h"
 
@@ -115,7 +116,6 @@ int main( void )
 #if enInit
     init();
 #endif
-
     /* No idea about this one*/
 //    vCommsStartTask();
 
@@ -187,6 +187,8 @@ static void initTask(void * params) {
 
     vConsolePrintf("Starting Command Handling\r\n");
     xStartUart1CommandHandling();
+
+    startStorageDriverTask();
 
     while(1){
         vTaskDelay(10000);

@@ -31,21 +31,52 @@ static void prvDoWrite(unsigned char *, unsigned int, unsigned int, unsigned cha
 void startStorageDriverTask()
 {
     messageQueue = xQueueCreate(16, sizeof(storageDriverCommand));
-    xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &xTaskHandle);
+    vConsolePrintf("Starting storage stuff\r\n");
+//    xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
+//    xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE + 1, NULL);
 }
 
 void storageTestTask()
 {
-    char testString = "Successful test";
+    char * testString = "Successful test";
     char testBuffer[16];
+    char flag = pdFALSE;
     memset(testBuffer, 0, 16);
+
     vConsolePrintf("Storage test task started...\r\n");
 
+    writeConfig(testString, 44, strlen(testString), &flag);
 
+    while (flag == pdFALSE){}
+    flag == pdFALSE;
+
+    vConsolePrintf("Reading back...\r\n");
+    readConfig(testBuffer, 44, strlen(testString), &flag);
+
+    while (flag == pdFALSE){}
+
+    vConsolePrintf("Flag set to true. Operation complete. Buffer:\r\n%s\r\n", testBuffer);
 
     for(;;);
 }
-void prvStorageTask()
+
+int sendStorageDriverCommand(
+        storageDriverCommandType type,
+        unsigned char * operand,
+        unsigned int offset,
+        unsigned int length,
+        unsigned char * flag)
+{
+    storageDriverCommand message;
+    message.command = type;
+    message.operand = operand;
+    message.offset = offset;
+    message.length = length;
+    message.completed = flag;
+    return xQueueSend(messageQueue, &message, portMAX_DELAY);
+}
+
+static void prvStorageTask()
 {
     for(;;)
     {
