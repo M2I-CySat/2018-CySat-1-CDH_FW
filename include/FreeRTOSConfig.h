@@ -89,7 +89,7 @@
 #define configCPU_CLOCK_HZ              ( ( unsigned long ) 4000000 )  /* Fosc / 2 */
 #define configMAX_PRIORITIES            ( ( unsigned portBASE_TYPE ) 4 )
 #define configMINIMAL_STACK_SIZE        ( 200 )
-#define configTOTAL_HEAP_SIZE           ( ( size_t ) 5120 )
+#define configTOTAL_HEAP_SIZE           ( ( size_t ) 10240 )
 //#define configTOTAL_HEAP_SIZE           ( ( size_t ) 8096 )
 #define configMAX_TASK_NAME_LEN         ( 4 )
 #define configUSE_16_BIT_TICKS          1

@@ -151,6 +151,7 @@
         <property key="preprocessor-macros" value="MPLAB_PIC24_PORT"/>
         <property key="scalar-model" value="default"/>
         <property key="use-cci" value="false"/>
+        <appendMe value="-mlarge-data"/>
       </C30>
       <C30-AS>
         <property key="assembler-symbols" value=""/>
@@ -174,6 +175,7 @@
         <property key="warning-level" value="emit-warnings"/>
       </C30-AS>
       <C30-LD>
+        <property key="additional-options-use-response-files" value="false"/>
         <property key="boot-eeprom" value="no_eeprom"/>
         <property key="boot-flash" value="no_flash"/>
         <property key="boot-ram" value="no_ram"/>
@@ -215,6 +217,7 @@
         <property key="legacy-libc" value="false"/>
         <property key="oXC16glb-macros" value=""/>
         <property key="output-file-format" value="elf"/>
+        <property key="save-temps" value="false"/>
       </C30Global>
       <ICD3PlatformTool>
         <property key="ADC 1" value="true"/>

@@ -31,33 +31,35 @@ static void prvDoWrite(unsigned char *, unsigned int, unsigned int, unsigned cha
 void startStorageDriverTask()
 {
     messageQueue = xQueueCreate(16, sizeof(storageDriverCommand));
-    vConsolePrintf("Starting storage stuff\r\n");
-//    xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
-//    xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE + 1, NULL);
+    vConsolePrintf("Starting storage driver...");
+    xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
+    xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE - 200, NULL, systemPRIORITY_TEST, NULL);
 }
 
 void storageTestTask()
 {
-    char * testString = "Successful test";
-    char testBuffer[16];
-    char flag = pdFALSE;
+    char * testString = "Successful sanity check";
+    char testBuffer[32];
+    volatile char flag = pdFALSE;
+    vConsolePrintf("Storage test task started...\r\n");
+    
     memset(testBuffer, 0, 16);
 
-    vConsolePrintf("Storage test task started...\r\n");
-
-    writeConfig(testString, 44, strlen(testString), &flag);
-
+    flag = pdFALSE;
+    writeConfig(testString, 0x20, strlen(testString), &flag);
     while (flag == pdFALSE){}
-    flag == pdFALSE;
 
     vConsolePrintf("Reading back...\r\n");
-    readConfig(testBuffer, 44, strlen(testString), &flag);
 
+    flag = pdFALSE;
+    readConfig(testBuffer, 0x40, strlen(testString), &flag);
     while (flag == pdFALSE){}
 
-    vConsolePrintf("Flag set to true. Operation complete. Buffer:\r\n%s\r\n", testBuffer);
+    vConsolePrintf("Flag set to true. Operation complete. Buffer: '%s'\r\n", testBuffer);
 
-    for(;;);
+    for(;;) {
+        vTaskDelay(10000);
+    }
 }
 
 int sendStorageDriverCommand(
@@ -97,7 +99,7 @@ static void prvStorageTask()
 static void prvDoRead(unsigned char * dst, unsigned int offset, unsigned int length, unsigned char * completed)
 {
     vFRAMRead(offset, length, dst);
-    *completed = pdTRUE;
+    *completed = 7;
 }
 static void prvDoWrite(unsigned char * src, unsigned int offset, unsigned int length, unsigned char * completed)
 {

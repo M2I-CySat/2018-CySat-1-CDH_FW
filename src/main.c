@@ -33,17 +33,6 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define FIRST_BOOT      0x000000
 #define ANTENNA_STATUS  0x000001
 
-//feature defines. 0 to disable
-#define enUart              1
-#define enConsoleCommand    1
-#define enRadioCommand      0
-#define enWire              1
-#define enPowerTest         0
-#define enUartTest          0
-#define enPayload           0
-#define enAutoBurn          0
-#define enMem               1
-#define enClock             1
 
 /*Use actual init system. Disables all other defines*/
 #define enInit              1
@@ -59,6 +48,19 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 #define enAutoBurn          0
 #define enMem               0
 #define enClock             0
+
+#else
+//feature defines. 0 to disable
+#define enUart              1
+#define enConsoleCommand    1
+#define enRadioCommand      0
+#define enWire              1
+#define enPowerTest         0
+#define enUartTest          0
+#define enPayload           0
+#define enAutoBurn          0
+#define enMem               1
+#define enClock             1
 #endif
 
 /*Init system config*/
