@@ -54,13 +54,15 @@ extern "C" {
     /*Data sizes and offsets*/
 
 #define HEAP_BEGIN 0x400
-#define CONFIG_BEGIN 0x400
+#define CONFIG_BEGIN 0x00
 
 #define FIRST_BOOT_FLAG_LENGTH 1
 #define ANTENNA_DEPLOY_FLAG_LENGTH 1
 
-#define FIRST_BOOT_FLAG_OFFSET (HEAP_BEGIN)
+#define FIRST_BOOT_FLAG_OFFSET (CONFIG_BEGIN)
 #define ANTENNA_DEPLOY_FLAG_OFFSET (FIRST_BOOT_FLAG_LENGTH + FIRST_BOOT_FLAG_OFFSET)
+
+#define FOOTPRINT_DATA_SIZE 64
     
 
     void storageTestTask();
