@@ -72,6 +72,7 @@ _CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
 static void initTask(void * params);
 static void init();
 
+
 int main( void )
 {
 
@@ -190,7 +191,9 @@ static void initTask(void * params) {
     vConsolePrintf("Starting Command Handling\r\n");
     xStartUart1CommandHandling();
 
+    vConsolePrintf("Starting storage driver task\r\n");
     startStorageDriverTask();
+
 
     while(1){
         vTaskDelay(10000);
@@ -208,4 +211,3 @@ void vApplicationIdleHook( void )
 	/* Schedule the co-routines from within the idle task hook. */
 //	vCoRoutineSchedule();
 }
-

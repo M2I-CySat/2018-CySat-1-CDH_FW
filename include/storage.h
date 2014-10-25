@@ -36,17 +36,24 @@ extern "C" {
         unsigned char * completed; /*Flag set upon completion. Used to signal a completed read*/
     } storageDriverCommand;
 
+#define HOUSEKEEPING_LENGTH 32 /*length of packed housekeeping*/
+#define FOOTPRINT_DATA_SIZE 32
+    
     void packHousekeeping(powerData *, unsigned char *);
     void unpackHousekeeping(unsigned char *, powerData *);
+
+    void pushFootprintBlocking(unsigned char *);
+    void popFootprintBlocking(unsigned char *);
+    void writeConfigBlocking(unsigned char *, unsigned int, unsigned int);
+    void readConfigBlocking(unsigned char *, unsigned int, unsigned int);
 
     /*queue up a command*/
     int sendStorageDriverCommand(storageDriverCommandType, unsigned char *, unsigned int, unsigned int, unsigned char *);
 
     void startStorageDriverTask();
 
-#define HOUSEKEEPING_LENGTH 32 /*length of packed housekeeping*/
-#define pushHousekeepingHeap(src) sendStorageDriverCommand(PUSH_HEAP, src, 0, 0, flag)
-#define popHousekeepingHeap(dest, flag) sendStorageDriverCommand(PUSH_HEAP, dest, 0, 0, flag)
+#define pushFootprint(src, flag) sendStorageDriverCommand(PUSH_HEAP, src, 0, 0, flag)
+#define popFootprint(dest, flag) sendStorageDriverCommand(POP_HEAP, dest, 0, 0, flag)
 
 #define writeConfig(src, offset, length, flag) sendStorageDriverCommand(WRITE_CONFIG, src, offset, length, flag)
 #define readConfig(dest, offset, length, flag) sendStorageDriverCommand(READ_CONFIG, dest, offset, length, flag)
@@ -62,7 +69,6 @@ extern "C" {
 #define FIRST_BOOT_FLAG_OFFSET (CONFIG_BEGIN)
 #define ANTENNA_DEPLOY_FLAG_OFFSET (FIRST_BOOT_FLAG_LENGTH + FIRST_BOOT_FLAG_OFFSET)
 
-#define FOOTPRINT_DATA_SIZE 64
     
 
     void storageTestTask();

@@ -52,7 +52,7 @@ static void upHeap(unsigned int);
 static void downHeap(unsigned int);
 
 /* Use raw offsets */
-static uint32_t getFootprintTimestamp(unsigned int);
+static long getFootprintTimestamp(unsigned int);
 
 static void upHeap(unsigned int cursor)
 {
@@ -70,10 +70,12 @@ static void upHeap(unsigned int cursor)
 static void heapInsert(unsigned char * fp)
 {
     unsigned int cursor = 0;
+    unsigned char buffer[4];
     vFRAMWrite(HEAP_BEGIN + (heapSize * FOOTPRINT_DATA_SIZE), FOOTPRINT_DATA_SIZE, fp);
     cursor = heapSize++;
 
     upHeap(cursor);
+    vFRAMRead(HEAP_BEGIN, 4, buffer);
 }
 
 static void downHeap(unsigned int cursor)
@@ -113,24 +115,24 @@ static void heapPop(unsigned char * fp)
     downHeap(cursor);
 }
 
-static uint32_t getFootprintTimestamp(unsigned int offest)
+static long getFootprintTimestamp(unsigned int offest)
 {
-    uint32_t timestamp = 0;
+    long timestamp = 0;
     unsigned char buffer[4] = {0,0,0,0};
-    
     vFRAMRead(offest, 4, buffer);
-    timestamp |= buffer[3];
-    timestamp |= (buffer[2] << 8);
-    timestamp |= (buffer[1] << 16);
-    timestamp |= (buffer[0] << 24);
+
+    timestamp += ((unsigned long) buffer[3]);
+    timestamp += (((unsigned long) buffer[2]) << 8);
+    timestamp += (((unsigned long) buffer[1]) << 16);
+    timestamp += (((unsigned long) buffer[0]) << 24);
     
     return timestamp;
 }
 
 static int compareFootprintTimestamps(unsigned int a, unsigned int b)
 {
-    uint32_t timestampA = getFootprintTimestamp((a * FOOTPRINT_DATA_SIZE) + HEAP_BEGIN);
-    uint32_t timestampB = getFootprintTimestamp(b * FOOTPRINT_DATA_SIZE + HEAP_BEGIN);
+    long timestampA = getFootprintTimestamp((a * FOOTPRINT_DATA_SIZE) + HEAP_BEGIN);
+    long timestampB = getFootprintTimestamp((b * FOOTPRINT_DATA_SIZE) + HEAP_BEGIN);
 
     if (timestampA == timestampB)
         return 0;
@@ -160,29 +162,48 @@ void startStorageDriverTask()
     messageQueue = xQueueCreate(16, sizeof(storageDriverCommand));
     vConsolePrintf("Starting storage driver...");
     xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
+
     xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE - 200, NULL, systemPRIORITY_TEST, NULL);
 }
 
 void storageTestTask()
 {
     char * testString = "Successful sanity check";
-    char testBuffer[32];
-    volatile char flag = pdFALSE;
-    vConsolePrintf("Storage test task started...\r\n");
-    
-    memset(testBuffer, 0, 16);
+    char testBuffer[FOOTPRINT_DATA_SIZE];
+    char testValues[12] = {5,1,9,3,4,2,5,10,12,18,14,10};
+    int i;
 
-    flag = pdFALSE;
-    writeConfig(testString, 0x20, strlen(testString), &flag);
-    while (flag == pdFALSE){}
+    vConsolePrintf("Storage sanity check started...\r\n");
+    memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
 
+    /* Direct write sanity check */
+    vConsolePrintf("Writing ``%s''\r\n", testString);
+    writeConfigBlocking(testString, 0x20, strlen(testString));
     vConsolePrintf("Reading back...\r\n");
+    readConfigBlocking(testBuffer, 0x20, strlen(testString));
+    vConsolePrintf("Read back: '%s'\r\n\r\n", testBuffer);
+    /* End direct write sanity check*/
+    
+    /* Heap sanity check */
+    memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
+    vConsolePrintf("Heap sanity check.\r\nWriting test footprints: ");
+    for (i = 0; i < 12; i++)
+    {
+        testBuffer[3] = testValues[i];
+        vConsolePrintf("%d ", testValues[i]);
+        pushFootprintBlocking(testBuffer);
+    }
 
-    flag = pdFALSE;
-    readConfig(testBuffer, 0x40, strlen(testString), &flag);
-    while (flag == pdFALSE){}
+    memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
+    vConsolePrintf("\r\nReading test footprints: ");
+    for (i = 0; i < 12; i++)
+    {
+        popFootprintBlocking(testBuffer);
+        vConsolePrintf("%d ", testBuffer[3]);
+    }
 
-    vConsolePrintf("Flag set to true. Operation complete. Buffer: '%s'\r\n", testBuffer);
+
+    /* End heap sanity check */
 
     for(;;) {
         vTaskDelay(10000);
@@ -219,10 +240,10 @@ static void prvStorageTask()
                     prvDoWrite(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
                     break;
                 case(PUSH_HEAP):
-                    heapInsert(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
+                    prvDoHeapInsert(messageBuffer.operand, messageBuffer.completed);
                     break;
-                case(WRITE_CONFIG):
-                    prvDoWrite(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
+                case(POP_HEAP):
+                    prvDoHeapPop(messageBuffer.operand, messageBuffer.completed);
                     break;
             }
         }
@@ -232,20 +253,49 @@ static void prvStorageTask()
 static void prvDoRead(unsigned char * dst, unsigned int offset, unsigned int length, unsigned char * completed)
 {
     vFRAMRead(offset, length, dst);
-    *completed = 7;
+    if (completed != 0)
+        *completed = 7;
 }
 static void prvDoWrite(unsigned char * src, unsigned int offset, unsigned int length, unsigned char * completed)
 {
     vFRAMWrite(offset, length, src);
-    *completed = pdTRUE;
+    if (completed != 0)
+        *completed = pdTRUE;
 }
 static void prvDoHeapInsert(unsigned char * src, unsigned char * completed)
 {
     heapInsert(src);
-    *completed = pdTRUE;
+    if (completed != 0)
+        *completed = pdTRUE;
 }
 static void prvDoHeapPop(unsigned char * dst, unsigned char * completed)
 {
     heapPop(dst);
-    *completed = pdTRUE;
+    if (completed != 0)
+        *completed = pdTRUE;
+}
+
+void pushFootprintBlocking(unsigned char * fp)
+{
+    unsigned char flag = pdFALSE;
+    pushFootprint(fp, &flag);
+    while (flag == pdFALSE) {}
+}
+void popFootprintBlocking(unsigned char * fp)
+{
+    unsigned char flag = pdFALSE;
+    popFootprint(fp, &flag);
+    while (flag == pdFALSE) {}
+}
+void writeConfigBlocking(unsigned char * src, unsigned int offset, unsigned int length)
+{
+    unsigned char flag = pdFALSE;
+    writeConfig(src, offset, length, &flag);
+    while (flag == pdFALSE) {}
+}
+void readConfigBlocking(unsigned char * dst, unsigned int offset, unsigned int length)
+{
+    unsigned char flag = pdFALSE;
+    readConfig(dst, offset, length, &flag);
+    while (flag == pdFALSE) {}
 }
