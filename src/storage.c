@@ -84,26 +84,34 @@ static void downHeap(unsigned int cursor)
     l = (cursor * 2) + 1;
     r = (cursor * 2) + 2;
 
-    if ((l >= heapSize) || (r >= heapSize))
+    if (r > heapSize) /* No children */
         return;
-
-    register int cmp_l, cmp_r, cmp_c;
-    cmp_l = compareFootprintTimestamps(cursor, l);
-    cmp_r = compareFootprintTimestamps(cursor, r);
-
-    if ((cmp_l != -1) && (cmp_r != -1))
-        return; /* Cursor goes before both children. Heap is good */
-
-    cmp_c = compareFootprintTimestamps(l, r);
-    if (cmp_c == 1) /* Left goes before right */
+    else if (r == heapSize) /* Only has one child */
     {
-        swapFootprints(l, cursor); /* Continue with left */
-        downHeap(l);
+        if (compareFootprintTimestamps(cursor, l) == -1)
+            swapFootprints(cursor, l);
+        return;
     }
     else
     {
-        swapFootprints(r, cursor); /* Continue with right*/
-        downHeap(r);
+        register int cmp_l, cmp_r, cmp_c;
+        cmp_l = compareFootprintTimestamps(cursor, l);
+        cmp_r = compareFootprintTimestamps(cursor, r);
+
+        if ((cmp_l != -1) && (cmp_r != -1))
+            return; /* Cursor goes before both children. Heap is good */
+
+        cmp_c = compareFootprintTimestamps(l, r);
+        if (cmp_c == 1) /* Left goes before right */
+        {
+            swapFootprints(l, cursor); /* Continue with left */
+            downHeap(l);
+        }
+        else
+        {
+            swapFootprints(r, cursor); /* Continue with right*/
+            downHeap(r);
+        }
     }
 }
 static void heapPop(unsigned char * fp)
@@ -170,7 +178,7 @@ void storageTestTask()
 {
     char * testString = "Successful sanity check";
     char testBuffer[FOOTPRINT_DATA_SIZE];
-    char testValues[12] = {5,1,9,3,4,2,5,10,12,18,14,10};
+    char testValues[10] = {5,3,2,8,7,1,9,5,6,4};
     int i;
 
     vConsolePrintf("Storage sanity check started...\r\n");
@@ -187,7 +195,7 @@ void storageTestTask()
     /* Heap sanity check */
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
     vConsolePrintf("Heap sanity check.\r\nWriting test footprints: ");
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < 10; i++)
     {
         testBuffer[3] = testValues[i];
         vConsolePrintf("%d ", testValues[i]);
@@ -196,14 +204,28 @@ void storageTestTask()
 
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
     vConsolePrintf("\r\nReading test footprints: ");
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < 10; i++)
     {
         popFootprintBlocking(testBuffer);
         vConsolePrintf("%d ", testBuffer[3]);
     }
-
-
+    vConsolePrintf("\r\nHeap sanity check complete\r\n");
     /* End heap sanity check */
+
+    vConsolePrintf("Beginning heap torture test...\r\nPushing Values: ");
+    for (i = 1; i <= 100; i++)
+    {
+        vConsolePrintf("%d ", i);
+        testBuffer[3] = i;
+        pushFootprintBlocking(testBuffer);
+    }
+    vConsolePrintf("\r\nPopping Values: ");
+    for (i = 1; i <= 100; i++)
+    {
+        popFootprintBlocking(testBuffer);
+        vConsolePrintf("%d ", testBuffer[3]);
+    }
+    vConsolePrintf("\r\n");
 
     for(;;) {
         vTaskDelay(10000);
