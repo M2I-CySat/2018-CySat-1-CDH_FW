@@ -45,8 +45,8 @@ extern "C" {
     void startStorageDriverTask();
 
 #define HOUSEKEEPING_LENGTH 32 /*length of packed housekeeping*/
-#define pushHousekeepingHeap(src) sendStorageDriverCommand(PUSH_HEAP, src, 0, HOUSEKEEPING_LENGTH, flag)
-#define popHousekeepingHeap(dest, flag) sendStorageDriverCommand(PUSH_HEAP, dest, 0, HOUSEKEEPING_LENGTH, flag)
+#define pushHousekeepingHeap(src) sendStorageDriverCommand(PUSH_HEAP, src, 0, 0, flag)
+#define popHousekeepingHeap(dest, flag) sendStorageDriverCommand(PUSH_HEAP, dest, 0, 0, flag)
 
 #define writeConfig(src, offset, length, flag) sendStorageDriverCommand(WRITE_CONFIG, src, offset, length, flag)
 #define readConfig(dest, offset, length, flag) sendStorageDriverCommand(READ_CONFIG, dest, offset, length, flag)

@@ -38,6 +38,8 @@ static unsigned int heapSize = 0;
 static void prvStorageTask();
 static void prvDoRead(unsigned char *, unsigned int, unsigned int, unsigned char *);
 static void prvDoWrite(unsigned char *, unsigned int, unsigned int, unsigned char *);
+static void prvDoHeapInsert(unsigned char *, unsigned char *);
+static void prvDoHeapPop(unsigned char *, unsigned char *);
 
 static void heapInsert(unsigned char *);
 static void heapPop(unsigned char *);
@@ -216,6 +218,12 @@ static void prvStorageTask()
                 case(WRITE_CONFIG):
                     prvDoWrite(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
                     break;
+                case(PUSH_HEAP):
+                    heapInsert(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
+                    break;
+                case(WRITE_CONFIG):
+                    prvDoWrite(messageBuffer.operand, messageBuffer.offset, messageBuffer.length, messageBuffer.completed);
+                    break;
             }
         }
     }
@@ -229,5 +237,15 @@ static void prvDoRead(unsigned char * dst, unsigned int offset, unsigned int len
 static void prvDoWrite(unsigned char * src, unsigned int offset, unsigned int length, unsigned char * completed)
 {
     vFRAMWrite(offset, length, src);
+    *completed = pdTRUE;
+}
+static void prvDoHeapInsert(unsigned char * src, unsigned char * completed)
+{
+    heapInsert(src);
+    *completed = pdTRUE;
+}
+static void prvDoHeapPop(unsigned char * dst, unsigned char * completed)
+{
+    heapPop(dst);
     *completed = pdTRUE;
 }
