@@ -26,8 +26,8 @@
 //JTAG off, Code Protect off, Write Proect off, COE mode off, WDT off
 _CONFIG1( JTAGEN_OFF & GCP_OFF & GWRP_OFF & COE_OFF & FWDTEN_OFF )
 //Clock switching/monitor off, Oscillator (RC15) on,
-// Oscillator in HS mode, Use primary oscillator (no PLL)
-_CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRI )
+// Oscillator in HS mode, Use primary oscillator (with PLL)
+_CONFIG2( FCKSM_CSDCMD & OSCIOFNC_ON & POSCMOD_HS & FNOSC_PRIPLL )
 
 /*Address Defines*/
 #define FIRST_BOOT      0x000000

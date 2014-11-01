@@ -33,23 +33,31 @@ static storageDriverCommand messageBuffer;
 static unsigned char heapBuffer1 [FOOTPRINT_DATA_SIZE];
 static unsigned char heapBuffer2 [FOOTPRINT_DATA_SIZE];
 
-static unsigned int heapSize = 0;
 
 static void prvStorageTask();
 static void prvDoRead(unsigned char *, unsigned int, unsigned int, unsigned char *);
 static void prvDoWrite(unsigned char *, unsigned int, unsigned int, unsigned char *);
 static void prvDoHeapInsert(unsigned char *, unsigned char *);
 static void prvDoHeapPop(unsigned char *, unsigned char *);
+static void prvDoClearHeap();
+
+static void setHeapVolatile();
+static void setHeapNotVolatile();
 
 static void heapInsert(unsigned char *);
 static void heapPop(unsigned char *);
 
+#ifdef USE_IMPLEMENTATION_HEAP
 /* These use heap indices */
 /* Returns 1 if a comes before b, -1 if b comes before a, zero if equal*/
 static int compareFootprintTimestamps(unsigned int, unsigned int);
 static void swapFootprints(unsigned int, unsigned int);
 static void upHeap(unsigned int);
 static void downHeap(unsigned int);
+
+static unsigned int getHeapSize();
+static unsigned int heapSize = 0;
+static void writeHeapSize();
 
 /* Use raw offsets */
 static long getFootprintTimestamp(unsigned int);
@@ -71,11 +79,13 @@ static void heapInsert(unsigned char * fp)
 {
     unsigned int cursor = 0;
     unsigned char buffer[4];
+    heapSize = getHeapSize();
     vFRAMWrite(HEAP_BEGIN + (heapSize * FOOTPRINT_DATA_SIZE), FOOTPRINT_DATA_SIZE, fp);
     cursor = heapSize++;
 
     upHeap(cursor);
     vFRAMRead(HEAP_BEGIN, 4, buffer);
+    writeHeapSize();
 }
 
 static void downHeap(unsigned int cursor)
@@ -117,10 +127,12 @@ static void downHeap(unsigned int cursor)
 static void heapPop(unsigned char * fp)
 {
     unsigned int cursor = 0;
+    heapSize = getHeapSize();
     vFRAMRead(HEAP_BEGIN, FOOTPRINT_DATA_SIZE, fp);
 
     swapFootprints(cursor, --heapSize);
     downHeap(cursor);
+    writeHeapSize();
 }
 
 static long getFootprintTimestamp(unsigned int offest)
@@ -165,12 +177,12 @@ static void swapFootprints(unsigned int a, unsigned int b)
     vFRAMWrite(offsetB, FOOTPRINT_DATA_SIZE, heapBuffer1);
 }
 
+#endif
 void startStorageDriverTask()
 {
     messageQueue = xQueueCreate(16, sizeof(storageDriverCommand));
-    vConsolePrintf("Starting storage driver...");
+    vConsolePrintf("Starting storage driver...\r\n");
     xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
-
     xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE - 200, NULL, systemPRIORITY_TEST, NULL);
 }
 
@@ -181,6 +193,8 @@ void storageTestTask()
     char testValues[10] = {5,3,2,8,7,1,9,5,6,4};
     int i;
 
+    vTaskDelay(1000);
+
     vConsolePrintf("Storage sanity check started...\r\n");
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
 
@@ -189,7 +203,7 @@ void storageTestTask()
     writeConfigBlocking(testString, 0x20, strlen(testString));
     vConsolePrintf("Reading back...\r\n");
     readConfigBlocking(testBuffer, 0x20, strlen(testString));
-    vConsolePrintf("Read back: '%s'\r\n\r\n", testBuffer);
+    vConsolePrintf("Read back: ``%s''\r\n\r\n", testString);
     /* End direct write sanity check*/
     
     /* Heap sanity check */
@@ -210,22 +224,23 @@ void storageTestTask()
         vConsolePrintf("%d ", testBuffer[3]);
     }
     vConsolePrintf("\r\nHeap sanity check complete\r\n");
-    /* End heap sanity check */
 
     vConsolePrintf("Beginning heap torture test...\r\nPushing Values: ");
-    for (i = 1; i <= 100; i++)
+    for (i = 1; i <= 10; i++)
     {
         vConsolePrintf("%d ", i);
         testBuffer[3] = i;
         pushFootprintBlocking(testBuffer);
     }
     vConsolePrintf("\r\nPopping Values: ");
-    for (i = 1; i <= 100; i++)
+    for (i = 1; i <= 10; i++)
     {
         popFootprintBlocking(testBuffer);
         vConsolePrintf("%d ", testBuffer[3]);
     }
     vConsolePrintf("\r\n");
+
+    /* End heap sanity check */
 
     for(;;) {
         vTaskDelay(10000);
@@ -250,6 +265,19 @@ int sendStorageDriverCommand(
 
 static void prvStorageTask()
 {
+#ifdef USE_IMPLEMENTATION_HEAP
+    heapSize = getHeapSize();
+    vConsolePrintf("Existing heap size: %d\r\n", heapSize);
+    unsigned char heapVolatile = 0;
+    vFRAMRead(0x41, 1, &heapVolatile);
+    if (heapVolatile)
+    {
+        vConsolePrintf("Heap detected in volatile state! Clearing!\r\n");
+        heapSize = 0;
+        writeHeapSize();
+        setHeapNotVolatile();
+    }
+#endif
     for(;;)
     {
         if(xQueueReceive(messageQueue, &messageBuffer, portMAX_DELAY) == pdTRUE)
@@ -266,6 +294,9 @@ static void prvStorageTask()
                     break;
                 case(POP_HEAP):
                     prvDoHeapPop(messageBuffer.operand, messageBuffer.completed);
+                    break;
+                case(CLEAR_HEAP):
+                    prvDoClearHeap();
                     break;
             }
         }
@@ -286,16 +317,61 @@ static void prvDoWrite(unsigned char * src, unsigned int offset, unsigned int le
 }
 static void prvDoHeapInsert(unsigned char * src, unsigned char * completed)
 {
+    setHeapVolatile();
     heapInsert(src);
     if (completed != 0)
         *completed = pdTRUE;
+    setHeapNotVolatile();
 }
 static void prvDoHeapPop(unsigned char * dst, unsigned char * completed)
 {
+    setHeapVolatile();
     heapPop(dst);
     if (completed != 0)
         *completed = pdTRUE;
+    setHeapNotVolatile();
 }
+static void prvDoClearHeap()
+{
+    setHeapVolatile();
+    heapSize = 0;
+    writeHeapSize();
+    setHeapNotVolatile();
+    vConsolePrintf("Heap size set to 0\r\n");
+}
+
+static void setHeapVolatile()
+{
+    unsigned char flag = 0xff;
+    vFRAMWrite(0x41, 1, &flag);
+}
+static void setHeapNotVolatile()
+{
+    unsigned char flag = 0x00;
+    vFRAMWrite(0x41, 1, &flag);
+}
+static unsigned int getHeapSize()
+{
+    unsigned char buffer[4] = {0,0,0,0};
+    vFRAMRead(0x42, 4, buffer);
+
+    heapSize = 0;
+
+    heapSize += ((unsigned long) buffer[3]);
+    heapSize += (((unsigned long) buffer[2]) << 8);
+    heapSize += (((unsigned long) buffer[1]) << 16);
+    heapSize += (((unsigned long) buffer[0]) << 24);
+
+}
+static void writeHeapSize()
+{
+    unsigned char buffer[4];
+    buffer[3] = heapSize & 0x000000ff;
+    buffer[2] = (heapSize & 0x0000ff00) >> 8;
+    buffer[1] = (heapSize & 0x00ff0000) >> 16;
+    buffer[0] = (heapSize & 0xff000000) >> 24;
+    vFRAMWrite(0x42, 4, buffer);
+ }
 
 void pushFootprintBlocking(unsigned char * fp)
 {

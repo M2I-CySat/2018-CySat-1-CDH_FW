@@ -26,6 +26,7 @@
 #include <nichrome.h>
 #include <mem.h>
 #include <clock.h>
+#include "storage.h"
 
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -253,6 +254,13 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
             zeroRTC();
+        } else
+            nackLength();
+    }
+    else if(strncmp("CLEAR_HEAP", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
+        if (fieldCount == 3) {
+            sendMessage("ACK_COMMAND");
+            clearHeap();
         } else
             nackLength();
     }

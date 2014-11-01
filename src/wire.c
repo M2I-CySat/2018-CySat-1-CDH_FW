@@ -64,7 +64,7 @@
 #define wireACKWAITMIN 50
 
 /* Hacky way to adjust how long 1us is */
-#define wireDELAY_SCALE 10
+#define wireDELAY_SCALE 5
 
 static xQueueHandle xWireQueue;
 

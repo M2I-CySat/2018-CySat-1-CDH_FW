@@ -19,6 +19,9 @@ extern "C" {
 
 #include <power.h>
 #include <FreeRTOS.h>
+
+#define USE_IMPLEMENTATION_HEAP
+// #define USE_IMPLEMENTATION_RINGBUFFER
     
     typedef enum {
         PUSH_HEAP,          //push OPERAND to heap, LENGTH is unit size
@@ -57,6 +60,8 @@ extern "C" {
 
 #define writeConfig(src, offset, length, flag) sendStorageDriverCommand(WRITE_CONFIG, src, offset, length, flag)
 #define readConfig(dest, offset, length, flag) sendStorageDriverCommand(READ_CONFIG, dest, offset, length, flag)
+
+#define clearHeap() sendStorageDriverCommand(CLEAR_HEAP, 0, 0, 0, 0)
 
     /*Data sizes and offsets*/
 
