@@ -1,7 +1,5 @@
-
-nbproject/private*
-
-
+*.o
+*.elf
 ## Below is GitHub's default .gitignore
 
 #################
