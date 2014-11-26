@@ -8,6 +8,8 @@
 #include "croutine.h"
 #include "mem.h"
 
+#include <system.h>
+
 /* Application includes */
 
 /*Address Defines*/
@@ -50,16 +52,40 @@
 
 
 
+
 static void initTask(void * params);
 static void init();
 
 
 int main( void )
 {
-
+  
+    xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
 
     /* Will only reach here if there is insufficient heap available to start
     the scheduler. */
     return 0;
+}
+
+void initTask(void * params)
+{
+    int a = 8;
+    int b = 7;
+    int c = 9;
+    for (a = 0; a < b; a++)
+    {
+        c += a;
+    }
+    for(;;) {}
+}
+
+void vApplicationStackOverflowHook()
+{
+  for(;;) {}
+}
+
+void vApplicationMallocFailedHook()
+{
+  for(;;) {}
 }
