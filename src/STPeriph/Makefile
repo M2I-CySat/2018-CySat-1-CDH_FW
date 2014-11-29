@@ -4,7 +4,7 @@ OBJDUMP=arg-none-eabi-objdump
 
 OBJECTS=misc.o stm32f4xx_gpio.o stm32f4xx_rcc.o
 
-CMSIS_ROOT=/opt/cross/stm32f4/Drivers/CMSIS
+CMSIS_ROOT=../../CMSIS
 
 IFLAGS=-I../../include/
 IFLAGS+=-I../../include/FreeRTOS
@@ -15,7 +15,7 @@ IFLAGS+= -I$(CMSIS_ROOT)/Include
 CPPFLAGS+= $(IFLAGS)
 
 CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
-CFLAGS+= -mfpu=fpv4-sp-d16 -DSTM32F411xE -g
+CFLAGS+= -mfpu=fpv4-sp-d16 -DSTM32F411xE -g -DUSE_STDPERIPH_DRIVER
 
 ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 

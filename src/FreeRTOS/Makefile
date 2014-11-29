@@ -4,7 +4,7 @@ OBJDUMP=arg-none-eabi-objdump
 
 OBJECTS=list.o port.o queue.o tasks.o heap_1.o
 
-CMSIS_ROOT=/opt/cross/stm32f4/Drivers/CMSIS
+CMSIS_ROOT=../../CMSIS
 
 IFLAGS=-I../../include/
 IFLAGS+=-I../../include/FreeRTOS

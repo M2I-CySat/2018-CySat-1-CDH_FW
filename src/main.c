@@ -10,6 +10,11 @@
 
 #include <system.h>
 
+/* Hardware Includes */
+#include <stm32f4xx.h>
+#include <stm32f4xx_gpio.h>
+#include <stm32f4xx_rcc.h>
+
 /* Application includes */
 
 /*Address Defines*/
@@ -51,8 +56,6 @@
 #define BURN_DELAY          15 /*Seconds until antenna burn*/
 
 
-
-
 static void initTask(void * params);
 static void init();
 
@@ -70,14 +73,24 @@ int main( void )
 
 void initTask(void * params)
 {
-    int a = 8;
-    int b = 7;
-    int c = 9;
-    for (a = 0; a < b; a++)
+    GPIO_InitTypeDef GPIO_InitStructure;
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+    
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    
+    for(;;)
     {
-        c += a;
+        GPIO_SetBits(GPIOA, GPIO_Pin_5);
+        vTaskDelay(3000);
+        GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+        vTaskDelay(1000);
     }
-    for(;;) {}
 }
 
 void vApplicationStackOverflowHook()
