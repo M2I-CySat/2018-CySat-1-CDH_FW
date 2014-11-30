@@ -18,10 +18,11 @@
 #include "FreeRTOS.h"
 
 void serialInit();
-int xSerialGetChar(USART_TypeDef, unsigned char *, portTickType);
-int xSerialPutChar(USART_TypeDef, unsigned char, portTickType);
+int xSerialGetChar(USART_TypeDef *, unsigned char *, portTickType);
+int xSerialPutChar(USART_TypeDef *, unsigned char, portTickType);
 
 
 #define serialUSART2_BAUDRATE 9600
+#define serialTX_QUEUE_SIZE 256
 
 #endif

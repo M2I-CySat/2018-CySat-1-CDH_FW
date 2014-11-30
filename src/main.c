@@ -84,7 +84,9 @@ void initTask(void * params)
     
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     
-    //vUartStartTask();
+    vUartStartTask();
+    
+    vConsolePrintf("Hello, World");
     
     for(;;)
     {

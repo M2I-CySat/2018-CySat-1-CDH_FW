@@ -1,6 +1,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "FreeRTOSConfig.h"
 
 
 #include "stm32f4xx_usart.h"
@@ -53,7 +54,7 @@ void vUartStartTask( void )
 
 inline static portBASE_TYPE prvUartPut( USART_TypeDef * usart, char c )
 {
-    //TODO: put character into tx queue
+    xSerialPutChar(usart, c, 0);
 }
 
 inline static portBASE_TYPE prvUartPrint( USART_TypeDef * usart, char s[])

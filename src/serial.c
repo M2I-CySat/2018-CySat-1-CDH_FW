@@ -7,10 +7,15 @@
 #include "serial.h"
 
 #include "stm32f4xx_usart.h"
+#include "queue.h"
+#include "FreeRTOS.h"
 
+static xQueueHandle usart2TxChars;
 
 void serialInit()
 {
+    usart2TxChars = xQueueCreate(serialTX_QUEUE_SIZE, 1);
+    
     USART_InitTypeDef usartConfig;
     GPIO_InitTypeDef gpioConfig;
     
@@ -44,9 +49,37 @@ void serialInit()
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
     
-    for(;;)
+    /* Enable desired interrupts */
+    USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+    NVIC_EnableIRQ(USART2_IRQn);
+    /* Hardware configuration for USART2 complete */
+
+}
+
+int xSerialPutChar(USART_TypeDef * usart, unsigned char a, portTickType blocktime)
+{
+    if (usart == USART2)
     {
-        while (USART_GetFlagStatus(USART2, USART_FLAG_TXE) == RESET);
-        USART_SendData(USART2, 'a');
+        NVIC_SetPendingIRQ(USART2_IRQn);
+        return xQueueSend(usart2TxChars, &a, blocktime);
     }
+    return pdFALSE;
+}
+
+void USART2_IRQHandler()
+{
+    BaseType_t taskWoken = pdFALSE;
+    char c;
+    if (USART_GetITStatus( USART2, USART_IT_TXE) == SET)
+    {
+        if (xQueueReceiveFromISR(usart2TxChars, &c, &taskWoken) == pdTRUE)
+        {
+            USART_SendData(USART2, c);
+        }
+        else
+        {
+            USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+        }
+    }
+    portEND_SWITCHING_ISR(taskWoken);
 }
