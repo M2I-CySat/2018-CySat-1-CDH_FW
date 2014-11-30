@@ -9,6 +9,7 @@
 #include "stm32f4xx_usart.h"
 #include "queue.h"
 #include "FreeRTOS.h"
+#include "FreeRTOSConfig.h"
 
 static xQueueHandle usart2TxChars;
 
@@ -18,6 +19,7 @@ void serialInit()
     
     USART_InitTypeDef usartConfig;
     GPIO_InitTypeDef gpioConfig;
+    NVIC_InitTypeDef nvicConfig;
     
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -50,8 +52,11 @@ void serialInit()
     GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
     
     /* Enable desired interrupts */
-    USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
-    NVIC_EnableIRQ(USART2_IRQn);
+    nvicConfig.NVIC_IRQChannel = USART2_IRQn;
+    nvicConfig.NVIC_IRQChannelPreemptionPriority = configLIBRARY_KERNEL_INTERRUPT_PRIORITY;
+    nvicConfig.NVIC_IRQChannelSubPriority = 0;
+    nvicConfig.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&nvicConfig);
     /* Hardware configuration for USART2 complete */
 
 }
@@ -60,7 +65,7 @@ int xSerialPutChar(USART_TypeDef * usart, unsigned char a, portTickType blocktim
 {
     if (usart == USART2)
     {
-        NVIC_SetPendingIRQ(USART2_IRQn);
+        USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
         return xQueueSend(usart2TxChars, &a, blocktime);
     }
     return pdFALSE;
