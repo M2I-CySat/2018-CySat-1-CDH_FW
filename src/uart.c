@@ -7,12 +7,17 @@
 
 #include "uart.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 
 /*
  * NOTE: This file serves to create all of the put/print stuff as well as 
  * establish a "console" uart (vConsolePrintf). Currently, uart1 is usart2,
  * which is console, and uart2 is usart6 (probably radio)
+ * 
+ * The "serial.c/h" drivers are RTOS drivers. They provide RTOS access to the
+ * hardware. This file matches the CubeSat API; it abstracts the hardware to 
+ * CubeSat taxonomy (Console = UART1, Radio = UART2, etc.)
  */
 
 
@@ -36,11 +41,8 @@ static void prvUartInit (void);
 
 static void prvUartInit (void)
 {
-    
-    /* TODO: Call a function in serial.c/serial.h that does hardware init */
-    /* Also todo - implement that function to be called */
-    /* Then call functions that create and start the serial queues and tasks */
-    
+    /* Start RTOS Driver */
+    serialInit();
 }
 
 void vUartStartTask( void )
@@ -49,12 +51,12 @@ void vUartStartTask( void )
     prvUartInit();
 }
 
-inline static portBASE_TYPE prvUartPut( USART_TypeDef & usart, char c )
+inline static portBASE_TYPE prvUartPut( USART_TypeDef * usart, char c )
 {
     //TODO: put character into tx queue
 }
 
-inline static portBASE_TYPE prvUartPrint( USART_TypeDef & usart, char s[])
+inline static portBASE_TYPE prvUartPrint( USART_TypeDef * usart, char s[])
 {
     int i;
     for( i = 0; s[i]; ++i )
@@ -68,7 +70,7 @@ inline static portBASE_TYPE prvUartPrint( USART_TypeDef & usart, char s[])
     return pdPASS;
 }
 
-inline static portBASE_TYPE prvUartVprintf(  USART_TypeDef & usart, const char *fmt, va_list ap )
+inline static portBASE_TYPE prvUartVprintf(  USART_TypeDef * usart, const char *fmt, va_list ap )
 {
     static char pcPrintfBuffer[uartSPRINTF_BUFFER_SIZE+1];
     portBASE_TYPE out;
@@ -137,9 +139,8 @@ void vConsolePrintf( const char *fmt, ... )
 void vConsoleErrorPrintf( const char *fmt, ... )
 {
     va_list ap;
-    vConsolePrint( uartERROR_TEXT "[ERROR] " );
+    vConsolePrint( "[ERROR] " );
     va_start(ap, fmt);
     prvUartVprintf( USART2, fmt, ap );
     va_end(ap);
-    vConsolePrint( uartDEFAULT_TEXT );
 }

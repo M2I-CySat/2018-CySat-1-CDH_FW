@@ -84,6 +84,8 @@ void initTask(void * params)
     
     GPIO_Init(GPIOA, &GPIO_InitStructure);
     
+    //vUartStartTask();
+    
     for(;;)
     {
         GPIO_SetBits(GPIOA, GPIO_Pin_5);

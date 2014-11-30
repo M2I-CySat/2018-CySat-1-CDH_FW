@@ -74,6 +74,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     _ebss __bss_end__
     
     _sidata
+    
+    end _end (to make libc happy)
 
 /* Entry */
 
@@ -129,6 +131,14 @@ SECTIONS
         _ebss = .; /*required by startup*/
         __bss_end__ = _ebss;
         . = ALIGN(4);
+    } >RAM
+    
+    /* Give the beginning of heap/stack to libc */
+    ._heap_stack_section :
+    {
+        . = ALIGN(4);
+        PROVIDE ( end = . );
+        PROVIDE ( _end = . );
     } >RAM
     
     /* .rodata (read only goes in FLASH) */

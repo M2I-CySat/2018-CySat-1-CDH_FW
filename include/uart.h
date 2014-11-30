@@ -22,11 +22,6 @@
 #define uartRX_BUFFER_SIZE      80
 #define uartSPRINTF_BUFFER_SIZE 256
 
-#ifdef serialALTERNATE_IMPLEMENTATION
-extern xComPortHandle xUart1Handle;
-extern xComPortHandle xUart2Handle;
-#endif
-
 /**
  * Create the task that will control the UART.
  */

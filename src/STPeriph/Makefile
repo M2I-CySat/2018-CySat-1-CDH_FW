@@ -2,7 +2,7 @@ CC=arm-none-eabi-gcc
 AS=arm-none-eabi-as
 OBJDUMP=arg-none-eabi-objdump
 
-OBJECTS=misc.o stm32f4xx_gpio.o stm32f4xx_rcc.o
+OBJECTS=misc.o stm32f4xx_gpio.o stm32f4xx_rcc.o stm32f4xx_usart.o
 
 CMSIS_ROOT=../../CMSIS
 

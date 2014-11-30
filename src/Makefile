@@ -2,7 +2,7 @@ CC=arm-none-eabi-gcc
 AS=arm-none-eabi-as
 OBJDUMP=arg-none-eabi-objdump
 
-OBJECTS=main.o system_stm32f4xx.o startup_stm32f411xe.o
+OBJECTS=main.o system_stm32f4xx.o startup_stm32f411xe.o serial.o uart.o
 
 CMSIS_ROOT=../CMSIS
 
