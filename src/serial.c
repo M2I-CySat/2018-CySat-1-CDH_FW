@@ -12,10 +12,12 @@
 #include "FreeRTOSConfig.h"
 
 static xQueueHandle usart2TxChars;
+static xQueueHandle usart2RxChars;
 
 void serialInit()
 {
     usart2TxChars = xQueueCreate(serialTX_QUEUE_SIZE, 1);
+    usart2RxChars = xQueueCreate(serialTX_QUEUE_SIZE, 1);
     
     USART_InitTypeDef usartConfig;
     GPIO_InitTypeDef gpioConfig;
@@ -57,24 +59,40 @@ void serialInit()
     nvicConfig.NVIC_IRQChannelSubPriority = 0;
     nvicConfig.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&nvicConfig);
+    
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
     /* Hardware configuration for USART2 complete */
 
 }
 
 int xSerialPutChar(USART_TypeDef * usart, unsigned char a, portTickType blocktime)
 {
+    portBASE_TYPE xReturn = pdFALSE;
     if (usart == USART2)
     {
+        xReturn = xQueueSend(usart2TxChars, &a, blocktime);
         USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
-        return xQueueSend(usart2TxChars, &a, blocktime);
     }
-    return pdFALSE;
+    return xReturn;
+}
+
+int xSerialGetChar(USART_TypeDef * usart, unsigned char * c, portTickType blocktime)
+{ 
+    portBASE_TYPE xReturn = pdFALSE;
+    if (usart == USART2)
+    {
+        xReturn = xQueueReceive(usart2RxChars, c, blocktime);
+    }
+    return xReturn;
+    
 }
 
 void USART2_IRQHandler()
 {
     BaseType_t taskWoken = pdFALSE;
     char c;
+    NVIC_ClearPendingIRQ(USART2_IRQn);
+    
     if (USART_GetITStatus( USART2, USART_IT_TXE) == SET)
     {
         if (xQueueReceiveFromISR(usart2TxChars, &c, &taskWoken) == pdTRUE)
@@ -83,8 +101,13 @@ void USART2_IRQHandler()
         }
         else
         {
-            USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
+            USART_ITConfig(USART2, USART_IT_TXE, DISABLE);
         }
+    }
+    else if (USART_GetITStatus( USART2, USART_IT_RXNE) == SET)
+    {
+        c = USART_ReceiveData(USART2);
+        xQueueSendFromISR( usart2RxChars, &c, &taskWoken);
     }
     portEND_SWITCHING_ISR(taskWoken);
 }

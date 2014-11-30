@@ -63,6 +63,7 @@ static void init();
 int main( void )
 {
   
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
 
@@ -91,9 +92,12 @@ void initTask(void * params)
     for(;;)
     {
         GPIO_SetBits(GPIOA, GPIO_Pin_5);
-        vTaskDelay(3000);
+        vTaskDelay(500);
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
-        vTaskDelay(1000);
+        vTaskDelay(500);
+        char c;
+        xSerialGetChar(USART2, &c, 0);
+        vConsolePut(c);
     }
 }
 
