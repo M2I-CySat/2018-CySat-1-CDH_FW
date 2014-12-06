@@ -7,4 +7,4 @@ clean:
 image.elf: all
 
 debug: src/image.elf
-	gdb src/image.elf -ex 'target extended localhost:4242' -ex 'load'
+	arm-none-eabi-gdb src/image.elf -ex 'target extended localhost:4242' -ex 'load'

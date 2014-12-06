@@ -27,11 +27,9 @@ all: image.elf
 %.o: %.s
 	$(AS) -c $(ASFLAGS) $< -o $@
 	
-freertos:
-	cd FreeRTOS && make
-	cd STPeriph && make
-
 image.elf: freertos $(OBJECTS)
+	cd STPeriph && make
+	cd FreeRTOS && make
 	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../stm32f411re.ld -o image.elf *.o FreeRTOS/*.o STPeriph/*.o
 
 clean:
