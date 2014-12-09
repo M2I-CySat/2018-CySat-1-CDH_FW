@@ -1,22 +1,6 @@
-CC=arm-none-eabi-gcc
-AS=arm-none-eabi-as
-OBJDUMP=arg-none-eabi-objdump
-
+# Add filename.o to include in compilation
 OBJECTS=list.o port.o queue.o tasks.o heap_1.o
 
-CMSIS_ROOT=../../CMSIS
-
-IFLAGS=-I../../include/
-IFLAGS+=-I../../include/FreeRTOS
-IFLAGS+= -I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include/
-IFLAGS+= -I$(CMSIS_ROOT)/Include
-
-CPPFLAGS+= $(IFLAGS)
-
-CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
-CFLAGS+= -mfpu=fpv4-sp-d16 -DSTM32F411xE -g
-
-ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $< -o $@

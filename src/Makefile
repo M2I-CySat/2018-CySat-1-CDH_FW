@@ -1,23 +1,6 @@
-CC=arm-none-eabi-gcc
-AS=arm-none-eabi-as
-OBJDUMP=arg-none-eabi-objdump
-
+# Add filename.o to include in compilation
 OBJECTS=main.o system_stm32f4xx.o startup_stm32f411xe.o serial.o uart.o
 
-CMSIS_ROOT=../CMSIS
-
-IFLAGS=-I../include/
-IFLAGS+=-I../include/FreeRTOS
-IFLAGS+=-I../include/STPeriph
-IFLAGS+= -I$(CMSIS_ROOT)/Device/ST/STM32F4xx/Include/
-IFLAGS+= -I$(CMSIS_ROOT)/Include
-
-CPPFLAGS+= $(IFLAGS)
-
-CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
-CFLAGS+= -mfpu=fpv4-sp-d16 -DSTM32F411xE -g -DUSE_STDPERIPH_DRIVER
-
-ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 
 all: image.elf
 
@@ -26,8 +9,9 @@ all: image.elf
 
 %.o: %.s
 	$(AS) -c $(ASFLAGS) $< -o $@
-	
-image.elf: freertos $(OBJECTS)
+
+  
+image.elf: $(OBJECTS)
 	cd STPeriph && make
 	cd FreeRTOS && make
 	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../stm32f411re.ld -o image.elf *.o FreeRTOS/*.o STPeriph/*.o
