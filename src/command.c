@@ -27,6 +27,7 @@
 #include <mem.h>
 #include <clock.h>
 #include "storage.h"
+#include <string.h>
 
 
 #define uartRX_BLOCK_TIME   ( ( portTickType ) 0xffff )
@@ -90,21 +91,21 @@ void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
     char resultBuffer[50];
     memset(resultBuffer, 0, 50);
     if (fields[2][0] == 'X') {
-        vPowerPollHousekeepingData();
-        housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,X,%04X,%04X,%04X",housekeeping->XVoltage, housekeeping->XCurrent0, housekeeping->XCurrent1);
+//TODO: Port        vPowerPollHousekeepingData();
+//TODO: Port         housekeeping = xPowerGetHousekeepingData();
+//TODO: Port         sprintf(resultBuffer, "RESULT,POW_PANEL,X,%04X,%04X,%04X",housekeeping->XVoltage, housekeeping->XCurrent0, housekeeping->XCurrent1);
         sendMessage(resultBuffer);
     }
     else if (fields[2][0] == 'Y') {
-        vPowerPollHousekeepingData();
-        housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,Y,%04X,%04X,%04X", housekeeping->YVoltage, housekeeping->YCurrent0, housekeeping->YCurrent1);
+//TODO: Port         vPowerPollHousekeepingData();
+//TODO: Port         housekeeping = xPowerGetHousekeepingData();
+//TODO: Port         sprintf(resultBuffer, "RESULT,POW_PANEL,Y,%04X,%04X,%04X", housekeeping->YVoltage, housekeeping->YCurrent0, housekeeping->YCurrent1);
         sendMessage(resultBuffer);
     }
     else if (fields[2][0] == 'Z') {
-        vPowerPollHousekeepingData();
-        housekeeping = xPowerGetHousekeepingData();
-        sprintf(resultBuffer, "RESULT,POW_PANEL,Z,%04X,%04X,%04X", housekeeping->ZVoltage, housekeeping->ZCurrent0, housekeeping->ZCurrent1);
+//TODO: Port         vPowerPollHousekeepingData();
+//TODO: Port         housekeeping = xPowerGetHousekeepingData();
+//TODO: Port         sprintf(resultBuffer, "RESULT,POW_PANEL,Z,%04X,%04X,%04X", housekeeping->ZVoltage, housekeeping->ZCurrent0, housekeeping->ZCurrent1);
         sendMessage(resultBuffer);
     }
     else
@@ -126,8 +127,8 @@ void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
     memset(resultBuffer, 0, 50);
 
     if (fields[2][0] == '0') {
-        vPowerPollHousekeepingData();
-        housekeeping = xPowerGetHousekeepingData();
+//TODO: Port         vPowerPollHousekeepingData();
+//TODO: Port         housekeeping = xPowerGetHousekeepingData();
 
         //housekeeping->Battery0Temperature = 0x02bc;
 
@@ -145,8 +146,8 @@ void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
         sendMessage(resultBuffer);
     }
     else if (fields[2][0] == '1') {
-        vPowerPollHousekeepingData();
-        housekeeping = xPowerGetHousekeepingData();
+//TODO: Port         vPowerPollHousekeepingData();
+//TODO: Port         housekeeping = xPowerGetHousekeepingData();
         char * dir;
         if (housekeeping->Battery1Direction)
             dir = "D";
@@ -202,7 +203,7 @@ static void framRead(char ** fields) {
     sscanf(fields[3], "%d", &length);
     sscanf(fields[2], "%ld", &addr);
 
-    vFRAMRead(addr, length, dataBuffer);
+//TODO: Port     vFRAMRead(addr, length, dataBuffer);
 
     vConsolePrint(dataBuffer);
     vConsolePrint("\r\n");
@@ -214,7 +215,7 @@ static void framWrite(char ** fields) {
     sscanf(fields[3], "%d", &length);
     sscanf(fields[2], "%ld", &addr);
 
-    vFRAMWrite(addr, length, fields[4]);
+//TODO: Port     vFRAMWrite(addr, length, fields[4]);
 }
 #endif
 
@@ -222,53 +223,53 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
     if(strncmp("BURN", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            vNichromeStartTask();
+//TODO: Port             vNichromeStartTask();
         } else
             nackLength();
     }
     else if(strncmp("REBOOT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            vTaskDelay(1000);
-            __asm__ volatile ("reset");
+            vTaskDelay(2000);
+//TODO: Port             __asm__ volatile ("reset");
         } else
             nackLength();
     }
     else if(strncmp("SET_FIRSTBOOT_0", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            unsigned char buffer = 0;
-            vFRAMWrite(0, 1, &buffer);
+//TODO: Port             unsigned char buffer = 0;
+//TODO: Port             vFRAMWrite(0, 1, &buffer);
         } else
             nackLength();
     }
     else if(strncmp("SET_FIRSTBOOT_1", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            unsigned char buffer = 1;
-            vFRAMWrite(0, 1, &buffer);
+//TODO: Port             unsigned char buffer = 1;
+//TODO: Port             vFRAMWrite(0, 1, &buffer);
         } else
             nackLength();
     }
     else if(strncmp("RESET_CLOCK", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            zeroRTC();
+            startRTC();
         } else
             nackLength();
     }
     else if(strncmp("CLEAR_HEAP", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            clearHeap();
+//TODO: Port             clearHeap();
         } else
             nackLength();
     }
     else if(strncmp("POW_PRINT", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-            vPowerPollHousekeepingData();
-            vPowerPrintHousekeepingData();
+//TODO: Port             vPowerPollHousekeepingData();
+//TODO: Port             vPowerPrintHousekeepingData();
         }
         else
             nackLength();
@@ -276,7 +277,7 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
 #if RAW_MEM
     else if(strncmp("READ", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 5) {
-            framRead(fields);
+//TODO: Port             framRead(fields);
             sendMessage("ACK_COMMAND");
         }
         else
@@ -284,7 +285,7 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
     }
     else if(strncmp("WRITE", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 6) {
-            framWrite(fields);
+//TODO: Port             framWrite(fields);
             sendMessage("ACK_COMMAND");
         }
         else
@@ -339,14 +340,14 @@ static void prvHandleMessage(char * command) {
 static inline char rxByte1() {
     signed char byte = 0;
 
-    while (!xSerialGetChar(xUart1Handle, &byte, uartRX_BLOCK_TIME));
+    while (!xSerialGetChar(USART2, &byte, uartRX_BLOCK_TIME));
     return byte;
 }
 
 static inline char rxByte2() {
     signed char byte = 0;
 
-    while (!xSerialGetChar(xUart2Handle, &byte, uartRX_BLOCK_TIME));
+//TODO: Port     while (!xSerialGetChar(xUart2Handle, &byte, uartRX_BLOCK_TIME));
     return byte;
 }
 

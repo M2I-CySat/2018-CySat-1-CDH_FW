@@ -9,6 +9,7 @@
 #include "mem.h"
 
 #include <system.h>
+#include <stdio.h>
 
 /* Hardware Includes */
 #include <stm32f4xx.h>
@@ -20,36 +21,6 @@
 /*Address Defines*/
 #define FIRST_BOOT      0x000000
 #define ANTENNA_STATUS  0x000001
-
-
-/*Use actual init system. Disables all other defines*/
-#define enInit              1
-
-#if enInit
-#define enUart              0
-#define enConsoleCommand    0
-#define enRadioCommand      0
-#define enWire              0
-#define enPowerTest         0
-#define enUartTest          0
-#define enPayload           0
-#define enAutoBurn          0
-#define enMem               0
-#define enClock             0
-
-#else
-//feature defines. 0 to disable
-#define enUart              1
-#define enConsoleCommand    1
-#define enRadioCommand      0
-#define enWire              1
-#define enPowerTest         0
-#define enUartTest          0
-#define enPayload           0
-#define enAutoBurn          0
-#define enMem               1
-#define enClock             1
-#endif
 
 /*Init system config*/
 
@@ -74,8 +45,9 @@ int main( void )
 
 void initTask(void * params)
 {
-    GPIO_InitTypeDef GPIO_InitStructure;
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    /* Test Heartbeat Initialization */
+    GPIO_InitTypeDef GPIO_InitStructure;
     
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
@@ -84,10 +56,65 @@ void initTask(void * params)
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     
     GPIO_Init(GPIOA, &GPIO_InitStructure);
+    /* End test heartbeat initialization */
     
+    /* Begin actual init */
+        unsigned char buffer;
     vUartStartTask();
+    vConsolePrintf("Init task started\r\n");
+
+#if SET_FIRST_BOOT
+//TODO: Port    buffer = 0;
+//TODO: Port    vFRAMWrite(FIRST_BOOT, 1, &buffer);
+    vConsolePrintf("Set First Boot Flag 0\r\n");
+#endif
+#if SET_NOT_FIRST_BOOT
+//TODO: Port    buffer = 1;
+//TODO: Port    vFRAMWrite(FIRST_BOOT, 1, &buffer);
+    vConsolePrintf("Set First Boot 1\r\n");
+#endif
+
+    vConsolePrintf("Checked first boot status\r\n");
+    if (!(RTC->ISR & RTC_ISR_INITS)) { /*This is first boot*/
+        vConsolePrintf("RTC Not Initialized. Performing first boot routine\r\n");
+        startRTC();
+//TODO: Port        vFRAMWrite(ANTENNA_STATUS, 1, &buffer);
+        vConsolePrintf("Antenna Status Set Zero\r\n");
+//TODO: Port        buffer = 1;
+//TODO: Port        vFRAMWrite(FIRST_BOOT, 1, &buffer);
+        vConsolePrintf("First boot routine complete\r\n");
+    }
+
+    vConsolePrintf("Passed first boot check. Delaying for RTC...\r\n");
     
-    vConsolePrintf("Hello, World");
+    vTaskDelay(2500);
+
+    char timeBuffer[15];
+    sprintf(timeBuffer, "Time: %ld\r\n", getMissionTime());
+    vConsolePrintf(timeBuffer);
+    vConsolePrintf("Clock Started - Waiting for Burn\r\n");
+
+    while(getMissionTime() <= BURN_DELAY) {
+        vTaskDelay(500);
+    }
+    vConsolePrintf("Burn Delay Reached - Checking Status\r\n");
+//TODO: Port    vFRAMRead(ANTENNA_STATUS, 1, &buffer);
+    if (!buffer) {
+        vConsolePrintf("Burning\r\n");
+//TODO: Port        vNichromeTask(0);
+    }
+    vConsolePrintf("Burn Complete - Setting Deploy Status\r\n");
+//TODO: Port    buffer = 1;
+//TODO: Port    vFRAMWrite(ANTENNA_STATUS, 1, &buffer);
+    vConsolePrintf("Deploy Status Set\r\n");
+
+    vConsolePrintf("Starting Command Handling\r\n");
+//TODO: Port    xStartUart1CommandHandling();
+
+    vConsolePrintf("Starting storage driver task\r\n");
+//TODO: Port    startStorageDriverTask();
+    
+    vConsolePrintf("Init finished");
     
     for(;;)
     {
@@ -95,9 +122,6 @@ void initTask(void * params)
         vTaskDelay(500);
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
-        char c;
-        xSerialGetChar(USART2, &c, 0);
-        vConsolePut(c);
     }
 }
 
