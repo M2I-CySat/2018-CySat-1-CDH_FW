@@ -38,6 +38,9 @@
 
 #define systemDEFAULT_STACK_SIZE ( 512 )
 
+#define bitSet(a, b) ((a) |= (b))
+#define bitClear(a, b) ((a) &= ~(b))
+
 
 #endif	/* SYSTEM_H */
 
