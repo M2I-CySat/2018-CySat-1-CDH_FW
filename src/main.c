@@ -30,11 +30,16 @@
 static void initTask(void * params);
 static void init();
 
+static void lowLevelHardwareInit()
+{
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+}
 
 int main( void )
 {
-  
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+    lowLevelHardwareInit();
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
 
@@ -45,7 +50,6 @@ int main( void )
 
 void initTask(void * params)
 {
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     /* Test Heartbeat Initialization */
     GPIO_InitTypeDef GPIO_InitStructure;
     

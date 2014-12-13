@@ -41,6 +41,10 @@
 #define bitSet(a, b) ((a) |= (b))
 #define bitClear(a, b) ((a) &= ~(b))
 
+#define tmpGet(b) ((tmp) = (b))
+#define tmpSet(b) ((tmp) |= (b))
+#define tmpClear(b) ((tmp) &= ~(b))
+#define tmpPut(b) ((b) = (tmp))
 
 #endif	/* SYSTEM_H */
 

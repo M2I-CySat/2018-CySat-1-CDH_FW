@@ -44,36 +44,57 @@ time_t getMissionTime() {
 }
 
 void startRTC() {
-    bitSet(PWR->CR, PWR_CR_DBP);
+    uint32_t tmp = 0;
+    RCC_TypeDef * rcc = RCC;
+    RTC_TypeDef * rtc = RTC;
+    PWR_TypeDef * pwr = PWR;
+    
+    tmpGet(PWR->CR);
+    tmpSet(PWR_CR_DBP);
+    tmpPut(PWR->CR);
+    for (tmp = 0; tmp < 2; tmp++) {} /* Delay for bus write */ 
+    
     RTC->WPR = 0xCA;
     RTC->WPR = 0x53;
     
+    tmpGet(RCC->BDCR);
+    tmpClear(RCC_BDCR_RTCSEL);
+    tmpSet(RCC_BDCR_RTCSEL_0);
+    tmpSet(RCC_BDCR_RTCEN);
+    tmpSet(RCC_BDCR_LSEON);
+    tmpPut(RCC->BDCR);
+    
     bitSet(RTC->ISR, RTC_ISR_INIT);
+    
     while(!(RTC->ISR & RTC_ISR_INITF)) {}
     
-    /* TODO: Set RTC_PRER Prescalars */
+    /* Prescaler defaults are good */
     
     RTC->TR = 0; /* Time = 00:00:00 */
     
-    bitClear(RTC->DR, RTC_DR_YT); /* Year 70 (1970) */
-    bitSet(RTC->DR, (RTC_DR_YU_0 & RTC_DR_YU_1 & RTC_DR_YU_2));
-    bitClear(RTC->DR, RTC_DR_YU);
+    tmpGet(RTC->DR);
+    tmpClear(RTC_DR_YT); /* Year 70 (1970) */
+    tmpSet((RTC_DR_YU_0 & RTC_DR_YU_1 & RTC_DR_YU_2));
+    tmpClear(RTC_DR_YU);
     
-    bitClear(RTC->DR, RTC_DR_WDU_0); /* Weekday 4 (Thursday) */
-    bitClear(RTC->DR, RTC_DR_WDU_1);
-    bitSet(RTC->DR, RTC_DR_WDU_2);
+    tmpClear(RTC_DR_WDU_0); /* Weekday 4 (Thursday) */
+    tmpClear(RTC_DR_WDU_1);
+    tmpSet(RTC_DR_WDU_2);
     
-    bitClear(RTC->DR, RTC_DR_MT); /* Month 1 (January) */
-    bitClear(RTC->DR, RTC_DR_MU);
-    bitSet(RTC->DR, RTC_DR_MU_0);
+    tmpClear(RTC_DR_MT); /* Month 1 (January) */
+    tmpClear(RTC_DR_MU);
+    tmpSet(RTC_DR_MU_0);
     
-    bitClear(RTC->DR, RTC_DR_DT); /* Day of Month 1 */
-    bitClear(RTC->DR, RTC_DR_DU);
-    bitSet(RTC->DR, RTC_DR_DU_0);
+    tmpClear(RTC_DR_DT); /* Day of Month 1 */
+    tmpClear(RTC_DR_DU);
+    tmpSet(RTC_DR_DU_0);
+    tmpPut(RTC->DR);
+	
+	bitSet(RTC->CR, RTC_CR_FMT);
      
-    bitClear(RTC->ISR, RTC_ISR_INIT);
-    
+    tmpClear(RTC_ISR_INIT);
+	
     RTC->WPR = 0;
     RTC->WPR = 0;
-    bitClear(PWR->CR, PWR_CR_DBP);
+    tmpClear(PWR_CR_DBP);
 }
