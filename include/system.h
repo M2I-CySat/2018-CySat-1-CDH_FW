@@ -46,5 +46,8 @@
 #define tmpClear(b) ((tmp) &= ~(b))
 #define tmpPut(b) ((b) = (tmp))
 
+/*Status Flag Register Masks*/
+#define ANTENNA_STATUS  0x000001
+
 #endif	/* SYSTEM_H */
 

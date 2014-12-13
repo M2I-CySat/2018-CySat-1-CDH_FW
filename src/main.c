@@ -18,10 +18,6 @@
 
 /* Application includes */
 
-/*Address Defines*/
-#define FIRST_BOOT      0x000000
-#define ANTENNA_STATUS  0x000001
-
 /*Init system config*/
 
 #define BURN_DELAY          15 /*Seconds until antenna burn*/
@@ -35,6 +31,21 @@ static void lowLevelHardwareInit()
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+}
+
+static void initializeBackupRegisters()
+{  
+    int i;
+    
+    bitSet(PWR->CR, PWR_CR_DBP);   
+    for (i = 0; i < 2; i++) {} /* Delay for bus write */ 
+   
+    /* RTC_BKP0R (Status Flags)
+      Bit 0: Antenna Status (0 undeployed, 1 deployed)
+    */
+    RTC->BKP0R = 0x00000000;
+    
+    bitClear(PWR->CR, PWR_CR_DBP);
 }
 
 int main( void )
@@ -63,63 +74,69 @@ void initTask(void * params)
     /* End test heartbeat initialization */
     
     /* Begin actual init */
-        unsigned char buffer;
+    unsigned char buffer;
+    int i;
+    
     vUartStartTask();
+    vConsolePrintf("\r\n\r\n==================== BOOT ====================\r\n");
     vConsolePrintf("Init task started\r\n");
 
-#if SET_FIRST_BOOT
-//TODO: Port    buffer = 0;
-//TODO: Port    vFRAMWrite(FIRST_BOOT, 1, &buffer);
-    vConsolePrintf("Set First Boot Flag 0\r\n");
-#endif
-#if SET_NOT_FIRST_BOOT
-//TODO: Port    buffer = 1;
-//TODO: Port    vFRAMWrite(FIRST_BOOT, 1, &buffer);
-    vConsolePrintf("Set First Boot 1\r\n");
-#endif
-
-    vConsolePrintf("Checked first boot status\r\n");
-    RTC_TypeDef * rtc = RTC;
+    vConsolePrintf("Checking RTC initialization status...\r\n");
     if (!(RTC->ISR & RTC_ISR_INITS)) { /*This is first boot*/
-        vConsolePrintf("RTC Not Initialized. Performing first boot routine\r\n");
+        vConsolePrintf("RTC Not Initialized. Performing first boot routine.\r\n");
+        vConsolePrintf("Initializing RTC...");
         startRTC();
-//TODO: Port        vFRAMWrite(ANTENNA_STATUS, 1, &buffer);
-        vConsolePrintf("Antenna Status Set Zero\r\n");
-//TODO: Port        buffer = 1;
-//TODO: Port        vFRAMWrite(FIRST_BOOT, 1, &buffer);
-        vConsolePrintf("First boot routine complete\r\n");
+        vConsolePrintf("Done.\r\n");
+        vConsolePrintf("Delaying for RTC synchronization...");
+        vTaskDelay(2500);
+        vConsolePrintf("Done\r\n");
+
+        vConsolePrintf("Initializing Backup Register...");
+        initializeBackupRegisters();
+        vConsolePrintf("Done\r\n");
+        
+        vConsolePrintf("First boot routine complete.\r\n");
+    }
+    else
+    {
+        vConsolePrintf("RTC already initialized.\r\n");
     }
 
-    vConsolePrintf("Passed first boot check. Delaying for RTC...\r\n");
-    
-    vTaskDelay(2500);
-
     char timeBuffer[15];
-    sprintf(timeBuffer, "Time: %ld\r\n", getMissionTime());
+    sprintf(timeBuffer, "Mission Time: %ld\r\n", getMissionTime());
     vConsolePrintf(timeBuffer);
-    vConsolePrintf("Clock Started - Waiting for Burn\r\n");
+    vConsolePrintf("Waiting for deployment delay...\r\n");
 
     while(getMissionTime() <= BURN_DELAY) {
         vTaskDelay(500);
     }
-    vConsolePrintf("Burn Delay Reached - Checking Status\r\n");
-//TODO: Port    vFRAMRead(ANTENNA_STATUS, 1, &buffer);
-    if (!buffer) {
-        vConsolePrintf("Burning\r\n");
-//TODO: Port        vNichromeTask(0);
+    
+    vConsolePrintf("Deployment delay reached - checking status...\r\n");
+    if (!(RTC->BKP0R & ANTENNA_STATUS)) {
+        vConsolePrintf("Deploying Antennas...");
+//TODO: Call antenna deployment function
+        vConsolePrintf("Done\r\n");
+        
+        vConsolePrintf("Setting antenna status flag...");
+        bitSet(PWR->CR, PWR_CR_DBP);     
+        for (i = 0; i < 2; i++) {} /* Delay for bus write */ 
+        bitSet(RTC->BKP0R, ANTENNA_STATUS);
+        bitSet(PWR->CR, PWR_CR_DBP);        
+        vConsolePrintf("Done\r\n");
     }
-    vConsolePrintf("Burn Complete - Setting Deploy Status\r\n");
-//TODO: Port    buffer = 1;
-//TODO: Port    vFRAMWrite(ANTENNA_STATUS, 1, &buffer);
-    vConsolePrintf("Deploy Status Set\r\n");
+    else
+    {
+      vConsolePrintf("Antennas already deployed!\r\n");
+    }
 
-    vConsolePrintf("Starting Command Handling\r\n");
+    vConsolePrintf("Starting command handling on console...");
     xStartUart1CommandHandling();
+    vConsolePrintf("Done\r\n");
 
-    vConsolePrintf("Starting storage driver task\r\n");
+//    vConsolePrintf("Starting storage driver task\r\n");
 //TODO: Port    startStorageDriverTask();
     
-    vConsolePrintf("Init finished\r\n");
+    vConsolePrintf("Init finished!\r\n");
     
     for(;;)
     {
