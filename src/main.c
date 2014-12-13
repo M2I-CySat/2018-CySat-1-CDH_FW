@@ -79,6 +79,7 @@ void initTask(void * params)
 #endif
 
     vConsolePrintf("Checked first boot status\r\n");
+    RTC_TypeDef * rtc = RTC;
     if (!(RTC->ISR & RTC_ISR_INITS)) { /*This is first boot*/
         vConsolePrintf("RTC Not Initialized. Performing first boot routine\r\n");
         startRTC();
@@ -113,12 +114,12 @@ void initTask(void * params)
     vConsolePrintf("Deploy Status Set\r\n");
 
     vConsolePrintf("Starting Command Handling\r\n");
-//TODO: Port    xStartUart1CommandHandling();
+    xStartUart1CommandHandling();
 
     vConsolePrintf("Starting storage driver task\r\n");
 //TODO: Port    startStorageDriverTask();
     
-    vConsolePrintf("Init finished");
+    vConsolePrintf("Init finished\r\n");
     
     for(;;)
     {
