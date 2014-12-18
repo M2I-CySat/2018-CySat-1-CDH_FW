@@ -23,6 +23,6 @@ int xSerialPutChar(USART_TypeDef *, unsigned char, portTickType);
 
 
 #define serialUSART2_BAUDRATE 9600
-#define serialTX_QUEUE_SIZE 256
+#define serialTX_QUEUE_SIZE 512
 
 #endif

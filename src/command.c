@@ -408,11 +408,9 @@ static void vUart2RXTask( void * params) {
 }
 
 void xStartUart1CommandHandling() {
-    vConsolePrint("Starting command handling on UART1\r\n");
     xTaskCreate( vUart1RXTask, NULL, configMINIMAL_STACK_SIZE + 200, NULL, systemPRIORITY_UART1, NULL );
 }
 
 void xStartUart2CommandHandling() {
-    vConsolePrint("Starting command handling on UART2\r\n");
     xTaskCreate( vUart2RXTask, NULL, configMINIMAL_STACK_SIZE + 200, NULL, systemPRIORITY_UART2, NULL );
 }

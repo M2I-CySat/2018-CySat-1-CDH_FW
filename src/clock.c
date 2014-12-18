@@ -13,45 +13,47 @@
 
 time_t getMissionTime() {
     struct tm currentTime;
+    uint32_t timeReg = 0, dateReg = 0;
+    
+    timeReg = RTC->TR;
+    dateReg = RTC->DR;
     
     currentTime.tm_sec = 0;
-    currentTime.tm_sec += (RTC->TR & RTC_TR_SU);
-    currentTime.tm_sec += (((RTC->TR & RTC_TR_ST) >> 4) * 10);
-    
     currentTime.tm_min = 0;
-    currentTime.tm_min += ((RTC->TR & RTC_TR_MNU) >> 8);
-    currentTime.tm_min += (((RTC->TR & RTC_TR_MNT) >> 12) * 10);
-    
     currentTime.tm_hour = 0;
-    currentTime.tm_hour += ((RTC->TR & RTC_TR_HU) >> 16);
-    currentTime.tm_hour += (((RTC->TR & RTC_TR_HT) >> 20) * 10);
-    
-    currentTime.tm_mday = 0;
-    currentTime.tm_mday += (RTC->DR & RTC_DR_DU);
-    currentTime.tm_mday += (((RTC->DR & RTC_DR_DT) >> 4) * 10);
-    
+    currentTime.tm_mday = 1;
     currentTime.tm_mon = 0;
-    currentTime.tm_mon += ((RTC->DR & RTC_DR_MU) >> 8);
-    currentTime.tm_mon += (((RTC->DR & RTC_DR_MT) >> 12) * 10);
-    
-    currentTime.tm_year = 0;
-    currentTime.tm_year += ((RTC->DR & RTC_DR_YU) >> 16);
-    currentTime.tm_year += (((RTC->DR & RTC_DR_YT) >> 20) * 10);
-    
+    currentTime.tm_year = 70;
     currentTime.tm_isdst = 0;
+    currentTime.tm_wday = 4;
+    currentTime.tm_yday = 0;
+    
+    currentTime.tm_sec = (timeReg & RTC_TR_SU);
+    currentTime.tm_sec += (((timeReg & RTC_TR_ST) >> 4) * 10);
+    
+    currentTime.tm_min = ((timeReg & RTC_TR_MNU) >> 8);
+    currentTime.tm_min += (((timeReg & RTC_TR_MNT) >> 12) * 10);
+    
+    currentTime.tm_hour = ((timeReg & RTC_TR_HU) >> 16);
+    currentTime.tm_hour += (((timeReg & RTC_TR_HT) >> 20) * 10);
+    
+    currentTime.tm_mday = (dateReg & RTC_DR_DU);
+    currentTime.tm_mday += (((dateReg & RTC_DR_DT) >> 4) * 10);
+    
+    currentTime.tm_mon = ((dateReg & RTC_DR_MU) >> 8);
+    currentTime.tm_mon += (((dateReg & RTC_DR_MT) >> 12) * 10);
+    currentTime.tm_mon--;
+    
+    currentTime.tm_year = ((dateReg & RTC_DR_YU) >> 16);
+    currentTime.tm_year += (((dateReg & RTC_DR_YT) >> 20) * 10);
     
     return mktime(&currentTime);
 }
 
 void startRTC() {
     uint32_t tmp = 0;
-    RCC_TypeDef * rcc = RCC;
-    RTC_TypeDef * rtc = RTC;
-    PWR_TypeDef * pwr = PWR;
     
-    tmpGet(PWR->CR);
-    tmpSet(PWR_CR_DBP);
-    tmpPut(PWR->CR);
+    bitSet(PWR->CR, PWR_CR_DBP);
     for (tmp = 0; tmp < 2; tmp++) {} /* Delay for bus write */ 
     
     RTC->WPR = 0xCA;
@@ -74,7 +76,7 @@ void startRTC() {
     
     tmpGet(RTC->DR);
     tmpClear(RTC_DR_YT); /* Year 70 (1970) */
-    tmpSet((RTC_DR_YU_0 & RTC_DR_YU_1 & RTC_DR_YU_2));
+    tmpSet((RTC_DR_YT_0 | RTC_DR_YT_1 | RTC_DR_YT_2));
     tmpClear(RTC_DR_YU);
     
     tmpClear(RTC_DR_WDU_0); /* Weekday 4 (Thursday) */
@@ -90,11 +92,11 @@ void startRTC() {
     tmpSet(RTC_DR_DU_0);
     tmpPut(RTC->DR);
 	
-	bitSet(RTC->CR, RTC_CR_FMT);
+    bitSet(RTC->CR, RTC_CR_FMT);
      
-    tmpClear(RTC_ISR_INIT);
+    bitClear(RTC->ISR, RTC_ISR_INIT);
 	
     RTC->WPR = 0;
     RTC->WPR = 0;
-    tmpClear(PWR_CR_DBP);
+    bitClear(PWR->CR, PWR_CR_DBP);
 }
