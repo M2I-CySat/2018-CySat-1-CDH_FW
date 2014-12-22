@@ -24,7 +24,6 @@
 #include <power.h>
 #include <helium.h>
 #include <nichrome.h>
-#include <mem.h>
 #include <clock.h>
 #include "storage.h"
 #include <string.h>

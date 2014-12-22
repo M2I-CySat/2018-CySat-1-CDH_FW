@@ -1,0 +1,130 @@
+=========Toolchain Information==========
+
+This project is meant to be compiled with some form of the GNU ARM Embedded
+toolchain. Here is some advice (not necessarily instructions) for getting
+a working toolchain.
+
+You will need the following:
+ - GNU ARM Embedded Toolchain
+ - make
+ - Some sort of Unix-like environment (Cygwin works)
+ - ST-Link GDB Server
+
+The Makefiles are pretty simple. The top-level makefile sets a bunch of
+variables (library paths, etc) and that's about it. Each subdirectory in `src`
+has its own Makefile. Each of these Makefiles has a variable called OBJECTS.
+This contains a list of objects (*.o) that need to be compiled. To add a source
+(*.c) file to the list, add filename.o to OBJECTS. This will cause filename.c
+to be compiled.
+
+------GNU ARM Embedded Toolchain-------- 
+
+https://launchpad.net/gcc-arm-embedded
+
+For Linux, figure out a way to install it. Hopefully it is in your distro's
+repositories, otherwise it isn't that hard to compile, especially for Ubuntu.
+For other distros, you might run into issues with some LaTeX documentation
+or such. I had to give the Makefile a lobotomy to get it to work.
+
+Windows binaries are available with an installer.
+
+Either way, make sure the entire toolchain ends up in your path after it's
+installed. Don't put the bare named binaries in your path; that will cause
+problems. Put the arm-none-eabi-{gcc|ld|as|gdb} ones in your path. These
+are in $(toolchain-root}/bin, not ${toolchain-root}/arm-none-eabi/bin.
+
+To test, open a terminal (or CMD) and run arm-none-eabi-gcc -v
+
+-------Make (and some sort of Unix-like environment)-----
+
+Linux: You're set
+
+Windows: Cygwin is highly recommended. The provided Makefiles probably won't
+work when run in cmd. They are confirmed working in Linux as well as Cygwin.
+
+Note that you will have to add the toolchain to the Cygwin $PATH (in ~/.bashrc)
+to get it to work. The path to the toolchain will be something to the tune of
+"/cygdrive/c/Program Files(x86)/GNU Arm Embedded". There are some issues that
+arise when using a non-cygwin toolchain from within Cygwin, but the Makefile
+compensates for that and expects it.
+
+You will probably see issues if you use a GNU ARM Embedded toolchain actually
+built and installed in Cygwin, but as far as I know no such toolchain exists.
+
+----------ST-Link GDB Server---------------
+
+https://github.com/texane/stlink
+
+This is open-source host software for the ST-Link. 
+
+Linux or Cygwin: Download, run autogen.sh, configure, make, make install.
+Cygwin note: Install libusb and libusb-devel, all of the versions just in case.
+
+Windows: There are instructions in the stlink repository for a MinGW build
+native to windows (not needing Cygwin) in INSTALL.mingw. I was not able to get
+that to successfully work due to preexisting issues with conflicting MinGW
+environments.
+
+As always, make sure it ends up in your path.
+
+
+=======Using the toolchain=========
+
+Linux: Assuming that the stlink binaries and the arm-none-eabi-xyz binaries are
+all in your path, git checkout, cd into the top level director, and make. It
+should compile no problem.
+
+Windows (Cygwin): More or less the same. Use your favorite git distribution,
+fire up Cygwin, make sure that all of the binaries are in your path, cd and
+make.
+
+Starting the debugger server: `st-util` is the GDBServer binary from the stlink
+package. It should be in your path on Linux or Cygwin. Do this in a separate
+terminal window/screen/tmux from your compilation, since it tends to get angry
+with unplugs/replugs or closes/restarts.
+
+=========Debug Options=============
+
+Command-line GDB
+
+The Makefile includes a `debug` target. This works perfectly on Linux, but
+something weird happens with ctrl-c in Cygwin. However, it works correctly when
+run from cmd, so on Windows it is preferable to use cmd and cd all the way
+to the project directory and manually run `arm-none-eabi-gdb src/image.elf` and
+set up the target.
+
+Any other GDB client, such as an IDE, should be able to load image.elf and a
+remote target. Look at the Makefile's `debug` target to see the command-line
+flags needed.
+
+==============IDE Support==============
+
+Any IDE that supports a makefile and a GDB remote (or `extended`) target should
+work for this project. 
+
+Eclipse - Use `Import existing code as makefile project.` As long as the 
+toolchain is in your path it should compile. Debugging is a bit weirder. First,
+you still have to manually run the st-util utility in a terminal somewhere.
+Second, you will have to manually create a debug target in the debug
+configurations for the project. Choose src/image.elf as the file, and then add
+the `target extended localhost:4242` and `load` under the `Arguments` tab. 
+See the Makefile for the exact command-line arguments.
+
+Other IDEs - IDEs with embedded-specific stuff (IAR, Atollic) might be happy
+to just be pointed at any old Makefile. I'm not sure. They do have their own
+GDBServer built in, so you won't need st-util.
+
+==========TL;DR Section====================
+
+Add filename.o to OBJECTS to get filename.c to compile
+
+Linux: toolchain in path, keep st-util running in separate terminal, compile 
+with make, debug with `make debug`
+
+Windows: keep st-util running in separate cygwin terminal, compile with make
+in cygwin terminal, debug with `make debug` from cygwin OR `arm-none-eabi-gdb 
+src/image.elf` in cmd
+
+IDE: Generic Makefile project. Custom debug target to get the command-line 
+parameters for GDB and load the right file. Still run st-util in a separate 
+Linux or Cygwin terminal

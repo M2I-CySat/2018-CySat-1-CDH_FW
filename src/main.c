@@ -6,7 +6,6 @@
 #include "task.h"
 #include "queue.h"
 #include "croutine.h"
-#include "mem.h"
 
 #include <system.h>
 #include <stdio.h>
