@@ -166,9 +166,10 @@ void initTask(void * params)
         I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Receiver);
         while(I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR) == RESET) {}
         
+        
+        /* one-byte read
         I2C_AcknowledgeConfig(I2C1, DISABLE);
         
-        /*voodoo read */
         (void)I2C1->SR2;
         I2C_GenerateSTOP(I2C1, ENABLE);
         while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET) {}
@@ -176,8 +177,19 @@ void initTask(void * params)
         while(I2C1->CR1 & I2C_CR1_STOP) {}
         
         I2C_AcknowledgeConfig(I2C1, ENABLE);
+        */
         
-        vConsolePrintf("I2C Test Byte: %x\r\n", i2cbuffer[0]);
+        /* DMA 3-byte read */
+        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
+        dmaConfig((uint32_t)i2cbuffer, 3, DIR_RX, DMA1_Stream5);
+        I2C_DMALastTransferCmd(I2C1, ENABLE);
+        DMA_Cmd(DMA1_Stream5, ENABLE);
+        I2C_DMACmd(I2C1, ENABLE);
+        
+        while(!DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG_TCIF5)) {}
+       /**/ 
+        
+        vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
     }
 }
 

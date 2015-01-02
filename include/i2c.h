@@ -10,6 +10,7 @@
 #define SPI_H
 
 #include <stdint.h>
+#include <stm32f4xx_dma.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -19,6 +20,9 @@ extern "C" {
   
   void dmaI2CRead(uint8_t * buffer, uint8_t address, uint16_t length);
   void dmaI2CWrite(uint8_t * buffer, uint8_t address, uint16_t length);
+  void dmaConfig(uint32_t, uint32_t, uint8_t, DMA_Stream_TypeDef *);
+#define DIR_TX 1
+#define DIR_RX 2
 
 
 #ifdef  __cplusplus
