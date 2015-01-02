@@ -7,8 +7,8 @@
  * Manually control /CS outside of this API.
  */
 
-#ifndef MEM_H
-#define	MEM_H
+#ifndef SPI_H
+#define	SPI_H
 
 #include <stdint.h>
 
@@ -25,5 +25,5 @@ extern "C" {
 }
 #endif
 
-#endif	/* MEM_H */
+#endif	/* SPI_H */
 

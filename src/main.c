@@ -15,6 +15,7 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
 
+#include <i2c.h>
 /* Application includes */
 
 /*Init system config*/
@@ -137,12 +138,46 @@ void initTask(void * params)
     
     vConsolePrintf("Init finished!\r\n");
     
+    initializeI2C();
+    
+    char i2cbuffer[10];
+    
     for(;;)
     {
         GPIO_SetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
+        
+        /* Test I2C */
+        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
+        I2C_GenerateSTART(I2C1, ENABLE);
+        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {
+        }
+        I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Transmitter);
+        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
+        
+        I2C_SendData(I2C1, 10);
+        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF) == RESET) {}
+        
+        
+        I2C_GenerateSTART(I2C1, ENABLE);
+        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
+        I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Receiver);
+        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR) == RESET) {}
+        
+        I2C_AcknowledgeConfig(I2C1, DISABLE);
+        
+        /*voodoo read */
+        (void)I2C1->SR2;
+        I2C_GenerateSTOP(I2C1, ENABLE);
+        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET) {}
+        i2cbuffer[0] = I2C_ReceiveData(I2C1);
+        while(I2C1->CR1 & I2C_CR1_STOP) {}
+        
+        I2C_AcknowledgeConfig(I2C1, ENABLE);
+        
+        vConsolePrintf("I2C Test Byte: %x\r\n", i2cbuffer[0]);
     }
 }
 
