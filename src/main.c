@@ -20,7 +20,7 @@
 
 /*Init system config*/
 
-#define BURN_DELAY          15 /*Seconds until antenna burn*/
+#define BURN_DELAY          5 /*Seconds until antenna burn*/
 
 
 static void initTask(void * params);
@@ -140,7 +140,7 @@ void initTask(void * params)
     
     initializeI2C();
     
-    char i2cbuffer[10];
+    uint8_t i2cbuffer[10];
     
     for(;;)
     {
@@ -149,8 +149,10 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
+        
         /* Test I2C */
-        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
+        //while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
+        /*
         I2C_GenerateSTART(I2C1, ENABLE);
         while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {
         }
@@ -165,6 +167,7 @@ void initTask(void * params)
         while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
         I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Receiver);
         while(I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR) == RESET) {}
+        */
         
         
         /* one-byte read
@@ -179,7 +182,7 @@ void initTask(void * params)
         I2C_AcknowledgeConfig(I2C1, ENABLE);
         */
         
-        /* DMA 3-byte read */
+        /* DMA 3-byte read 
         while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
         dmaConfig((uint32_t)i2cbuffer, 3, DIR_RX, DMA1_Stream5);
         I2C_DMALastTransferCmd(I2C1, ENABLE);
@@ -191,7 +194,11 @@ void initTask(void * params)
         I2C_GenerateSTOP(I2C1, ENABLE);
         DMA_Cmd(DMA1_Stream5, DISABLE);
         DMA_ClearFlag(DMA1_Stream5, DMA_FLAG_TCIF5);
-       /**/ 
+       */ 
+        
+        i2cbuffer[0] = 10;
+        dmaI2C1Write(i2cbuffer, 0x3C, 1);
+        dmaI2C1Read(i2cbuffer, 0x3C, 3);
         
         vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
     }
