@@ -187,6 +187,10 @@ void initTask(void * params)
         I2C_DMACmd(I2C1, ENABLE);
         
         while(!DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG_TCIF5)) {}
+        
+        I2C_GenerateSTOP(I2C1, ENABLE);
+        DMA_Cmd(DMA1_Stream5, DISABLE);
+        DMA_ClearFlag(DMA1_Stream5, DMA_FLAG_TCIF5);
        /**/ 
         
         vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
