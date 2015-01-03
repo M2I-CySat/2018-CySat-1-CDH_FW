@@ -16,10 +16,14 @@
 #include <stm32f4xx_spi.h>
 #include <stm32f4xx_rcc.h>
 
+#include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
+#include <semphr.h>
+
 static DMA_InitTypeDef I2C1_DMA_InitStructure;
 
-static volatile I2C1_DMA_RX_SEMAPHORE = 0;
-static volatile I2C1_DMA_TX_SEMAPHORE = 0;
+static volatile SemaphoreHandle_t I2C1_DMA_RX_Semaphore = NULL;
+static volatile SemaphoreHandle_t I2C1_DMA_TX_Semaphore = NULL;
 
 #define DIR_TX 1
 #define DIR_RX 2
@@ -130,6 +134,9 @@ static void initializeI2C1()
   /* Enable TC Interrupts */
   DMA_ITConfig(I2C1_DMA_STREAM_TX, DMA_IT_TC, ENABLE);
   DMA_ITConfig(I2C1_DMA_STREAM_RX, DMA_IT_TC, ENABLE);      
+  
+  I2C1_DMA_RX_Semaphore = xSemaphoreCreateBinary();
+  I2C1_DMA_TX_Semaphore = xSemaphoreCreateBinary();
 }
 
 void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
@@ -154,14 +161,13 @@ void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
     }
     else
     {
-        I2C1_DMA_TX_SEMAPHORE = 0;
         I2C1_DMAConfig((uint32_t)buffer, length, DIR_TX);
         I2C_DMALastTransferCmd(I2C1, ENABLE);
         DMA_Cmd(I2C1_DMA_STREAM_TX, ENABLE);
         I2C_DMACmd(I2C1, ENABLE);
         
         /* Wait for DMA interrupt */
-        while(I2C1_DMA_TX_SEMAPHORE == 0) {}
+        xSemaphoreTake(I2C1_DMA_TX_Semaphore, portMAX_DELAY);
     }
 }
 
@@ -191,7 +197,6 @@ void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length)
     }
     else
     {
-        I2C1_DMA_RX_SEMAPHORE = 0;
         while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
         I2C1_DMAConfig((uint32_t)buffer, length, DIR_RX);
         I2C_DMALastTransferCmd(I2C1, ENABLE);
@@ -199,7 +204,7 @@ void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length)
         I2C_DMACmd(I2C1, ENABLE);
         
         /* Wait for DMA interrupt */
-        while(I2C1_DMA_RX_SEMAPHORE == 0) {}
+        xSemaphoreTake(I2C1_DMA_RX_Semaphore, portMAX_DELAY);
     }
 }
 
@@ -211,6 +216,7 @@ void initializeI2C()
 /* I2C1_DMA_RX_IRQHandler */
 void DMA1_Stream5_IRQHandler()
 {
+    BaseType_t higherPriorityTaskWoken = pdFALSE;
     NVIC_ClearPendingIRQ(DMA1_Stream5_IRQn);
     if(DMA_GetFlagStatus(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF) != RESET)
     {
@@ -218,13 +224,15 @@ void DMA1_Stream5_IRQHandler()
         DMA_Cmd(I2C1_DMA_STREAM_RX, DISABLE);
         DMA_ClearFlag(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF);
         
-        I2C1_DMA_RX_SEMAPHORE = 1; /* TODO: RTOS Semaphores */
+        xSemaphoreGiveFromISR(I2C1_DMA_RX_Semaphore, &higherPriorityTaskWoken);
     }
+    portEND_SWITCHING_ISR(higherPriorityTaskWoken);
 }
 
 /* I2C1_DMA_TX_IRQHandler */
 void DMA1_Stream6_IRQHandler()
 { 
+    BaseType_t higherPriorityTaskWoken = pdFALSE;
     NVIC_ClearPendingIRQ(DMA1_Stream6_IRQn);
     if(DMA_GetFlagStatus(I2C1_DMA_STREAM_TX, I2C1_DMA_TX_FLAG_TCIF) != RESET)
     {
@@ -232,6 +240,7 @@ void DMA1_Stream6_IRQHandler()
         DMA_Cmd(I2C1_DMA_STREAM_TX, DISABLE);
         DMA_ClearFlag(I2C1_DMA_STREAM_TX, I2C1_DMA_TX_FLAG_TCIF);
         
-        I2C1_DMA_TX_SEMAPHORE = 1; /* TODO: RTOS Semaphores */
+        xSemaphoreGiveFromISR(I2C1_DMA_TX_Semaphore, &higherPriorityTaskWoken);
     }
+    portEND_SWITCHING_ISR(higherPriorityTaskWoken);
 }
