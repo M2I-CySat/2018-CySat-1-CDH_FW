@@ -149,58 +149,29 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-        
-        /* Test I2C */
-        //while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
-        /*
-        I2C_GenerateSTART(I2C1, ENABLE);
-        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {
-        }
-        I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Transmitter);
-        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {}
-        
-        I2C_SendData(I2C1, 10);
-        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BTF) == RESET) {}
-        
-        
-        I2C_GenerateSTART(I2C1, ENABLE);
-        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT)) {}
-        I2C_Send7bitAddress(I2C1, 0x3C, I2C_Direction_Receiver);
-        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_ADDR) == RESET) {}
-        */
-        
-        
-        /* one-byte read
-        I2C_AcknowledgeConfig(I2C1, DISABLE);
-        
-        (void)I2C1->SR2;
-        I2C_GenerateSTOP(I2C1, ENABLE);
-        while(I2C_GetFlagStatus(I2C1, I2C_FLAG_RXNE) == RESET) {}
-        i2cbuffer[0] = I2C_ReceiveData(I2C1);
-        while(I2C1->CR1 & I2C_CR1_STOP) {}
-        
-        I2C_AcknowledgeConfig(I2C1, ENABLE);
-        */
-        
-        /* DMA 3-byte read 
-        while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
-        dmaConfig((uint32_t)i2cbuffer, 3, DIR_RX, DMA1_Stream5);
-        I2C_DMALastTransferCmd(I2C1, ENABLE);
-        DMA_Cmd(DMA1_Stream5, ENABLE);
-        I2C_DMACmd(I2C1, ENABLE);
-        
-        while(!DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG_TCIF5)) {}
-        
-        I2C_GenerateSTOP(I2C1, ENABLE);
-        DMA_Cmd(DMA1_Stream5, DISABLE);
-        DMA_ClearFlag(DMA1_Stream5, DMA_FLAG_TCIF5);
-       */ 
-        
+        /* I2C test */
         i2cbuffer[0] = 10;
-        dmaI2C1Write(i2cbuffer, 0x3C, 1);
-        dmaI2C1Read(i2cbuffer, 0x3C, 3);
+        I2C1Write(i2cbuffer, 0x3C, 1);
+        I2C1Read(i2cbuffer, 0x3C, 3);
         
         vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
+        
+        i2cbuffer[0] = 0x00;
+        I2C1Write(i2cbuffer, 0x3C, 1);
+        I2C1Read(i2cbuffer, 0x3C, 3);
+        vConsolePrintf("I2C Pre-Write Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
+        
+        i2cbuffer[0] = 0x02;
+        I2C1Write(i2cbuffer, 0x3C, 1);
+        
+        i2cbuffer[1] = 0x00;
+        I2C1Write(i2cbuffer, 0x3C, 1);
+        
+        i2cbuffer[0] = 0x00;
+        I2C1Write(i2cbuffer, 0x3C, 1);
+        I2C1Read(i2cbuffer, 0x3C, 3);
+        
+        vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
     }
 }
 

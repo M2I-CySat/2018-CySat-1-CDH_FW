@@ -18,26 +18,30 @@
 
 static DMA_InitTypeDef I2C1_DMA_InitStructure;
 
+static volatile I2C1_DMA_RX_SEMAPHORE = 0;
+static volatile I2C1_DMA_TX_SEMAPHORE = 0;
+
 #define DIR_TX 1
 #define DIR_RX 2
-static void I2C1_DMAConfig(uint32_t buffer, uint32_t bufferSize, uint8_t dir,
-                      DMA_Stream_TypeDef * stream)
+static void I2C1_DMAConfig(uint32_t buffer, uint32_t bufferSize, uint8_t dir)
 {
   if (dir == DIR_TX)
   {
     /* Configure the DMA Tx Stream with the buffer address and the buffer size */
+    I2C1_DMA_InitStructure.DMA_Channel = I2C1_DMA_CHANNEL_TX;
     I2C1_DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)buffer;
     I2C1_DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;    
     I2C1_DMA_InitStructure.DMA_BufferSize = (uint32_t)bufferSize;  
-    DMA_Init(stream, &I2C1_DMA_InitStructure);  
+    DMA_Init(I2C1_DMA_STREAM_TX, &I2C1_DMA_InitStructure);  
   }
   else
   { 
     /* Configure the DMA Rx Stream with the buffer address and the buffer size */
+    I2C1_DMA_InitStructure.DMA_Channel = I2C1_DMA_CHANNEL_RX;
     I2C1_DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)buffer;
     I2C1_DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
     I2C1_DMA_InitStructure.DMA_BufferSize = (uint32_t)bufferSize;      
-    DMA_Init(stream, &I2C1_DMA_InitStructure);    
+    DMA_Init(I2C1_DMA_STREAM_RX, &I2C1_DMA_InitStructure);    
   }
 }
 
@@ -45,6 +49,7 @@ static void initializeI2C1()
 {
   I2C_InitTypeDef I2C_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure; 
+  NVIC_InitTypeDef NVIC_InitStructure;
   
   RCC_AHB1PeriphClockCmd(I2C1_DMA_CLK, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
@@ -111,7 +116,20 @@ static void initializeI2C1()
   DMA_Init(I2C1_DMA_STREAM_TX, &I2C1_DMA_InitStructure);
   
   /* Setup interrupts */
+  NVIC_InitStructure.NVIC_IRQChannel = I2C1_DMA_RX_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = I2C1_DMA_PREPRIO;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = I2C1_DMA_SUBPRIO;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  NVIC_InitStructure.NVIC_IRQChannel = I2C1_DMA_TX_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = I2C1_DMA_PREPRIO;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = I2C1_DMA_SUBPRIO;
+  NVIC_Init(&NVIC_InitStructure);  
   
+  /* Enable TC Interrupts */
+  DMA_ITConfig(I2C1_DMA_STREAM_TX, DMA_IT_TC, ENABLE);
+  DMA_ITConfig(I2C1_DMA_STREAM_RX, DMA_IT_TC, ENABLE);      
 }
 
 void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
@@ -136,7 +154,14 @@ void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
     }
     else
     {
-        /* TODO: DMA WRITE */
+        I2C1_DMA_TX_SEMAPHORE = 0;
+        I2C1_DMAConfig((uint32_t)buffer, length, DIR_TX);
+        I2C_DMALastTransferCmd(I2C1, ENABLE);
+        DMA_Cmd(I2C1_DMA_STREAM_TX, ENABLE);
+        I2C_DMACmd(I2C1, ENABLE);
+        
+        /* Wait for DMA interrupt */
+        while(I2C1_DMA_TX_SEMAPHORE == 0) {}
     }
 }
 
@@ -166,22 +191,47 @@ void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length)
     }
     else
     {
+        I2C1_DMA_RX_SEMAPHORE = 0;
         while(!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {}
-        I2C1_DMAConfig((uint32_t)buffer, length, DIR_RX, I2C1_DMA_STREAM_RX);
+        I2C1_DMAConfig((uint32_t)buffer, length, DIR_RX);
         I2C_DMALastTransferCmd(I2C1, ENABLE);
         DMA_Cmd(I2C1_DMA_STREAM_RX, ENABLE);
         I2C_DMACmd(I2C1, ENABLE);
         
-        /*TODO: Move EOT handling to interrupt/RTOS wrapping*/
-        while(!DMA_GetFlagStatus(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF)) {}
-        
-        I2C_GenerateSTOP(I2C1, ENABLE);
-        DMA_Cmd(I2C1_DMA_STREAM_RX, DISABLE);
-        DMA_ClearFlag(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF);
+        /* Wait for DMA interrupt */
+        while(I2C1_DMA_RX_SEMAPHORE == 0) {}
     }
 }
 
 void initializeI2C()
 {
   initializeI2C1();
+}
+
+/* I2C1_DMA_RX_IRQHandler */
+void DMA1_Stream5_IRQHandler()
+{
+    NVIC_ClearPendingIRQ(DMA1_Stream5_IRQn);
+    if(DMA_GetFlagStatus(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF) != RESET)
+    {
+        I2C_GenerateSTOP(I2C1, ENABLE);
+        DMA_Cmd(I2C1_DMA_STREAM_RX, DISABLE);
+        DMA_ClearFlag(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_TCIF);
+        
+        I2C1_DMA_RX_SEMAPHORE = 1; /* TODO: RTOS Semaphores */
+    }
+}
+
+/* I2C1_DMA_TX_IRQHandler */
+void DMA1_Stream6_IRQHandler()
+{ 
+    NVIC_ClearPendingIRQ(DMA1_Stream6_IRQn);
+    if(DMA_GetFlagStatus(I2C1_DMA_STREAM_TX, I2C1_DMA_TX_FLAG_TCIF) != RESET)
+    {
+        I2C_GenerateSTOP(I2C1, ENABLE);
+        DMA_Cmd(I2C1_DMA_STREAM_TX, DISABLE);
+        DMA_ClearFlag(I2C1_DMA_STREAM_TX, I2C1_DMA_TX_FLAG_TCIF);
+        
+        I2C1_DMA_TX_SEMAPHORE = 1; /* TODO: RTOS Semaphores */
+    }
 }

@@ -20,6 +20,9 @@ extern "C" {
   
   void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length);
   void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length);
+  
+#define I2C1Read(a, b, c) dmaI2C1Read(a, b, c)
+#define I2C1Write(a, b, c) dmaI2C1Write(a, b, c)
 #define DIR_TX 1
 #define DIR_RX 2
   
@@ -48,6 +51,10 @@ extern "C" {
 #define I2C1_DMA_CLK RCC_AHB1Periph_DMA1
 #define I2C1_GPIO_CLK RCC_AHB1Periph_GPIOB
 #define I2C1_OWN_ADDRESS 0x34
+#define I2C1_DMA_PREPRIO 0
+#define I2C1_DMA_SUBPRIO 0
+#define I2C1_DMA_RX_IRQn DMA1_Stream5_IRQn
+#define I2C1_DMA_TX_IRQn DMA1_Stream6_IRQn
 
 
 #ifdef  __cplusplus
