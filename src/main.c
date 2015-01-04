@@ -140,7 +140,7 @@ void initTask(void * params)
     
     initializeI2C();
     
-    uint8_t i2cbuffer[10];
+    uint8_t i2cbuffer[1000];
     
     for(;;)
     {
@@ -151,27 +151,35 @@ void initTask(void * params)
         
         /* I2C test */
         i2cbuffer[0] = 10;
-        I2C1Write(i2cbuffer, 0x3C, 1);
-        I2C1Read(i2cbuffer, 0x3C, 3);
+        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1);
-        I2C1Read(i2cbuffer, 0x3C, 3);
+        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         vConsolePrintf("I2C Pre-Write Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x02;
-        I2C1Write(i2cbuffer, 0x3C, 1);
+        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         
         i2cbuffer[1] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1);
+        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         
         i2cbuffer[0] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1);
-        I2C1Read(i2cbuffer, 0x3C, 3);
+        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
+        
+        vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
+        for(i = 0; i < 100; i++)
+        {
+            I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+            I2C1Read(i2cbuffer, 0x3c, 1000, portMAX_DELAY);
+        }
+        vConsolePrintf("Long read done");
     }
 }
 

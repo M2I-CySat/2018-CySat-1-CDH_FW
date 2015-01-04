@@ -27,6 +27,7 @@ static volatile SemaphoreHandle_t I2C1_DMA_TX_Semaphore = NULL;
 
 #define DIR_TX 1
 #define DIR_RX 2
+
 static void I2C1_DMAConfig(uint32_t buffer, uint32_t bufferSize, uint8_t dir)
 {
   if (dir == DIR_TX)
@@ -139,8 +140,9 @@ static void initializeI2C1()
   I2C1_DMA_TX_Semaphore = xSemaphoreCreateBinary();
 }
 
-void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
+int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime)
 {
+    int16_t return_code = pdTRUE;
     uint16_t bytes_sent = 0;
     while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
     I2C_GenerateSTART(I2C1, ENABLE);
@@ -167,12 +169,14 @@ void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length)
         I2C_DMACmd(I2C1, ENABLE);
         
         /* Wait for DMA interrupt */
-        xSemaphoreTake(I2C1_DMA_TX_Semaphore, portMAX_DELAY);
+        return_code = xSemaphoreTake(I2C1_DMA_TX_Semaphore, blocktime);
     }
+    return return_code;
 }
 
-void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length)
+int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime)
 {
+    int16_t return_code = pdTRUE;
     uint16_t bytes_received = 0;
     while(I2C_GetFlagStatus(I2C1, I2C_FLAG_BUSY)) {} /*TODO: Timeout*/
     I2C_GenerateSTART(I2C1, ENABLE);
@@ -204,8 +208,9 @@ void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length)
         I2C_DMACmd(I2C1, ENABLE);
         
         /* Wait for DMA interrupt */
-        xSemaphoreTake(I2C1_DMA_RX_Semaphore, portMAX_DELAY);
+        return_code = xSemaphoreTake(I2C1_DMA_RX_Semaphore, blocktime);
     }
+    return return_code;
 }
 
 void initializeI2C()

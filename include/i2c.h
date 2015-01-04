@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 #include <stm32f4xx_dma.h>
+#include <FreeRTOS.h>
+#include <FreeRTOSConfig.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -18,13 +20,8 @@ extern "C" {
 
   void initializeSPI();
   
-  void dmaI2C1Read(uint8_t * buffer, uint8_t address, uint16_t length);
-  void dmaI2C1Write(uint8_t * buffer, uint8_t address, uint16_t length);
-  
-#define I2C1Read(a, b, c) dmaI2C1Read(a, b, c)
-#define I2C1Write(a, b, c) dmaI2C1Write(a, b, c)
-#define DIR_TX 1
-#define DIR_RX 2
+  int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime);
+  int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime);
   
 /* I2C1: SCL: PB8, SDA: PB9, DMA1 Stream 5 Channel 1(RX)/Stream 6 Channel 1(TX) */
 /* Defines for portability */
