@@ -16,6 +16,7 @@
 #include <stm32f4xx_rcc.h>
 
 #include <i2c.h>
+#include <spi.h>
 /* Application includes */
 
 /*Init system config*/
@@ -139,8 +140,11 @@ void initTask(void * params)
     vConsolePrintf("Init finished!\r\n");
     
     initializeI2C();
+    initializeSPI();
     
     uint8_t i2cbuffer[1000];
+    uint8_t spitxbuffer[100];
+    uint8_t spirxbuffer[100];
     
     for(;;)
     {
@@ -172,7 +176,7 @@ void initTask(void * params)
         I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
-        
+       /* 
         vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
         for(i = 0; i < 100; i++)
         {
@@ -180,6 +184,10 @@ void initTask(void * params)
             I2C1Read(i2cbuffer, 0x3c, 1000, portMAX_DELAY);
         }
         vConsolePrintf("Long read done");
+        */
+        vConsolePrintf("Testing SPI transfer...");
+        SPI1Transfer(spitxbuffer, spirxbuffer, 100);
+        vConsolePrintf("Done\r\n");
     }
 }
 
