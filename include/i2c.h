@@ -6,8 +6,8 @@
  * Usage: Initialize with initializeI2C(); Take the mutex for I2C and call dmaI2CRead() or dmaI2CWrite()
  */
 
-#ifndef SPI_H
-#define SPI_H
+#ifndef I2C_H
+#define I2C_H
 
 #include <stdint.h>
 #include <stm32f4xx_dma.h>
@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-  void initializeSPI();
+  void initializeI2C();
   
   int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
   int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);

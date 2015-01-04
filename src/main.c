@@ -17,6 +17,9 @@
 
 #include <i2c.h>
 #include <spi.h>
+#include <uart.h>
+#include <clock.h>
+#include <command.h>
 /* Application includes */
 
 /*Init system config*/
@@ -25,7 +28,6 @@
 
 
 static void initTask(void * params);
-static void init();
 
 static void lowLevelHardwareInit()
 {
@@ -75,7 +77,6 @@ void initTask(void * params)
     /* End test heartbeat initialization */
     
     /* Begin actual init */
-    unsigned char buffer;
     int i;
     
     vUartStartTask();
@@ -190,8 +191,8 @@ void initTask(void * params)
         */
        
         vConsolePrintf("Testing SPI transfer...");
-        SPI1_TakeMutex();
-        SPI1Transfer(spitxbuffer, spirxbuffer, 100);
+        SPI1_TakeMutex(portMAX_DELAY);
+        SPI1Transfer(spitxbuffer, spirxbuffer, 100, portMAX_DELAY);
         SPI1_ReleaseMutex();
         vConsolePrintf("Done\r\n");
     }

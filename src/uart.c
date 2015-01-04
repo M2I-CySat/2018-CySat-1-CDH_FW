@@ -54,7 +54,7 @@ void vUartStartTask( void )
 
 inline static portBASE_TYPE prvUartPut( USART_TypeDef * usart, char c )
 {
-    xSerialPutChar(usart, c, 0);
+    return xSerialPutChar(usart, c, 0);
 }
 
 inline static portBASE_TYPE prvUartPrint( USART_TypeDef * usart, char s[])
