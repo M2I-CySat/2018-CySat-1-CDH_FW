@@ -10,9 +10,9 @@
  *
  */
 
-void vStartClockTask();
-long getMissionTime();
-void zeroRTC();
+#include <time.h>
+time_t getMissionTime();
+void startRTC();
 
 
 #endif

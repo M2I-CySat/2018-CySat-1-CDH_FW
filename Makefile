@@ -28,6 +28,8 @@ export IFLAGS+= -I$(CMSIS_ROOT)/Include/
 export CPPFLAGS+= $(IFLAGS)
 export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
 export CFLAGS+= -mfpu=fpv4-sp-d16 -g -DUSE_STDPERIPH_DRIVER -D$(MCU_MODEL)
+#Bitchy nag-nag mode settings
+export CFLAGS+= -Wall -Wno-unused-function -Wno-pointer-sign -Werror
 export ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 
 all:

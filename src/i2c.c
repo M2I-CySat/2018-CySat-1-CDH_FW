@@ -7,6 +7,7 @@
  */
 
 #include <i2c.h>
+#include <spi.h>
 #include <uart.h>
 #include <system.h>
 

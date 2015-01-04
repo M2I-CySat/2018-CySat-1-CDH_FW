@@ -85,7 +85,7 @@ static void sendMessage(char * body) {
 
 /*Message subtype handling*/
 void prvHandlePowerPanelQuery(char** fields, int fieldCount) {
-    powerData * housekeeping;
+//    powerData * housekeeping;
 
     char resultBuffer[50];
     memset(resultBuffer, 0, 50);
@@ -120,7 +120,7 @@ void prvHandleTimeQuery() {
 }
 
 void prvHandlePowerBattQuery(char ** fields, int fieldCount) {
-    powerData * housekeeping;
+    powerData * housekeeping = NULL;
 
     char resultBuffer[50];
     memset(resultBuffer, 0, 50);
