@@ -1,8 +1,21 @@
-/* 
- * File:   uart.h
- * Author: Kris Scott
+/*!
+ * \File   uart.h
+ * \Author Kris Scott
+ * 
+ * \addtogroup CySat
+ * \{
+ * \defgroup CySat_UART
+ * \{
  *
+ * \brief UART API wrapping stdio.h printf functions
+ * 
  * Created on September 26, 2012, 6:40 PM
+ * 
+ * Use these functions for printf-style functionality.
+ * 
+ * Use vConsolePrintf() as the generic printf. Avoid 
+ * explicitly using uart1 and uart2 unless there is a very
+ * good reason.
  */
 
 #ifndef UART_H
@@ -13,13 +26,8 @@
 // Define if you want to use test functions. e.g. vUartTest()
 #define uartTEST_FUNCTIONS
 
-#define BACKSPACE 0x8
-
-//#define BRATE       25              /* 9600 Bd (BREGH=0) */
-//#define U_ENABLE    0x8000          /* enable UART, 1 stop, no parity */
-//#define U_TX        0x0400          /* enable transmission, clear all flags */
-
-#define uartRX_BUFFER_SIZE      80
+/*! Maximum size of printf. Do not exceed
+ */
 #define uartSPRINTF_BUFFER_SIZE 256
 
 /**
@@ -91,18 +99,10 @@ void vConsolePrintf( const char *fmt, ... );
  */
 void vConsoleErrorPrintf( const char *fmt, ... );
 
-#ifdef uartTEST_FUNCTIONS
-/**
- * Prints a test pattern to Console's UART
+/*!
+ * \}
+ * \}
  */
-void vUartTest();
-
-/**
- * Create the task that will run a UART test.
- */
-void vUartStartTestTask( void );
-#endif
-
 
 #endif	/* UART_H */
 

@@ -1,8 +1,13 @@
-/* 
- * File:   nichrome.h
+/*!
+ * \File   nichrome.h
  * Author: kscott
  *
  * Created on April 27, 2013, 1:36 PM
+ * 
+ * \addtogroup CySat
+ * \{
+ * \addtogroup CySat_Private
+ * \{
  */
 
 #ifndef NICHROME_H
@@ -21,3 +26,7 @@ void vNichromeTask( void *pvParameters );
 
 #endif	/* NICHROME_H */
 
+/*!
+ * \}
+ * \}
+ */

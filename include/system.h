@@ -1,9 +1,14 @@
-/* 
- * File:   system.h
+/*! 
+ * \File   system.h
  * Author: Kris
  *
  * Created on October 30, 2012, 8:49 AM
+ * \addtogroup CySat
+ * \{
+ * \addtogroup CySat_Private
+ * \{
  */
+
 
 #ifndef SYSTEM_H
 #define	SYSTEM_H
@@ -51,3 +56,7 @@
 
 #endif	/* SYSTEM_H */
 
+/*!  
+ * \}
+ * \}
+ */

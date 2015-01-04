@@ -1,4 +1,6 @@
-/* serial.h 
+/*!
+ * \file serial.h 
+ * \author Jake Drahos
  * 
  * USART driver for FreeRTOS
  * 
@@ -8,6 +10,11 @@
  *  PutChar:        xSerialPutChar(USARTx, byte, blocktime);
  * 
  * Get and Put return success/fail
+ * 
+ * \addtogroup CySat
+ * \{
+ * \addtogroup CySat_Private
+ * \{
  * 
  */
 
@@ -26,3 +33,8 @@ int xSerialPutChar(USART_TypeDef *, unsigned char, portTickType);
 #define serialTX_QUEUE_SIZE 512
 
 #endif
+
+/*!  
+ * \}
+ * \}
+ */

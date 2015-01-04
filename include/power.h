@@ -1,8 +1,12 @@
-/* 
- * File:   power.h
- * Author: Kris
+/*! 
+ * \File:   power.h
+ * \Author: Kris
  *
  * Created on October 29, 2012, 10:07 AM
+ * \addtogroup \CySat
+ * \{
+ * \addtogroup \CySat_Private
+ * \{
  */
 
 #ifndef POWER_H
@@ -11,8 +15,9 @@
 #define powerLOCAL_PRINT
 
 #if 0
-/*
+/*!
  * For internal memory management only.
+ * 
  *   Bit field order is NOT guaranteed.
  *   Do NOT attempt to write this struct directly to disk, radio, etc.
  */
@@ -73,4 +78,9 @@ void vPowerStartTask();
 powerData* xPowerGetHousekeepingData();
 
 #endif	/* POWER_H */
+
+/*!
+ * \}
+ * \}
+ */
 

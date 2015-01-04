@@ -1,9 +1,7 @@
-/*
- * File:   i2c.c
- * Author: Jake Drahos
+/*!
+ * \File   i2c.c
+ * \Author Jake Drahos
  *
- *
- * Created on November 11, 2013, 5:43 PM
  */
 
 #include <i2c.h>
