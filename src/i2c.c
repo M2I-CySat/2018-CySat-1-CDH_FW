@@ -25,6 +25,8 @@ static DMA_InitTypeDef I2C1_DMA_InitStructure;
 static volatile SemaphoreHandle_t I2C1_DMA_RX_Semaphore = NULL;
 static volatile SemaphoreHandle_t I2C1_DMA_TX_Semaphore = NULL;
 
+static SemaphoreHandle_t I2C1_Mutex = NULL;
+
 #define DIR_TX 1
 #define DIR_RX 2
 
@@ -138,9 +140,10 @@ static void initializeI2C1()
   
   I2C1_DMA_RX_Semaphore = xSemaphoreCreateBinary();
   I2C1_DMA_TX_Semaphore = xSemaphoreCreateBinary();
+  I2C1_Mutex = xSemaphoreCreateMutex();
 }
 
-int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime)
+int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
 {
     int16_t return_code = pdTRUE;
     uint16_t bytes_sent = 0;
@@ -174,7 +177,7 @@ int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, portTickTy
     return return_code;
 }
 
-int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime)
+int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
 {
     int16_t return_code = pdTRUE;
     uint16_t bytes_received = 0;
@@ -211,6 +214,16 @@ int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, portTickTyp
         return_code = xSemaphoreTake(I2C1_DMA_RX_Semaphore, blocktime);
     }
     return return_code;
+}
+
+int16_t I2C1_TakeMutex(TickType_t blocktime)
+{
+    return xSemaphoreTake(I2C1_Mutex, blocktime);
+}
+
+int16_t I2C1_ReleaseMutex()
+{
+    return xSemaphoreGive(I2C1_Mutex);
 }
 
 void initializeI2C()

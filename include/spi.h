@@ -20,7 +20,9 @@ extern "C" {
 
 	void initializeSPI();
 	
-	int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, portTickType blocktime);
+	int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime);
+    int16_t SPI1_TakeMutex(TickType_t blocktime);
+    int16_t SPI1_ReleaseMutex();
     
 /* SPI1: Unknown GPIOs, DMA2 Stream 2 Channel 3(RX)/Stream 5 Channel 3(TX) */
 #define SPI1_DMA_CLK RCC_AHB1Periph_DMAA2

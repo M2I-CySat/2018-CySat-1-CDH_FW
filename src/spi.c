@@ -24,7 +24,9 @@
 
 static DMA_InitTypeDef SPI1_DMA_InitStructure;
 
-static SemaphoreHandle_t SPI1_DMA_RX_Semaphore;
+static volatile SemaphoreHandle_t SPI1_DMA_RX_Semaphore;
+
+static SemaphoreHandle_t SPI1_Mutex;
 
 /* SPI1: Unknown GPIOs, DMA2 Stream 2 Channel 3(RX)/Stream 5 Channel 3(TX) */
 
@@ -91,6 +93,7 @@ static void initializeSPI1()
     DMA_ITConfig(SPI1_DMA_STREAM_RX, DMA_IT_TC, ENABLE);      
   
     SPI1_DMA_RX_Semaphore = xSemaphoreCreateBinary();
+    SPI1_Mutex = xSemaphoreCreateMutex();
 }
 
 void initializeSPI()
@@ -98,7 +101,7 @@ void initializeSPI()
     initializeSPI1();
 }
 
-int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, portTickType blocktime)
+int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime)
 {
     SPI1_DMA_InitStructure.DMA_BufferSize = length;
     
@@ -116,6 +119,16 @@ int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, po
     SPI_I2S_DMACmd(SPI1, SPI_I2S_DMAReq_Tx | SPI_I2S_DMAReq_Rx, ENABLE);
     
     return xSemaphoreTake(SPI1_DMA_RX_Semaphore, blocktime);
+}
+
+int16_t SPI1_TakeMutex(TickType_t blocktime)
+{
+    return xSemaphoreTake(SPI1_Mutex, blocktime);
+}
+
+int16_t SPI1_ReleaseMutex()
+{
+    return xSemaphoreGive(SPI1_Mutex);
 }
 
 /* SPI1_DMA_RX_IRQHandler */

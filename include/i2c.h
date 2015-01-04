@@ -20,8 +20,10 @@ extern "C" {
 
   void initializeSPI();
   
-  int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime);
-  int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, portTickType blocktime);
+  int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
+  int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
+  int16_t I2C1_TakeMutex(TickType_t blocktime);
+  int16_t I2C1_ReleaseMutex();
   
 /* I2C1: SCL: PB8, SDA: PB9, DMA1 Stream 5 Channel 1(RX)/Stream 6 Channel 1(TX) */
 /* Defines for portability */

@@ -154,6 +154,7 @@ void initTask(void * params)
         vTaskDelay(500);
         
         /* I2C test */
+        I2C1_TakeMutex(portMAX_DELAY);
         i2cbuffer[0] = 10;
         I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
@@ -175,6 +176,8 @@ void initTask(void * params)
         I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
+        I2C1_ReleaseMutex();
+        
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
        /* 
         vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
@@ -185,8 +188,11 @@ void initTask(void * params)
         }
         vConsolePrintf("Long read done");
         */
+       
         vConsolePrintf("Testing SPI transfer...");
+        SPI1_TakeMutex();
         SPI1Transfer(spitxbuffer, spirxbuffer, 100);
+        SPI1_ReleaseMutex();
         vConsolePrintf("Done\r\n");
     }
 }
