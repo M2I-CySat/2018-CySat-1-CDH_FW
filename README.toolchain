@@ -98,18 +98,25 @@ remote target. Look at the Makefile's `debug` target to see the command-line
 flags needed.
 
 ==============IDE Support==============
+----------------Eclipse----------------
+1. Install GNU Arm Embedded GCC (as above, either from source or Windows binaries)
+2. Add GNU arm embedded to system PATH or custom environment PATH in Eclipse
 
-Any IDE that supports a makefile and a GDB remote (or `extended`) target should
-work for this project. 
+In Eclipse
+1. File->Import->C/C++->Existing Code as Makefile Project
+2. Name project and select the CySat root directory
+3. Toolchain <none> (feel free to expirement)
+4. Finish. Build succeeds
 
-Eclipse - Use `Import existing code as makefile project.` As long as the 
-toolchain is in your path it should compile. Debugging is a bit weirder. First,
-you still have to manually run the st-util utility in a terminal somewhere.
-Second, you will have to manually create a debug target in the debug
-configurations for the project. Choose src/image.elf as the file, and then add
-the `target extended localhost:4242` and `load` under the `Arguments` tab. 
-See the Makefile for the exact command-line arguments.
+Install ST-Util for your platform (Native windows via mingw, native Linux, or Cygwin. All work)
 
+Setting up debugger: http://erika.tuxfamily.org/wiki/index.php?title=Tutorial:_STM32_-_Integrated_Debugging_in_Eclipse_using_GNU_toolchain&oldid=5474
+Basically, add the GDB Hardware Debugging package to Eclipse, then create a GDB Hardware Debugging target. Use
+arm-none-eabi-gcc (or the full path to it) as the debugger, and set port to 4242.
+Also add ST-Util as an "external program" to Eclipse so you can run it through Eclipse. Start ST-Util
+and debug like normal.
+
+---------------Commercial IDEs-----------
 Other IDEs - IDEs with embedded-specific stuff (IAR, Atollic) might be happy
 to just be pointed at any old Makefile. I'm not sure. They do have their own
 GDBServer built in, so you won't need st-util.
