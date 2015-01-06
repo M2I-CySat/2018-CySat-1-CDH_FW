@@ -8,11 +8,15 @@ export AS=arm-none-eabi-as
 export OBJDUMP=arg-none-eabi-objdump
 
 #Project root (Complicated because Windows)
-ifeq ($(shell printenv OS),Windows_NT)
-  export PROJECT_ROOT=$(shell cygpath -ma .)
-else
-  export PROJECT_ROOT=$(shell pwd)
+ifndef PROJECT_ROOT
+	ifeq ($(shell printenv OS),Windows_NT)
+		export PROJECT_ROOT=$(shell cygpath -ma .)
+	else
+		export PROJECT_ROOT=$(shell pwd)
+	endif
 endif
+
+export PROJECT_ROOT
 
 # Path to CMSIS Headers
 export CMSIS_ROOT=$(PROJECT_ROOT)/CMSIS
