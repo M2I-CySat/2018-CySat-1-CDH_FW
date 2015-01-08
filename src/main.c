@@ -154,7 +154,7 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-        /* I2C test */
+        /* I2C test
         I2C1_TakeMutex(portMAX_DELAY);
         i2cbuffer[0] = 10;
         I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
@@ -178,6 +178,7 @@ void initTask(void * params)
         I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         I2C1_ReleaseMutex();
+        */
         
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
        /* 
