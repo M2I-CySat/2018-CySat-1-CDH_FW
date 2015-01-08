@@ -106,7 +106,9 @@ In Eclipse
 1. File->Import->C/C++->Existing Code as Makefile Project
 2. Name project and select the CySat root directory
 3. Toolchain <none> (feel free to expirement)
-4. Finish. Build succeeds
+4. PROJECT_ROOT Workaround: "Project->Properties->C/C++ Build". Set 
+    "Build command" to "make PROJECT_ROOT="${workspace_loc:/<project_name>}/"
+5. Finish. Build succeeds 
 
 Install ST-Util for your platform (Native windows via mingw, native Linux, or Cygwin. All work)
 
