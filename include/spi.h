@@ -12,7 +12,7 @@
  * The CySat SPI API uses DMA and RTOS-wrapping to allow
  * large SPI transactions to occur without blocking
  * other tasks from running. In order to use any
- * functionality of this API, initializeSPI() must first
+ * functionality of this API, SPI_Initialize() must first
  * be called.
  * 
  * Acces is determined by a mutex for each SPI peripheral.
@@ -44,7 +44,7 @@
     SPI1_TakeMutex(portMAX_DELAY);
     
     ASSERT_CHIP_SELECT();
-    SPI1Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
+    SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
     DEASSERT_CHIP_SELECT();
 \endcode
  * The 4 bytes have been written to the device,
@@ -55,7 +55,7 @@
     txbuffer[0] = 0xBB;
     
     ASSERT_CHIP_SELECT();
-    SPI1Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
+    SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
     DEASSERT_CHIP_SELECT();
     
     SPI1_ReleaseMutex();
@@ -103,11 +103,11 @@ extern "C" {
      * \return pdTRUE when the transfer completes, or pdFALSE
      * if the blocktime was reached.
      */
-	int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime);
+	int16_t SPI1_Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime);
 	
 	/*! Acqire Mutex for SPI1
      * 
-     * This mutex must be acquired before the SPI1Transfer()
+     * This mutex must be acquired before the SPI1_Transfer()
      * can be used. Release the mutex with SPI1_ReleaseMutex() once
      * the transaction is complete.
      * 
@@ -159,12 +159,12 @@ extern "C" {
     /*! Initialize all SPI peripherals.
      * 
      * No other functions from the SPI API may be used until
-     * initializeSPI() has been called.
+     * SPI_Initialize() has been called.
      * 
      * This function is called early during the satellite 
      * init process.
      */
-    void initializeSPI();
+    void SPI_Initialize();
     
 
 #ifdef	__cplusplus

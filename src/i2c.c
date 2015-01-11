@@ -51,7 +51,7 @@ static void I2C1_DMAConfig(uint32_t buffer, uint32_t bufferSize, uint8_t dir)
   }
 }
 
-static void initializeI2C1()
+static void I2C_Initialize1()
 {
   I2C_InitTypeDef I2C_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure; 
@@ -142,7 +142,7 @@ static void initializeI2C1()
   I2C1_Mutex = xSemaphoreCreateMutex();
 }
 
-int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
+int16_t I2C1_Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
 {
     int16_t return_code = pdTRUE;
     uint16_t bytes_sent = 0;
@@ -176,7 +176,7 @@ int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t
     return return_code;
 }
 
-int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
+int16_t I2C1_Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime)
 {
     int16_t return_code = pdTRUE;
     uint16_t bytes_received = 0;
@@ -225,9 +225,9 @@ int16_t I2C1_ReleaseMutex()
     return xSemaphoreGive(I2C1_Mutex);
 }
 
-void initializeI2C()
+void I2C_Initialize()
 {
-  initializeI2C1();
+  I2C_Initialize1();
 }
 
 /* I2C1_DMA_RX_IRQHandler */

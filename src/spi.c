@@ -30,7 +30,7 @@ static SemaphoreHandle_t SPI1_Mutex;
 
 /* SPI1: Unknown GPIOs, DMA2 Stream 2 Channel 3(RX)/Stream 5 Channel 3(TX) */
 
-static void initializeSPI1()
+static void SPI_Initialize1()
 {
     NVIC_InitTypeDef NVIC_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
@@ -96,12 +96,12 @@ static void initializeSPI1()
     SPI1_Mutex = xSemaphoreCreateMutex();
 }
 
-void initializeSPI()
+void SPI_Initialize()
 {
-    initializeSPI1();
+    SPI_Initialize1();
 }
 
-int16_t SPI1Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime)
+int16_t SPI1_Transfer(uint8_t * txBuffer, uint8_t * rxBuffer, uint16_t length, TickType_t blocktime)
 {
     SPI1_DMA_InitStructure.DMA_BufferSize = length;
     

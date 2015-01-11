@@ -12,7 +12,7 @@
  * The CySat I2C API uses DMA and RTOS-wrapping to allow
  * large I2C transactions to occur without blocking other
  * tasks from running. In order to use any functionality of this
- * API, initializeI2C() must first be called.
+ * API, I2C_Initialize() must first be called.
  * 
  * Access is determined by a mutex for each I2C peripheral. The mutex
  * must be obtained before a task can safely use the peripheral.
@@ -35,8 +35,8 @@
     buffer[0] = 0x0A;
   
     I2C1_TakeMutex(portMAX_DELAY);
-    I2C1Write(buffer, 0x3C, 1, portMAX_DELAY);
-    I2C1Read(buffer, 0x3C, 3, portMAX_DELAY);
+    I2C1_Write(buffer, 0x3C, 1, portMAX_DELAY);
+    I2C_Read(buffer, 0x3C, 3, portMAX_DELAY);
     I2C1_ReleaseMutex();
     \endcode
  * 
@@ -84,7 +84,7 @@ extern "C" {
     
     /*!
      */
-    int16_t I2C1Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
+    int16_t I2C1_Read(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
     
     /*! Perform an I2C Write
      * 
@@ -111,7 +111,7 @@ extern "C" {
      * \return pdTRUE when transaction completes, otherwise
      * pdFALSE
      */
-    int16_t I2C1Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
+    int16_t I2C1_Write(uint8_t * buffer, uint8_t address, uint16_t length, TickType_t blocktime);
     
     /*! Obtain Mutex for I2C1
      * 
@@ -140,7 +140,30 @@ extern "C" {
      * to the release)
      */
     int16_t I2C1_ReleaseMutex();
+    
+    /*!
+     * 
+     * Aliased to the System I2C bus (SYS_I2C)
+     */
+#define I2CSYS_Read(buffer, address, length, blocktime) I2C1_Read(buffer, address, length, blocktime)
 
+    /*!
+     * 
+     * Aliased to the System I2C bus (SYS_I2C)
+     */
+#define I2CSYS_Write(buffer, address, length, blocktime) I2C1_Write(buffer, address, length, blocktime)
+
+    /*!
+     * 
+     * Aliased to the System I2C bus (SYS_I2C)
+     */
+#define I2CSYS_TakeMutex(blocktime) I2C1_TakeMutex(blocktime)
+
+    /*!
+     * 
+     * Aliased to the System I2C bus (SYS_I2C)
+     */
+#define I2CSYS_ReleaseMutex() I2C1_ReleaseMutex()
     /*!
      * \}
      * \addtogroup CySat_Private
@@ -153,13 +176,12 @@ extern "C" {
     /*! Initialize all I2C peripherals.
      * 
      * No other functions from the I2C API may be used until
-     * initializeI2C() has been called.
+     * I2C_Initialize() has been called.
      * 
      * This function is called early during the satellite 
      * init process.
      */
-    void initializeI2C();
-  
+    void I2C_Initialize();
   
 /* I2C1: SCL: PB8, SDA: PB9, DMA1 Stream 5 Channel 1(RX)/Stream 6 Channel 1(TX) */
 /* Defines for portability */

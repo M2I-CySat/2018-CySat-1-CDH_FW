@@ -56,7 +56,8 @@ int main( void )
     lowLevelHardwareInit();
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
-
+    
+    
     /* Will only reach here if there is insufficient heap available to start
     the scheduler. */
     return 0;
@@ -78,6 +79,9 @@ void initTask(void * params)
     
     /* Begin actual init */
     int i;
+    
+    I2C_Initialize();
+    SPI_Initialize();
     
     vUartStartTask();
     vConsolePrintf("\r\n\r\n==================== BOOT ====================\r\n");
@@ -140,12 +144,11 @@ void initTask(void * params)
     
     vConsolePrintf("Init finished!\r\n");
     
-    initializeI2C();
-    initializeSPI();
-    
+#if 0
     uint8_t i2cbuffer[1000];
     uint8_t spitxbuffer[100];
     uint8_t spirxbuffer[100];
+#endif
     
     for(;;)
     {
@@ -154,49 +157,49 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-        /* I2C test
-        I2C1_TakeMutex(portMAX_DELAY);
+#if 0
+        /* I2C test */
+        I2CSYS_TakeMutex(portMAX_DELAY);
         i2cbuffer[0] = 10;
-        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
-        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
+        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
-        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
+        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         vConsolePrintf("I2C Pre-Write Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x02;
-        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         
         i2cbuffer[1] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         
         i2cbuffer[0] = 0x00;
-        I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
-        I2C1Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
+        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
-        I2C1_ReleaseMutex();
         
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]); 
-        */
-       /* 
+        /*  Long read test */
         vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
         for(i = 0; i < 100; i++)
         {
-            I2C1Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
-            I2C1Read(i2cbuffer, 0x3c, 1000, portMAX_DELAY);
+            I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+            I2CSYS_Read(i2cbuffer, 0x3c, 1000, portMAX_DELAY);
         }
         vConsolePrintf("Long read done");
-        */
-       /*
+        
+        I2CSYS_ReleaseMutex();
+        
         vConsolePrintf("Testing SPI transfer...");
         SPI1_TakeMutex(portMAX_DELAY);
-        SPI1Transfer(spitxbuffer, spirxbuffer, 100, portMAX_DELAY);
+        SPI1_Transfer(spitxbuffer, spirxbuffer, 100, portMAX_DELAY);
         SPI1_ReleaseMutex();
         vConsolePrintf("Done\r\n");
-        */
+#endif
     }
 }
 
