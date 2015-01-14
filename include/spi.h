@@ -41,24 +41,25 @@
     uint8_t txbuffer[8] = {0xAA, 0x00, 0x00, 0x40, 0x1A, 0x2B, 0x3C, 0x4D};
     uint8_t rxbuffer[8] = {0};
     
-    SPI1_TakeMutex(portMAX_DELAY);
-    
-    ASSERT_CHIP_SELECT();
-    SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
-    DEASSERT_CHIP_SELECT();
+    if(SPI1_TakeMutex(portMAX_DELAY))
+    {
+        ASSERT_CHIP_SELECT();
+        SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
+        DEASSERT_CHIP_SELECT();
 \endcode
  * The 4 bytes have been written to the device,
  * and rxbuffer is full of junk data from the device.
  * The contents of txbuffer[4] through txbuffer[7] do
  * not matter past this point 
 \code{.c}
-    txbuffer[0] = 0xBB;
+        txbuffer[0] = 0xBB;
     
-    ASSERT_CHIP_SELECT();
-    SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
-    DEASSERT_CHIP_SELECT();
+        ASSERT_CHIP_SELECT();
+        SPI1_Transfer(txbuffer, rxbuffer, 8, portMAX_DELAY);
+        DEASSERT_CHIP_SELECT();
     
-    SPI1_ReleaseMutex();
+        SPI1_ReleaseMutex();
+    }
 \endcode
     
  * rxbuffer now contains the data read back from

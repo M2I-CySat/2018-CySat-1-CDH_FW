@@ -34,10 +34,12 @@
     uint8_t buffer[3];
     buffer[0] = 0x0A;
   
-    I2C1_TakeMutex(portMAX_DELAY);
-    I2C1_Write(buffer, 0x3C, 1, portMAX_DELAY);
-    I2C_Read(buffer, 0x3C, 3, portMAX_DELAY);
-    I2C1_ReleaseMutex();
+    if(I2C1_TakeMutex(portMAX_DELAY))
+    {
+    	I2C1_Write(buffer, 0x3C, 1, portMAX_DELAY);
+    	I2C_Read(buffer, 0x3C, 3, portMAX_DELAY);
+    	I2C1_ReleaseMutex();
+    }
     \endcode
  * 
  * The buffer now contains 3 bytes read from the internal
