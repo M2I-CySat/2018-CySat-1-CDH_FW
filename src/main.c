@@ -20,6 +20,7 @@
 #include <uart.h>
 #include <clock.h>
 #include <command.h>
+#include <string.h>
 /* Application includes */
 
 /*Init system config*/
@@ -144,7 +145,7 @@ void initTask(void * params)
     
     vConsolePrintf("Init finished!\r\n");
     
-#if 0
+#if 1
     uint8_t i2cbuffer[1000];
     uint8_t spitxbuffer[100];
     uint8_t spirxbuffer[100];
@@ -157,8 +158,10 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-#if 0
+#if 1
         /* I2C test */
+        
+        bzero(i2cbuffer, 100);
         I2CSYS_TakeMutex(portMAX_DELAY);
         i2cbuffer[0] = 10;
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
@@ -174,8 +177,11 @@ void initTask(void * params)
         i2cbuffer[0] = 0x02;
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         
-        i2cbuffer[1] = 0x00;
-        I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
+        i2cbuffer[1] = 0x03;
+        i2cbuffer[2] = 0x04;
+        i2cbuffer[3] = 0x05;
+        i2cbuffer[4] = 0x06;
+        I2CSYS_Write(i2cbuffer, 0x3C, 5, portMAX_DELAY);
         
         i2cbuffer[0] = 0x00;
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
@@ -183,14 +189,14 @@ void initTask(void * params)
         
         
         vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]); 
-        /*  Long read test */
+        /*  Long read test 
         vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
         for(i = 0; i < 100; i++)
         {
             I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
-            I2CSYS_Read(i2cbuffer, 0x3c, 1000, portMAX_DELAY);
+            I2CSYS_Read(i2cbuffer, 0x3C, 1000, portMAX_DELAY);
         }
-        vConsolePrintf("Long read done");
+        vConsolePrintf("Long read done\r\n");*/
         
         I2CSYS_ReleaseMutex();
         

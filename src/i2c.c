@@ -83,13 +83,13 @@ static void I2C_Initialize1()
   
   GPIO_InitStructure.GPIO_Pin = I2C1_SCL_PIN;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-  GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
   GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_Init(I2C1_SCL_PORT, &GPIO_InitStructure);
   
   GPIO_InitStructure.GPIO_Pin = I2C1_SDA_PIN;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  GPIO_Init(I2C1_SDA_PORT, &GPIO_InitStructure);
   
   DMA_ClearFlag(I2C1_DMA_STREAM_RX, I2C1_DMA_RX_FLAG_FEIF | I2C1_DMA_RX_FLAG_DMEIF | I2C1_DMA_RX_FLAG_TEIF |
                               I2C1_DMA_RX_FLAG_HTIF | I2C1_DMA_RX_FLAG_TCIF);
