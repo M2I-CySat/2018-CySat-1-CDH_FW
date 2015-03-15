@@ -588,7 +588,7 @@ static void vSoftI2cScan()
     static char bus = wireBUS1;
     if( cWrite( bus, addr, NULL, 0) )
     {
-        vConsolePrintf( "Hit addr 0x%x (0x%x Read) on bus (%d)\r\n", addr, addr>>1, bus );
+        printf( "Hit addr 0x%x (0x%x Read) on bus (%d)\r\n", addr, addr>>1, bus );
     }
     addr += 2;
 }
@@ -599,7 +599,7 @@ void vWireScan( char cBus )
 
     vConsolePrint( "Scanning I2C\r\n" );
     vTaskDelay(100);
-    vConsolePrintf( "Bus: %d", (int) cBus );
+    printf( "Bus: %d", (int) cBus );
 
     do
     {
@@ -611,7 +611,7 @@ void vWireScan( char cBus )
 //            sprintf( out, "Bus %d Addr %02x (%02xR) ACK", cBus, 0xff & addr, 0x7f & (addr >> 1) );
 //            vConsolePuts( out );
 //            vTaskDelay(10);
-            vConsolePrintf( "%02x Hit!\r\n" );
+            printf( "%02x Hit!\r\n" );
         }
         addr += 2;
 

@@ -205,8 +205,8 @@ static void framRead(char ** fields) {
 
 //TODO: Port     vFRAMRead(addr, length, dataBuffer);
 
-    vConsolePrint(dataBuffer);
-    vConsolePrint("\r\n");
+    printf(dataBuffer);
+    printf("\r\n");
 }
 
 static void framWrite(char ** fields) {
@@ -369,7 +369,7 @@ static void vUart1RXTask( void * params) {
         byte = rxByte1();
 
 #if UART1_ECHO
-        vConsolePut(byte);
+        xSerialPutChar(USART2, byte, 0);
 #endif
 
         if ((byteIndex == MAX_COMMAND_LENGTH) || (byte == '!')) {

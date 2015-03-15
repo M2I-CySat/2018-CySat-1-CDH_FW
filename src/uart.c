@@ -3,6 +3,8 @@
 #include "queue.h"
 #include "FreeRTOSConfig.h"
 
+#include <unistd.h>
+
 
 #include "stm32f4xx_usart.h"
 
@@ -13,7 +15,7 @@
 
 /*
  * NOTE: This file serves to create all of the put/print stuff as well as 
- * establish a "console" uart (vConsolePrintf). Currently, uart1 is usart2,
+ * establish a "console" uart (printf). Currently, uart1 is usart2,
  * which is console, and uart2 is usart6 (probably radio)
  * 
  * The "serial.c/h" drivers are RTOS drivers. They provide RTOS access to the
@@ -144,4 +146,17 @@ void vConsoleErrorPrintf( const char *fmt, ... )
     va_start(ap, fmt);
     prvUartVprintf( USART2, fmt, ap );
     va_end(ap);
+}
+
+int _write(int fd, char * ptr, int len)
+{
+    int i;
+    if (fd == STDOUT_FILENO)
+    {
+        for (i = 0; i < len; i++)
+        {
+            xSerialPutChar(USART2, ptr[i], 0);
+        }
+    }
+    return len;
 }

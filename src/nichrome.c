@@ -125,7 +125,7 @@ static void vNichromeBurn(char ctrl, unsigned ms)
 {
 #ifdef nichromeCTRL1
 #ifdef nichromeLOCAL_PRINT
-    vConsolePrintf("Burn #%d (%d ms) start...", ctrl, ms);
+    printf("Burn #%d (%d ms) start...", ctrl, ms);
 #endif
     vNichromeSet(ctrl, nichromeON);
     vTaskDelay(ms);

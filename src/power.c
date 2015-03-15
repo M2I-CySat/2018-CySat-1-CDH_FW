@@ -46,7 +46,7 @@ unsigned short usGetChannel( char cChannel )
 
     data[0] = pcData[0] & 0xFF;
     data[1] = pcData[1] & 0xFF;
-    vConsolePrintf("Channel %d read: %02X %02X\r\n", cChannel, data[0], data[1]);
+    printf("Channel %d read: %02X %02X\r\n", cChannel, data[0], data[1]);
     /* If the EPS is not ready, it will send 0xf000, and we return 0 */
     return ( ( data[0] << 8 ) | ( 0xff & data[1] ) ) & 0x03ff;
 }
@@ -80,7 +80,7 @@ void vPowerPollHousekeepingData()
 #ifdef powerLOCAL_PRINT
 static void vPrintChannel( char* pcName, double fValue, char* pcUnit )
 {
-    vConsolePrintf( "%s: %f %s\r\n", pcName, fValue, pcUnit );
+    printf( "%s: %f %s\r\n", pcName, fValue, pcUnit );
 }
 
 void vPowerPrintHousekeepingData()
