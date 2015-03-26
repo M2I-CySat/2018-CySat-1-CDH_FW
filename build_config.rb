@@ -112,6 +112,12 @@ MRuby::Build.new do |conf|
   else
     toolchain :gcc
   end
+  
+  conf.cc.command = 'gcc'
+  conf.cc.flags = %w(-Wno-format)
+  
+  conf.archiver.command = 'ar'
+  conf.linker.command = 'gcc'
 
   enable_debug
 
