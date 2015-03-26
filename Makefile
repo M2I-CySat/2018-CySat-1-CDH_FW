@@ -37,11 +37,23 @@ export CFLAGS+= -mfpu=fpv4-sp-d16 -g -DUSE_STDPERIPH_DRIVER -D$(MCU_MODEL)
 export CFLAGS+= -Wall -Wno-unused-function -Wno-pointer-sign -Werror
 export ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 
-all:
+all: src/libmruby.a
 	cd src && make
-	
-mruby-lib: 
+
+# Build the mruby library. This is hard to get right, so the mruby lib is not
+# deleted by a clean.
+src/libmruby.a: 
 	cd mruby && MRUBY_CONFIG="$(PROJECT_ROOT)/build_config.rb" make
+	cp mruby/build/arm-embedded/lib/libmruby.a src/
+	cp -r mruby/include/mr* include/
+
+mruby-lib: src/libmruby.a
+
+# The build will "fail" but still build everything, so this is here to
+# be run manually
+copy-mruby-library: mruby/build/arm-embedded/lib/libmruby.a
+	cp mruby/build/arm-embedded/lib/libmruby.a src/
+	cp -r mruby/include/mr* include/
 
 mruby-clean:
 	cd mruby && make clean
@@ -50,7 +62,7 @@ clean: mruby-clean
 	cd src && make clean
 	
 
-image.elf: all
+src/image.elf: all
 
 debug: src/image.elf
 	arm-none-eabi-gdb src/image.elf -ex 'target extended localhost:4242' -ex 'load'

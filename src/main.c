@@ -9,6 +9,7 @@
 
 #include <system.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 /* Hardware Includes */
@@ -24,12 +25,34 @@
 #include <string.h>
 /* Application includes */
 
+/* Ruby includes */
+#include <mruby.h>
+#include <mruby/compile.h>
+
 /*Init system config*/
 
 #define BURN_DELAY          5 /*Seconds until antenna burn*/
 
 
 static void initTask(void * params);
+
+static mrb_value test_method(mrb_state *mrb, mrb_value self)
+{
+  vConsolePrintf("Ruby submodule operational!\r\n");
+  return self;
+}
+static void test_mruby()
+{
+  mrb_state *mrb = mrb_open();
+  struct RClass *test_class = mrb_define_module(mrb, "TestModule");
+  mrb_define_class_method(mrb, test_class, "test_method", test_method, MRB_ARGS_NONE());
+
+  char code[] = "TestModule.test_method";
+  vConsolePrintf("Executing Ruby code!\r\n");
+  mrb_load_string(mrb, code);
+  
+  mrb_close(mrb);
+}
 
 static void lowLevelHardwareInit()
 {
@@ -55,8 +78,8 @@ static void initializeBackupRegisters()
 
 int main( void )
 {
-    volatile int x = 0;
-    x = pow(x, 2);
+    volatile uint8_t x = 0;
+    x = pow(x, 5);
     lowLevelHardwareInit();
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
@@ -147,6 +170,8 @@ void initTask(void * params)
 //TODO: Port    startStorageDriverTask();
     
     vConsolePrintf("Init finished!\r\n");
+    
+    test_mruby();
     
 #if 0
     uint8_t i2cbuffer[1000];
