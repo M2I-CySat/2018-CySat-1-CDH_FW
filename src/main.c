@@ -9,6 +9,7 @@
 
 #include <system.h>
 #include <stdio.h>
+#include <math.h>
 
 /* Hardware Includes */
 #include <stm32f4xx.h>
@@ -54,6 +55,8 @@ static void initializeBackupRegisters()
 
 int main( void )
 {
+    volatile int x = 0;
+    x = pow(x, 2);
     lowLevelHardwareInit();
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
@@ -145,7 +148,7 @@ void initTask(void * params)
     
     vConsolePrintf("Init finished!\r\n");
     
-#if 1
+#if 0
     uint8_t i2cbuffer[1000];
     uint8_t spitxbuffer[100];
     uint8_t spirxbuffer[100];
@@ -158,7 +161,7 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-#if 1
+#if 0
         /* I2C test */
         
         bzero(i2cbuffer, 100);
