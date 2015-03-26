@@ -33,7 +33,6 @@ static void initTask(void * params);
 static void lowLevelHardwareInit()
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-    NVIC_DisableIRQ(WWDG_IRQn);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 }
@@ -56,7 +55,7 @@ static void initializeBackupRegisters()
 int main( void )
 {
     lowLevelHardwareInit();
-    xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE + 256, NULL, systemPRIORITY_INIT, NULL);
+    xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
     
     
@@ -86,68 +85,67 @@ void initTask(void * params)
     SPI_Initialize();
     
     vUartStartTask();
-    printf("\r\n\r\n==================== BOOT ====================\r\n");
-    printf("Init task started\r\n");
+    vConsolePrintf("\r\n\r\n==================== BOOT ====================\r\n");
+    vConsolePrintf("Init task started\r\n");
 
-    printf("Checking RTC initialization status...\r\n");
+    vConsolePrintf("Checking RTC initialization status...\r\n");
     if (!(RTC->ISR & RTC_ISR_INITS)) { /*This is first boot*/
-        printf("RTC Not Initialized. Performing first boot routine.\r\n");
-        printf("Initializing RTC...");
+        vConsolePrintf("RTC Not Initialized. Performing first boot routine.\r\n");
+        vConsolePrintf("Initializing RTC...");
         startRTC();
-        printf("Done.\r\n");
-        printf("Delaying for RTC synchronization...");
+        vConsolePrintf("Done.\r\n");
+        vConsolePrintf("Delaying for RTC synchronization...");
         vTaskDelay(2500);
-        printf("Done\r\n");
+        vConsolePrintf("Done\r\n");
 
-        printf("Initializing Backup Register...");
+        vConsolePrintf("Initializing Backup Register...");
         initializeBackupRegisters();
-        printf("Done\r\n");
+        vConsolePrintf("Done\r\n");
         
-        printf("First boot routine complete.\r\n");
+        vConsolePrintf("First boot routine complete.\r\n");
     }
     else
     {
-        printf("RTC already initialized.\r\n");
+        vConsolePrintf("RTC already initialized.\r\n");
     }
 
     char timeBuffer[15];
     sprintf(timeBuffer, "Mission Time: %ld\r\n", getMissionTime());
-    printf(timeBuffer);
-    printf("Waiting for deployment delay...\r\n");
+    vConsolePrintf(timeBuffer);
+    vConsolePrintf("Waiting for deployment delay...\r\n");
 
     while(getMissionTime() <= BURN_DELAY) {
         vTaskDelay(500);
     }
     
-    printf("Deployment delay reached - checking status...\r\n");
+    vConsolePrintf("Deployment delay reached - checking status...\r\n");
     if (!(RTC->BKP0R & ANTENNA_STATUS)) {
-        printf("Deploying Antennas...");
+        vConsolePrintf("Deploying Antennas...");
 //TODO: Call antenna deployment function
-        printf("Done\r\n");
+        vConsolePrintf("Done\r\n");
         
-        printf("Setting antenna status flag...");
+        vConsolePrintf("Setting antenna status flag...");
         bitSet(PWR->CR, PWR_CR_DBP);     
         for (i = 0; i < 2; i++) {} /* Delay for bus write */ 
         bitSet(RTC->BKP0R, ANTENNA_STATUS);
         bitSet(PWR->CR, PWR_CR_DBP);        
-        printf("Done\r\n");
+        vConsolePrintf("Done\r\n");
     }
     else
     {
-      printf("Antennas already deployed!\r\n");
+      vConsolePrintf("Antennas already deployed!\r\n");
     }
 
-    printf("Starting command handling on console...");
+    vConsolePrintf("Starting command handling on console...");
     xStartUart1CommandHandling();
-    printf("Done\r\n");
+    vConsolePrintf("Done\r\n");
 
-//    printf("Starting storage driver task\r\n");
+//    vConsolePrintf("Starting storage driver task\r\n");
 //TODO: Port    startStorageDriverTask();
     
-    printf("Init finished!\r\n");
-    printf("Success");
+    vConsolePrintf("Init finished!\r\n");
     
-#if 0
+#if 1
     uint8_t i2cbuffer[1000];
     uint8_t spitxbuffer[100];
     uint8_t spirxbuffer[100];
@@ -160,7 +158,7 @@ void initTask(void * params)
         GPIO_ResetBits(GPIOA, GPIO_Pin_5);
         vTaskDelay(500);
         
-#if 0
+#if 1
         /* I2C test */
         
         bzero(i2cbuffer, 100);
@@ -169,12 +167,12 @@ void initTask(void * params)
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
-        printf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
+        vConsolePrintf("I2C Test Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x00;
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
         I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
-        printf("I2C Pre-Write Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
+        vConsolePrintf("I2C Pre-Write Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]);
         
         i2cbuffer[0] = 0x02;
         I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
@@ -190,23 +188,23 @@ void initTask(void * params)
         I2CSYS_Read(i2cbuffer, 0x3C, 3, portMAX_DELAY);
         
         
-        printf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]); 
+        vConsolePrintf("I2C Readback Bytes: %x %x %x\r\n", i2cbuffer[0], i2cbuffer[1], i2cbuffer[2]); 
         /*  Long read test 
-        printf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
+        vConsolePrintf("Beginning long read. (100 1KB reads).  Should take 8 seconds\r\n");
         for(i = 0; i < 100; i++)
         {
             I2CSYS_Write(i2cbuffer, 0x3C, 1, portMAX_DELAY);
             I2CSYS_Read(i2cbuffer, 0x3C, 1000, portMAX_DELAY);
         }
-        printf("Long read done\r\n");*/
+        vConsolePrintf("Long read done\r\n");*/
         
         I2CSYS_ReleaseMutex();
         
-        printf("Testing SPI transfer...");
+        vConsolePrintf("Testing SPI transfer...");
         SPI1_TakeMutex(portMAX_DELAY);
         SPI1_Transfer(spitxbuffer, spirxbuffer, 100, portMAX_DELAY);
         SPI1_ReleaseMutex();
-        printf("Done\r\n");
+        vConsolePrintf("Done\r\n");
 #endif
     }
 }

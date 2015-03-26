@@ -86,7 +86,7 @@ static void vPayloadPrototypePollData()
     for( i=0; i<payloadCHANNELS*5; ++i )
     {
         vTaskDelay(10);
-        printf( "%d\t%x\r\n", i+1, 0xff & pcPayloadData[i] );
+        vConsolePrintf( "%d\t%x\r\n", i+1, 0xff & pcPayloadData[i] );
     }
 }
 

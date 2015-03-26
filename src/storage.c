@@ -181,7 +181,7 @@ static void swapFootprints(unsigned int a, unsigned int b)
 void startStorageDriverTask()
 {
     messageQueue = xQueueCreate(16, sizeof(storageDriverCommand));
-    printf("Starting storage driver...\r\n");
+    vConsolePrintf("Starting storage driver...\r\n");
     xTaskCreate(prvStorageTask, NULL, STORAGE_STACK_SIZE, NULL, systemPRIORITY_STORAGE, &driverTask);
     xTaskCreate(storageTestTask, NULL, STORAGE_STACK_SIZE - 200, NULL, systemPRIORITY_TEST, NULL);
 }
@@ -195,50 +195,50 @@ void storageTestTask()
 
     vTaskDelay(1000);
 
-    printf("Storage sanity check started...\r\n");
+    vConsolePrintf("Storage sanity check started...\r\n");
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
 
     /* Direct write sanity check */
-    printf("Writing ``%s''\r\n", testString);
+    vConsolePrintf("Writing ``%s''\r\n", testString);
     writeConfigBlocking(testString, 0x20, strlen(testString));
-    printf("Reading back...\r\n");
+    vConsolePrintf("Reading back...\r\n");
     readConfigBlocking(testBuffer, 0x20, strlen(testString));
-    printf("Read back: ``%s''\r\n\r\n", testString);
+    vConsolePrintf("Read back: ``%s''\r\n\r\n", testString);
     /* End direct write sanity check*/
     
     /* Heap sanity check */
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
-    printf("Heap sanity check.\r\nWriting test footprints: ");
+    vConsolePrintf("Heap sanity check.\r\nWriting test footprints: ");
     for (i = 0; i < 10; i++)
     {
         testBuffer[3] = testValues[i];
-        printf("%d ", testValues[i]);
+        vConsolePrintf("%d ", testValues[i]);
         pushFootprintBlocking(testBuffer);
     }
 
     memset(testBuffer, 0, FOOTPRINT_DATA_SIZE);
-    printf("\r\nReading test footprints: ");
+    vConsolePrintf("\r\nReading test footprints: ");
     for (i = 0; i < 10; i++)
     {
         popFootprintBlocking(testBuffer);
-        printf("%d ", testBuffer[3]);
+        vConsolePrintf("%d ", testBuffer[3]);
     }
-    printf("\r\nHeap sanity check complete\r\n");
+    vConsolePrintf("\r\nHeap sanity check complete\r\n");
 
-    printf("Beginning heap torture test...\r\nPushing Values: ");
+    vConsolePrintf("Beginning heap torture test...\r\nPushing Values: ");
     for (i = 1; i <= 10; i++)
     {
-        printf("%d ", i);
+        vConsolePrintf("%d ", i);
         testBuffer[3] = i;
         pushFootprintBlocking(testBuffer);
     }
-    printf("\r\nPopping Values: ");
+    vConsolePrintf("\r\nPopping Values: ");
     for (i = 1; i <= 10; i++)
     {
         popFootprintBlocking(testBuffer);
-        printf("%d ", testBuffer[3]);
+        vConsolePrintf("%d ", testBuffer[3]);
     }
-    printf("\r\n");
+    vConsolePrintf("\r\n");
 
     /* End heap sanity check */
 
@@ -267,12 +267,12 @@ static void prvStorageTask()
 {
 #ifdef USE_IMPLEMENTATION_HEAP
     heapSize = getHeapSize();
-    printf("Existing heap size: %d\r\n", heapSize);
+    vConsolePrintf("Existing heap size: %d\r\n", heapSize);
     unsigned char heapVolatile = 0;
     vFRAMRead(0x41, 1, &heapVolatile);
     if (heapVolatile)
     {
-        printf("Heap detected in volatile state! Clearing!\r\n");
+        vConsolePrintf("Heap detected in volatile state! Clearing!\r\n");
         heapSize = 0;
         writeHeapSize();
         setHeapNotVolatile();
@@ -337,7 +337,7 @@ static void prvDoClearHeap()
     heapSize = 0;
     writeHeapSize();
     setHeapNotVolatile();
-    printf("Heap size set to 0\r\n");
+    vConsolePrintf("Heap size set to 0\r\n");
 }
 
 static void setHeapVolatile()

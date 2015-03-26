@@ -384,7 +384,7 @@ void vHeliumSendPacket( heliumPacket *pxPacket )
 
 uint8_t ucHeliumSendUart( uint8_t ucByte )
 {
-    printf("%02x", ucByte);
+    vConsolePrintf("%02x", ucByte);
 //    vUart2Put( (char) ucByte );
     return 1;
 
