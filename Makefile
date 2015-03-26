@@ -6,6 +6,7 @@ export MCU_MODEL=STM32F411xE
 export CC=arm-none-eabi-gcc
 export AS=arm-none-eabi-as
 export OBJDUMP=arg-none-eabi-objdump
+export LD=arm-none-eabi-gcc
 
 #Project root (Complicated because Windows)
 ifndef PROJECT_ROOT
@@ -38,9 +39,16 @@ export ASFLAGS= -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -g
 
 all:
 	cd src && make
+	
+mruby-lib: 
+	cd mruby && MRUBY_CONFIG="$(PROJECT_ROOT)/build_config.rb" make
 
-clean:
+mruby-clean:
+	cd mruby && make clean
+
+clean: mruby-clean
 	cd src && make clean
+	
 
 image.elf: all
 
