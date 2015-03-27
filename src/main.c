@@ -41,17 +41,37 @@ static mrb_value test_method(mrb_state *mrb, mrb_value self)
   vConsolePrintf("Ruby submodule operational!\r\n");
   return self;
 }
-static void test_mruby()
+static void * mrb_custom_allocf(mrb_state *mrb, void *ptr, size_t s, void *ud)
 {
-  mrb_state *mrb = mrb_open();
-  struct RClass *test_class = mrb_define_module(mrb, "TestModule");
-  mrb_define_class_method(mrb, test_class, "test_method", test_method, MRB_ARGS_NONE());
+    vConsolePrintf("allocing");
+    if (s == 0)
+    {
+        vPortFree(ptr);
+        return NULL;
+    }
+    else
+    {
+        return pvPortRealloc(ptr, s);
+    }
+}
+static void test_mruby()
+{ 
+    vConsolePrintf("Opening MRB instance in 1 second...");
+    vTaskDelay(1000);
+    vConsolePrintf("Begin...");
+    mrb_state *mrb = mrb_open_allocf(mrb_custom_allocf, NULL);
+    vConsolePrintf("Done!");
+    
+    struct RClass *test_class = mrb_define_module(mrb, "TestModule");
+    mrb_define_class_method(mrb, test_class, "test_method", test_method, MRB_ARGS_NONE());
 
-  char code[] = "TestModule.test_method";
-  vConsolePrintf("Executing Ruby code!\r\n");
-  mrb_load_string(mrb, code);
+    char code[] = "TestModule.test_method";
+    vConsolePrintf("Executing Ruby code in 1 second...");
+    vTaskDelay(1000);
+    vConsolePrintf("Begin!\r\n");
+    mrb_load_string(mrb, code);
   
-  mrb_close(mrb);
+    mrb_close(mrb);
 }
 
 static void lowLevelHardwareInit()

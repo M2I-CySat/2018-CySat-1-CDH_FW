@@ -76,6 +76,7 @@
  */
 
 #include <stdlib.h>
+#include <sys/types.h>
 
 /* Defining MPU_WRAPPERS_INCLUDED_FROM_API_FILE prevents task.h from redefining
 all the API functions to use the MPU wrappers.  That should only be done when
@@ -113,7 +114,30 @@ void *pvReturn;
 	return pvReturn;
 }
 /*-----------------------------------------------------------*/
+void *pvPortRealloc(void *ptr, size_t xWantedSize )
+{
+void *pvReturn;
 
+    vTaskSuspendAll();
+    {
+        pvReturn = realloc(ptr, xWantedSize );
+        traceMALLOC( pvReturn, xWantedSize );
+    }
+    ( void ) xTaskResumeAll();
+
+    #if( configUSE_MALLOC_FAILED_HOOK == 1 )
+    {
+        if( pvReturn == NULL )
+        {
+            extern void vApplicationMallocFailedHook( void );
+            vApplicationMallocFailedHook();
+        }
+    }
+    #endif
+
+    return pvReturn;
+}
+/*-----------------------------------------------------------*/
 void vPortFree( void *pv )
 {
 	if( pv )
@@ -127,5 +151,26 @@ void vPortFree( void *pv )
 	}
 }
 
+/* Make libc happy! */
+uint8_t _heap[configTOTAL_HEAP_SIZE];
 
-
+caddr_t _sbrk(int32_t incr)
+{
+    static uint8_t *heap_end;
+    
+    uint8_t *prev_heap_end;
+    
+    if (heap_end == 0)
+        heap_end = _heap;
+        
+    prev_heap_end = heap_end;
+    
+    if(heap_end + incr - _heap > configTOTAL_HEAP_SIZE)
+    {
+        while(1){}
+    }
+    
+    heap_end += incr;
+    
+    return (caddr_t) prev_heap_end;
+}
