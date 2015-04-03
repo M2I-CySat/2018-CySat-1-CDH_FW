@@ -19,23 +19,26 @@ typedef struct
   SemaphoreHandle_t mutex;
 } DATASTORE_RamRingbuffer;
 
-/* Datastore for various types of data */
+#define SUCCESS 0
+#define ERR_BUFFER_FULL 1
+#define ERR_BUFFER_EMPTY 2
+#define ERR_TIMEOUT 3
 
-DATASTORE_RamRingbuffer_Initialize(
+uint8_t DATASTORE_RamRingbuffer_Initialize(
                     DATASTORE_RamRingBuffer * ramringbuffer, 
                     uint8_t * buffer, 
                     uint16_t size, 
                     uint8_t packet_size);
                     
-DATASTORE_RamRingbuffer_Push(
+uint8_t DATASTORE_RamRingbuffer_Push(
                     DATASTORE_RamRingBuffer * ramringbuffer, 
                     uint8_t * packet);
                             
-DATASTORE_RamRingbuffer_Pop(
+uint8_t DATASTORE_RamRingbuffer_Pop(
                     DATASTORE_RamRingbuffer * ramringbuffer, 
                     uint8_t * dest);
                     
-DATASTORE_InitializeStandardBuffers();
+uint8_t DATASTORE_InitializeStandardBuffers();
 
 DATASTORE_RamRingbuffer * DATASTORE_RamRingbuffer_Test;
                     

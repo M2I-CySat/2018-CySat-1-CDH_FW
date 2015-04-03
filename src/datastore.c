@@ -1,30 +1,68 @@
 /* Datastore.c */
 
-DATASTORE_RamRingbuffer_Initialize(
-                    DATASTORE_RamRingBuffer * ramringbuffer, 
+uint8_t DATASTORE_RamRingbuffer_Initialize(
+                    DATASTORE_RamRingBuffer * rb, 
                     uint8_t * buffer, 
                     uint16_t size, 
                     uint8_t packetSize)
 {
-  ramringbuffer->bufferStart = buffer;
-  ramringbuffer->maxSize = size;
-  ramringbuffer->bufferEnd = buffer + (size * packetSize);
-  ramringbuffer->packetSize = packetSize;
-  ramringbuffer->mutex = xSemaphoreCreateMutex();
+  rb->bufferStart = buffer;
+  rb->maxSize = size;
+  rb->bufferEnd = buffer + (size * packetSize);
+  rb->packetSize = packetSize;
+  rb->mutex = xSemaphoreCreateMutex();
   
-  ramringbuffer->head = buffer;
-  ramringbuffer->tail = buffer;
-  ramringbuffer->size = 0;
+  rb->head = buffer;
+  rb->tail = buffer;
+  rb->size = 0;
+  
+  return SUCCESS;
 }
                     
-DATASTORE_RamRingbuffer_Push(
-                    DATASTORE_RamRingBuffer * ramringbuffer, 
+uint8_t DATASTORE_RamRingbuffer_Push(
+                    DATASTORE_RamRingBuffer * rb, 
                     uint8_t * packet)
 {
-  xSemaphoreTakeMutex
+  if (xSemaphoreTake(rb->mutex, portMAX_DELAY) != pdTRUE)
+    return ERR_TIMEOUT;
+    
+  if (rb->size >= rb->maxSize)
+    return ERR_BUFFER_FULL;
+    
+  memcpy(rb->head, packet, rb->packetSize);
+  
+  rb->head += rb->packetSize;
+  
+  if (rb->head >= rb->bufferEnd)
+    head = rb->bufferStart;
+   
+  rb->size += 1;
+  
+  xSemaphoreGive(rb->mutex);
+  return SUCCESS;
+}
                             
-DATASTORE_RamRingbuffer_Pop(
-                    DATASTORE_RamRingbuffer * ramringbuffer, 
-                    uint8_t * dest);
+uint8_t DATASTORE_RamRingbuffer_Pop(
+                    DATASTORE_RamRingbuffer * rb, 
+                    uint8_t * dest)
+{
+  if (xSemaphoreTake(rb->mutex, portMAX_DELAY) != pdTRUE)
+    return ERR_TIMEOUT;
+    
+  if (rb->size == 0)
+    return ERR_BUFFER_FULL;
+    
+  memcpy(dest, rb->tail, rb->packetSize);
+  
+  rb->tail += rb->packetSize;
+  
+  if (rb->tail >= rb->bufferEnd)
+    head = rb->bufferStart;
+   
+  rb->size -= 1;
+  
+  xSemaphoreGive(rb->mutex);
+  return SUCCESS;
+}
                     
 DATASTORE_InitializeStandardBuffers();
