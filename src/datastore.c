@@ -1,7 +1,7 @@
 /* Datastore.c */
 
 uint8_t DATASTORE_RamRingbuffer_Initialize(
-                    DATASTORE_RamRingBuffer * rb, 
+                    DATASTORE_RamRingbuffer * rb, 
                     uint8_t * buffer, 
                     uint16_t size, 
                     uint8_t packetSize)
@@ -20,7 +20,7 @@ uint8_t DATASTORE_RamRingbuffer_Initialize(
 }
                     
 uint8_t DATASTORE_RamRingbuffer_Push(
-                    DATASTORE_RamRingBuffer * rb, 
+                    DATASTORE_RamRingbuffer * rb, 
                     uint8_t * packet)
 {
   if (xSemaphoreTake(rb->mutex, portMAX_DELAY) != pdTRUE)
@@ -63,6 +63,18 @@ uint8_t DATASTORE_RamRingbuffer_Pop(
   
   xSemaphoreGive(rb->mutex);
   return SUCCESS;
+}
+
+uint16_t DATASTORE_RamRingbuffer_GetSize(DATASTORE_RamRingbuffer * rb)
+{
+    uint16_t retval;
+    if (xSemaphoreTake(rb->mutex, portMAX_DELAY) != pdTRUE)
+        return -1;
+
+    retval = rb->size;
+
+    xSemaphoreGive(rb->mutex);
+    return retval;
 }
                     
 DATASTORE_InitializeStandardBuffers();

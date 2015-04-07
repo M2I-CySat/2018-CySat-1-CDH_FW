@@ -1,6 +1,25 @@
 # Global project variables
-# MCU Define
-export MCU_MODEL=STM32F411xE
+
+# Select target
+ifndef TARGET
+	export TARGET=411
+endif
+
+# Set variables based on target
+ifeq "$(TARGET)" "411"
+	export MCU_MODEL=STM32F411xE
+	export LDSCRIPT=stm32f411re.ld
+endif
+
+ifeq "$(TARGET)" "417"
+	export MCU_MODEL=STM32F40_41xxx
+	export LDSCRIPT=stm32f417vg.ld
+endif
+
+ifeq "$(TARGET)" "401"
+	export MCU_MODEL=STM32F401xx
+	export LDSCRIPT=stm32f401re.ld
+endif
 
 # Toolchain
 export CC=arm-none-eabi-gcc
