@@ -16,7 +16,7 @@ image.elf: $(OBJECTS)
 	cd STPeriph && make
 	cd FreeRTOS && make
 	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../$(LDSCRIPT) -o image.elf *.o FreeRTOS/*.o STPeriph/*.o
-
+	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../stm32f411re.ld -o image.elf *.o FreeRTOS/*.o STPeriph/*.o -lm
 clean:
 	rm -f *.o
 	cd FreeRTOS && make clean
