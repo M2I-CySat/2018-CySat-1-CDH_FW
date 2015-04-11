@@ -1,6 +1,6 @@
 /**
 
-    Linker Script for STM32F417VG
+    Linker Script for STM32F401RE
     
     
 Copyright (c) 2014 Jake Drahos <drahos@iastate.edu>
@@ -83,8 +83,8 @@ ENTRY(Reset_Handler)
 
 MEMORY 
 {
-    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
-    RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 112K
+    FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 512K
+    RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 96K
 }
 
 _estack = 0x2001FFFF;
