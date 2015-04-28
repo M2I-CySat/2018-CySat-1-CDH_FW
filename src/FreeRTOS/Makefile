@@ -1,5 +1,5 @@
 # Add filename.o to include in compilation
-OBJECTS=list.o port.o queue.o tasks.o heap_1.o
+OBJECTS=list.o port.o queue.o tasks.o heap_1.o timers.o
 
 
 %.o: %.c

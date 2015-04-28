@@ -28,7 +28,6 @@
 
 #define BURN_DELAY          5 /*Seconds until antenna burn*/
 
-
 static void initTask(void * params);
 
 static void lowLevelHardwareInit()
@@ -91,6 +90,7 @@ void initTask(void * params)
     vConsolePrintf("\r\n\r\n=================== BOOT ===================\r\n");
     vConsolePrintf("Init task started\r\n");
 
+#ifdef USE_RTC
     vConsolePrintf("Checking RTC initialization status...\r\n");
     if (!(RTC->ISR & RTC_ISR_INITS)) { /*This is first boot*/
         vConsolePrintf("RTC Not Initialized. Performing first boot routine.\r\n");
@@ -111,6 +111,9 @@ void initTask(void * params)
     {
         vConsolePrintf("RTC already initialized.\r\n");
     }
+#else
+    startSoftwareClock();
+#endif
 
     char timeBuffer[15];
     sprintf(timeBuffer, "Mission Time: %ld\r\n", getMissionTime());

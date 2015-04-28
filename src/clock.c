@@ -3,6 +3,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "timers.h"
 
 #include "system.h"
 #include "uart.h"
@@ -10,9 +11,26 @@
 #include <time.h>
 #include <stm32f4xx.h>
 
+static time_t mission_time = 0;
+
+static void softwareTimerCallback()
+{
+  mission_time++;
+}
+void startSoftwareClock()
+{
+  TimerHandle_t timer;
+  mission_time = 0;
+  timer = xTimerCreate(NULL, 1000, pdTRUE, NULL, softwareTimerCallback);
+  xTimerStart(timer, portMAX_DELAY);
+}
 
 time_t getMissionTime() {
     struct tm currentTime;
+    
+    if (mission_time != 0)
+      return mission_time; /* Use software clock */
+     
     uint32_t timeReg = 0, dateReg = 0;
     
     timeReg = RTC->TR;
@@ -50,8 +68,10 @@ time_t getMissionTime() {
     return mktime(&currentTime);
 }
 
+
 void startRTC() {
     uint32_t tmp = 0;
+    mission_time = 0;
     
     bitSet(PWR->CR, PWR_CR_DBP);
     for (tmp = 0; tmp < 2; tmp++) {} /* Delay for bus write */ 
@@ -61,7 +81,7 @@ void startRTC() {
     
     tmpGet(RCC->BDCR);
     tmpClear(RCC_BDCR_RTCSEL);
-    tmpSet(RCC_BDCR_RTCSEL_0);
+    tmpSet(RCC_BDCR_RTCSEL_1);
     tmpSet(RCC_BDCR_RTCEN);
     tmpSet(RCC_BDCR_LSEON);
     tmpPut(RCC->BDCR);

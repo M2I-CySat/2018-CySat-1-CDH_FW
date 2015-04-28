@@ -44,6 +44,10 @@ time_t getMissionTime();
  */
 void startRTC();
 
+/*! Start a software clock. Overrides hardware
+ */
+void startSoftwareClock();
+
 
 /*!  
  * \}
