@@ -1,5 +1,19 @@
 /* Datastore.c */
 
+#include <datastore.h>
+#include <string.h>
+
+#define EPS_MAX_SIZE 64
+
+static DATASTORE_RamRingbuffer epsRamRingBuffer;
+
+static uint8_t epsBuffer[EPS_MAX_SIZE * sizeof(DATASTORE_EPS_Packet)];
+
+DATASTORE_RamRingbuffer * DATASTORE_GetEPSDatastore()
+{
+	return &epsRamRingBuffer;
+}
+
 uint8_t DATASTORE_RamRingbuffer_Initialize(
                     DATASTORE_RamRingbuffer * rb, 
                     uint8_t * buffer, 
@@ -34,7 +48,7 @@ uint8_t DATASTORE_RamRingbuffer_Push(
   rb->head += rb->packetSize;
   
   if (rb->head >= rb->bufferEnd)
-    head = rb->bufferStart;
+    rb->head = rb->bufferStart;
    
   rb->size += 1;
   
@@ -57,7 +71,7 @@ uint8_t DATASTORE_RamRingbuffer_Pop(
   rb->tail += rb->packetSize;
   
   if (rb->tail >= rb->bufferEnd)
-    head = rb->bufferStart;
+    rb->head = rb->bufferStart;
    
   rb->size -= 1;
   
@@ -77,4 +91,12 @@ uint16_t DATASTORE_RamRingbuffer_GetSize(DATASTORE_RamRingbuffer * rb)
     return retval;
 }
                     
-DATASTORE_InitializeStandardBuffers();
+uint8_t DATASTORE_InitializeStandardBuffers()
+{
+	DATASTORE_RamRingbuffer_Initialize(
+			&epsRamRingBuffer,
+			epsBuffer,
+			EPS_MAX_SIZE,
+			sizeof(DATASTORE_EPS_Packet));
+	return SUCCESS;
+}

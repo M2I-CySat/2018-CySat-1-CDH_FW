@@ -122,9 +122,18 @@ uint16_t DATASTORE_RamRingbuffer_GetSize(
  */
 uint8_t DATASTORE_InitializeStandardBuffers();
 
-/*! Definitely used for testing or something
+/*! 
  */
-DATASTORE_RamRingbuffer * DATASTORE_RamRingbuffer_Test;
+DATASTORE_RamRingbuffer * DATASTORE_GetEPSDatastore();
+
+/*! EPS Packet Struct
+ */
+
+typedef struct
+{
+	uint32_t timestamp;
+	uint32_t testData;
+} DATASTORE_EPS_Packet;
                     
 #endif
 

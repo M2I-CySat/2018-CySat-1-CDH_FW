@@ -88,7 +88,7 @@ void initTask(void * params)
     SPI_Initialize();
     
     vUartStartTask();
-    vConsolePrintf("\r\n\r\n==================== BOOT ====================\r\n");
+    vConsolePrintf("\r\n\r\n=================== BOOT ===================\r\n");
     vConsolePrintf("Init task started\r\n");
 
     vConsolePrintf("Checking RTC initialization status...\r\n");

@@ -5,8 +5,6 @@
 #include "task.h"
 #include "queue.h"
 
-#include "system.h"
-
 #define nichromeTRIS1 _TRISF0
 #define nichromeTRIS2 _TRISG0
 #define nichromeTRIS3 _TRISA15
