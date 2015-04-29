@@ -7,7 +7,7 @@
 
 #include "system.h"
 #include "uart.h"
-#include "wire.h"
+#include "i2c.h"
 
 #define powerBLOCK_TIME         ( ( portTickType ) 0xffff )
 #define powerWIRE_BLOCK_TIME    ( ( portTickType ) 0xffff )
@@ -32,14 +32,14 @@ unsigned short usGetChannel( char cChannel )
     int data[2] = {0,0};
     char channel[2] = {0, cChannel};
 
-    if( wireSTATUS_SUCCESS != cWireWritePutsError( powerBUS, powerADDR, channel, 2 ) ){
+    if( pdTRUE != I2CSYS_Write(channel, powerADDR, 2, portMAX_DELAY) ){
         vConsoleErrorPrintf( "Power: I2C Write Error\r\n" );
         return 0;
     }
 
     vTaskDelay(3); //delay for power board read
     
-    if( wireSTATUS_SUCCESS != cWireReadPutsError( powerBUS, powerADDR, pcData, 2 ) ){
+    if( wireSTATUS_SUCCESS != I2CSYS_Read( pcData, powerADDR, 2, portMAX_DELAY ) ){
         vConsoleErrorPrintf( "Power: I2C Read Error\r\n" );
         return 0;
     }
@@ -54,6 +54,9 @@ unsigned short usGetChannel( char cChannel )
 void vPowerPollHousekeepingData()
 {
     memset(&xHousekeepingData, 0, sizeof(powerData));
+
+    if (I2CSYS_TakeMutex(portMAX_DELAY) != pdTRUE)
+	    return;
 
     xHousekeepingData.XVoltage              = usGetChannel(  6 );
     xHousekeepingData.XCurrent0             = usGetChannel(  4 );
@@ -75,6 +78,8 @@ void vPowerPollHousekeepingData()
     xHousekeepingData.Battery1Voltage       = usGetChannel( 19 );
     xHousekeepingData.Battery1Direction     = usGetChannel( 21 ) & 0x01;
     xHousekeepingData.Battery1Current       = usGetChannel( 22 );
+
+    I2CSYS_ReleaseMutex();
 }
 
 #ifdef powerLOCAL_PRINT
