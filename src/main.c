@@ -36,11 +36,15 @@ static void lowLevelHardwareInit()
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 }
-
-void DisableWWDG()
-{
-    NVIC_DisableIRQ(WWDG_IRQn);
-}
+  
+/* Traps to make debug easier */
+void WWDG_IRQHandler(){for(;;){}}
+void NMI_Handler(){for(;;){}}
+void HardFault_Handler(){for(;;){}}
+void MemManage_Handler(){}
+void BusFault_Handler(){}
+void UsageFault_Handler(){}
+void DebugMon_Handler(){}
 
 static void initializeBackupRegisters()
 {  
@@ -63,7 +67,6 @@ int main( void )
     x = pow(x, 2);
     lowLevelHardwareInit();
     
-    for(;;){}
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
     

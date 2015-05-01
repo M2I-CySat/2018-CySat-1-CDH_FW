@@ -84,10 +84,10 @@ ENTRY(Reset_Handler)
 MEMORY 
 {
     FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
-    RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 112K
+    RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 96K
 }
 
-_estack = 0x2001FFFF;
+_estack = 0x20017FFF;
 
 SECTIONS
 {
