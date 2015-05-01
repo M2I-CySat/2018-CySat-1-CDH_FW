@@ -22,11 +22,13 @@
 #include <clock.h>
 #include <command.h>
 #include <string.h>
+#include <nichrome.h>
+#include <pinmapping.h>
 /* Application includes */
 
 /*Init system config*/
 
-#define BURN_DELAY          5 /*Seconds until antenna burn*/
+#define BURN_DELAY          30 /*Seconds until antenna burn*/
 
 static void initTask(void * params);
 
@@ -34,6 +36,7 @@ static void lowLevelHardwareInit()
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 }
   
@@ -81,13 +84,19 @@ void initTask(void * params)
     /* Test Heartbeat Initialization */
     GPIO_InitTypeDef GPIO_InitStructure;
     
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
     
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    
+        __attribute__((unused)) GPIO_TypeDef * gpio = IO_47_GPIO;
+        GPIO_SetBits(GPIOD, GPIO_Pin_3);
+        vTaskDelay(500);
+        GPIO_ResetBits(GPIOD, GPIO_Pin_3);
+        vTaskDelay(500);
     /* End test heartbeat initialization */
     
     /* Begin actual init */
@@ -130,14 +139,15 @@ void initTask(void * params)
     vConsolePrintf(timeBuffer);
     vConsolePrintf("Waiting for deployment delay...\r\n");
 
-    while(getMissionTime() <= BURN_DELAY) {
-        vTaskDelay(500);
+    for(i = 0; i < BURN_DELAY; i++)
+    {
+      vTaskDelay(1000);
     }
-    
     vConsolePrintf("Deployment delay reached - checking status...\r\n");
-    if (!(RTC->BKP0R & ANTENNA_STATUS)) {
+    /*if (!(RTC->BKP0R & ANTENNA_STATUS)) { */
+    if(1){
         vConsolePrintf("Deploying Antennas...");
-//TODO: Call antenna deployment function
+        vNichromeStartTask();
         vConsolePrintf("Done\r\n");
         
         vConsolePrintf("Setting antenna status flag...");
@@ -169,9 +179,10 @@ void initTask(void * params)
     
     for(;;)
     {
-        GPIO_SetBits(GPIOA, GPIO_Pin_5);
+        __attribute__((unused)) GPIO_TypeDef * gpio = IO_47_GPIO;
+        GPIO_SetBits(IO_47_GPIO, IO_47_PIN);
         vTaskDelay(500);
-        GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+        GPIO_ResetBits(IO_47_GPIO, IO_47_PIN);
         vTaskDelay(500);
         
 #if 0
