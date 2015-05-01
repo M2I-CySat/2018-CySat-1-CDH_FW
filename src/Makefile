@@ -1,5 +1,5 @@
 # Add filename.o to include in compilation
-OBJECTS=main.o system_stm32f4xx.o startup_stm32f411xe.o serial.o uart.o
+OBJECTS=main.o system_stm32f4xx.o $(STARTUP_OBJECT) serial.o uart.o
 OBJECTS+= command.o clock.o spi.o i2c.o datastore.o nichrome.o
 
 
@@ -15,7 +15,7 @@ all: image.elf
 image.elf: $(OBJECTS)
 	cd STPeriph && make
 	cd FreeRTOS && make
-	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../stm32f411re.ld -o image.elf *.o FreeRTOS/*.o STPeriph/*.o -lm
+	$(CC) $(CFLAGS) $(CPPFLAGS) -T ../$(LDSCRIPT) -o image.elf *.o FreeRTOS/*.o STPeriph/*.o -lm
 clean:
 	rm -f *.o
 	cd FreeRTOS && make clean

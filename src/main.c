@@ -37,6 +37,11 @@ static void lowLevelHardwareInit()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
 }
 
+void DisableWWDG()
+{
+    NVIC_DisableIRQ(WWDG_IRQn);
+}
+
 static void initializeBackupRegisters()
 {  
     int i;
@@ -57,6 +62,8 @@ int main( void )
     volatile int x = 0;
     x = pow(x, 2);
     lowLevelHardwareInit();
+    
+    for(;;){}
     xTaskCreate(initTask, NULL, systemDEFAULT_STACK_SIZE, NULL, systemPRIORITY_INIT, NULL);
     vTaskStartScheduler();
     
