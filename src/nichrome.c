@@ -162,7 +162,6 @@ static void vNichromeInit()
 
 static void vNichromeBurn(char ctrl, unsigned ms)
 {
-#ifdef nichromeCTRL1
 #ifdef nichromeLOCAL_PRINT
 	vConsolePrintf("Burn #%d (%d ms) start...", ctrl, ms);
 #endif
@@ -172,13 +171,12 @@ static void vNichromeBurn(char ctrl, unsigned ms)
 #ifdef nichromeLOCAL_PRINT
 	vConsolePrint("Done.\r\n");
 #endif
-#endif /* ifdef nichromeCTRL1 */
 }
 
 void vNichromeStartTask()
 {
 	vNichromeInit();
-	xTaskCreate( vNichromeTask, NULL, configMINIMAL_STACK_SIZE, NULL, systemPRIORITY_NICHROME, NULL );
+	xTaskCreate( vNichromeTask, NULL, configMINIMAL_STACK_SIZE + 200, NULL, systemPRIORITY_NICHROME, NULL );
 }
 
 void vNichromeTask( void *pvParameters )
@@ -209,15 +207,8 @@ void vNichromeTask( void *pvParameters )
 		vNichromeBurn(ctrl, BURN_TIME);
 	}
 
-	/* End task */
-#if INCLUDE_vTaskDelete == 1
-	vTaskDelete(NULL);
-#else
-#if 0
 	for( ;; )
 	{
 		vTaskDelay(10000);
 	}
-#endif
-#endif
 }

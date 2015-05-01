@@ -223,7 +223,7 @@ static void prvHandleCommand(char * fields[], int fieldCount) {
     if(strncmp("BURN", fields[1], MAX_QUERY_SUBTYPE_LENGTH) == 0) {
         if (fieldCount == 3) {
             sendMessage("ACK_COMMAND");
-//TODO: Port             vNichromeStartTask();
+            vNichromeStartTask();
         } else
             nackLength();
     }
