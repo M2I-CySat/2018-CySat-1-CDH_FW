@@ -1,6 +1,6 @@
 # Add filename.o to include in compilation
 OBJECTS=main.o system_stm32f4xx.o $(STARTUP_OBJECT) serial.o uart.o
-OBJECTS+= command.o clock.o spi.o i2c.o datastore.o nichrome.o
+OBJECTS+= command.o clock.o spi.o i2c.o datastore.o nichrome.o coremem.o
 
 
 all: image.elf

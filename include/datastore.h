@@ -7,6 +7,8 @@
  * \addtogroup \CySat_Private
  * \{
  *
+ * DEPRECATED BY COREMEM.H
+ *
  * This file defines the interface to various datastores.
  * There is no polymorphic or inheritance-based datastore API, rather
  * a set of functions with similar flavor and functionality. This
