@@ -35,27 +35,38 @@
 
 #define CORE_HEAP_PACKET_STATUS_INVALID 0
 #define CORE_HEAP_PACKET_STATUS_GOOD 1
+#define CORE_HEAP_PACKET_STATUS_NO_PACKET 2
+#define CORE_HEAP_PACKET_STATUS_TIMEOUT 3
+
+#define CORE_HEAP_STABLE 0x01
 
 typedef struct CORE_HEAP_Packet
 {
 	uint8_t status;
-	uint8_t[CORE_HEAP_PACKET_SIZE] data;
+	uint8_t data[CORE_HEAP_PACKET_SIZE];
 } CORE_HEAP_Packet;
 
-/*! Initialize (blank) core memory heap 
+/*! Initialize core memory heap mutexes, queues, and stuff
  * \return status code
  * */
-uint8_t CORE_HEAP_Initialize();
+void CORE_HEAP_Initialize();
+
+/*! Blank core memory heap
+ * \return status code
+ */
+uint8_t CORE_HEAP_Clear();
 
 /*! Push a packet to core memory heap
- * \return status code
  * */
-uint8_t CORE_HEAP_Push(CORE_HEAP_Packet);
+uint8_t CORE_HEAP_Send(CORE_HEAP_Packet);
 
 /*! Retrieve a packet from core memory heap
  * \return A core heap packet
  */
 CORE_HEAP_Packet CORE_HEAP_Retrieve();
+
+uint16_t CORE_HEAP_Size();
+uint8_t CORE_HEAP_Status();
 
                     
 #endif

@@ -34,7 +34,7 @@
 
 #define systemPRIORITY_INIT     ( systemPRIORITY_BASE + 8 )
 
-#define systemPRIORITY_STORAGE  ( systemPRIORITY_BASE + 9 )
+#define systemPRIORITY_HEAP  	( systemPRIORITY_BASE + 9 )
 
 #define systemPRIORITY_NICHROME ( systemPRIORITY_BASE + 10 )
 
