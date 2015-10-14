@@ -46,7 +46,7 @@ uint8_t CORE_HEAP_Send(CORE_HEAP_Packet p)
 	return SUCCESS;
 }
 
-CORE_HEAP_Packet CORE_HEAP_Receive()
+CORE_HEAP_Packet CORE_HEAP_Retrieve()
 {
 	CORE_HEAP_Packet p;
 	CORE_HEAP_Packet *pp;

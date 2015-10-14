@@ -26,9 +26,11 @@
 #include <pinmapping.h>
 /* Application includes */
 
+#include <coremem.h>
+
 /*Init system config*/
 
-#define BURN_DELAY          30 /*Seconds until antenna burn*/
+#define BURN_DELAY          5 /*Seconds until antenna burn*/
 
 static void initTask(void * params);
 
@@ -147,7 +149,7 @@ void initTask(void * params)
     /*if (!(RTC->BKP0R & ANTENNA_STATUS)) { */
     if(1){
         vConsolePrintf("Deploying Antennas...");
-        vNichromeStartTask();
+   //     vNichromeStartTask();
         vConsolePrintf("Done\r\n");
         
         vConsolePrintf("Setting antenna status flag...");
@@ -161,6 +163,24 @@ void initTask(void * params)
     {
       vConsolePrintf("Antennas already deployed!\r\n");
     }
+
+    CORE_HEAP_Initialize();
+
+    CORE_HEAP_Packet p;
+    p.status = 0;
+    p.data[0] = 'A';
+    p.data[1] = 'b';
+    p.data[2] = 0;
+    CORE_HEAP_Send(p);
+
+    p.data[0] = 'A';
+    p.data[1] = 'c';
+    p.data[2] = 0;
+    CORE_HEAP_Send(p);
+
+    p = CORE_HEAP_Retrieve();
+
+    vConsolePrintf(p.data);
 
     vConsolePrintf("Starting command handling on console...");
     xStartUart1CommandHandling();

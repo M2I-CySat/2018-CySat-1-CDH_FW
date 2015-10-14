@@ -87,7 +87,7 @@ MEMORY
     RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 96K
 }
 
-_estack = 0x2001FFFF;
+_estack = 0x20017FFF;
 
 SECTIONS
 {
