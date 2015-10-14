@@ -9,18 +9,19 @@ endif
 ifeq "$(TARGET)" "411"
 	export MCU_MODEL=STM32F411xE
 	export LDSCRIPT=stm32f411re.ld
-  export STARTUP_OBJECT=startup_stm32f411xe.o
+  	export STARTUP_OBJECT=startup_stm32f411xe.o
 endif
 
 ifeq "$(TARGET)" "417"
 	export MCU_MODEL=STM32F40_41xxx
 	export LDSCRIPT=stm32f417vg.ld
-  export STARTUP_OBJECT=startup_stm32f417xx.o
+  	export STARTUP_OBJECT=startup_stm32f417xx.o
 endif
 
 ifeq "$(TARGET)" "401"
 	export MCU_MODEL=STM32F401xx
 	export LDSCRIPT=stm32f401re.ld
+	export STARTUP_OBJECT=startup_stm32f401xx.o
 endif
 
 # Toolchain
