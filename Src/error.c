@@ -17,3 +17,9 @@ void ERROR_Uninitialized(char * msg)
 	while(1) {
 	}
 }
+
+void ERROR_NotImplemented(char * msg)
+{
+	while(1) {
+	}
+}

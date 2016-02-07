@@ -90,7 +90,10 @@ int main(void)
   UART_Initialize();
   
   /* Output a message on Hyperterminal using printf function */
-  dbg_printf("UART Printf Example: using custom  printf & friends implementation\n\r");
+  uputs("\r\nUART Printf Example: using custom printf & friends implementation\n\r", UART_GetDebug());
+  dbg_printf("Testing %s interpolation", "string");
+  dbg_printf("Debug Printf simplifies things.");
+  uprintf(UART_GetDebug(), "For %s you have to use uprintf\r\n", "full fprintf");
 
   /* Infinite loop */ 
   while (1)

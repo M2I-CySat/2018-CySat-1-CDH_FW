@@ -9,5 +9,6 @@ void ERROR_MiscRTOS(char * msg);
 
 /* Hardware Errors */
 void ERROR_Uninitialized(char * msg);
+void ERROR_NotImplemented(char * msg);
 
 #endif

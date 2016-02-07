@@ -20,6 +20,9 @@ int vuprintf(USART_TypeDef *uart, const char *format_string, va_list args);
 /* Wraps uprintf() and prints to the debug UART with thread information if available */
 int dbg_printf(const char *format_string, ...);
 
+/* UART equivalent of fputs */
+int uputs(const char * s, USART_TypeDef *uart);
+
 /* One shared buffer is used for all printf's across all tasks.
 * This buffer is only used for formatting; it is atomically passed to
 * the UART drivers.
