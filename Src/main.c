@@ -99,7 +99,7 @@ int main(void)
   UartHandle.Init.BaudRate     = 9600;
   UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
   UartHandle.Init.StopBits     = UART_STOPBITS_1;
-  UartHandle.Init.Parity       = UART_PARITY_ODD;
+  UartHandle.Init.Parity       = UART_PARITY_NONE;
   UartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
   UartHandle.Init.Mode         = UART_MODE_TX_RX;
   UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
@@ -111,7 +111,7 @@ int main(void)
   }
   
   /* Output a message on Hyperterminal using printf function */
-  dbg_printf("\n\r UART Printf Example: retarget the C library printf function to the UART\n\r");
+  dbg_printf("UART Printf Example: using custom  printf & friends implementation\n\r");
 
   /* Infinite loop */ 
   while (1)
