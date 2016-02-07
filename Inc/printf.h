@@ -13,9 +13,8 @@
  /* Call printf to a specific uart */
  int uprintf(USART_TypeDef uart, const char *format_string, ...);
  
- /* Wraps uprintf() and prints to the debug UART */
+ /* Wraps uprintf() and prints to the debug UART with thread information if available */
  int dbg_printf(const char *format_string, ...);
- 
  
  /* One shared buffer is used for all printf's across all tasks.
   * This buffer is only used for formatting; it is atomically passed to

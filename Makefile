@@ -19,7 +19,7 @@ export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
 export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/Inc
 export IFLAGS+= -I$(DRIVERS)/Device/ST/STM32F4xx/Include/
-export IFLAGS+= -I$(PROJECT_ROOT)/Inc/
+export IFLAGS+= -Iquote$(PROJECT_ROOT)/Inc/
 
 # Set flags
 export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
