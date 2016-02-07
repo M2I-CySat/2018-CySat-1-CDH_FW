@@ -68,9 +68,6 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
-/* Eventuall move this in to uart.h */
-UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart);
-
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

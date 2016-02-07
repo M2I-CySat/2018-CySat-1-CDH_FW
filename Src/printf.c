@@ -6,8 +6,7 @@
 #include <printf.h>
 #include <error.h>
 
-/* Eventually move this functionality to a uart.h */
-#include <main.h>
+#include <uart.h>
 
 /* The static printf() buffer */
 

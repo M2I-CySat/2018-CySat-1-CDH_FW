@@ -7,4 +7,7 @@
 void ERROR_ResourceFrozen(char * msg);
 void ERROR_MiscRTOS(char * msg);
 
+/* Hardware Errors */
+void ERROR_Uninitialized(char * msg);
+
 #endif

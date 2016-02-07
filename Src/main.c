@@ -39,6 +39,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <printf.h>
+#include <uart.h>
 
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
@@ -85,30 +86,8 @@ int main(void)
   
   /* Configure the system clock to 100 MHz */
   SystemClock_Config();
-   
-  /*##-1- Configure the UART peripheral ######################################*/
-  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
-  /* UART1 configured as follow:
-      - Word Length = 8 Bits
-      - Stop Bit = One Stop bit
-      - Parity = ODD parity
-      - BaudRate = 9600 baud
-      - Hardware flow control disabled (RTS and CTS signals) */
-  UartHandle.Instance          = USARTx;
   
-  UartHandle.Init.BaudRate     = 9600;
-  UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
-  UartHandle.Init.StopBits     = UART_STOPBITS_1;
-  UartHandle.Init.Parity       = UART_PARITY_NONE;
-  UartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
-  UartHandle.Init.Mode         = UART_MODE_TX_RX;
-  UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
-    
-  if(HAL_UART_Init(&UartHandle) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler(); 
-  }
+  UART_Initialize();
   
   /* Output a message on Hyperterminal using printf function */
   dbg_printf("UART Printf Example: using custom  printf & friends implementation\n\r");
@@ -117,18 +96,6 @@ int main(void)
   while (1)
   {
   }
-}
-
-
-UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
-{
-	if (usart == USARTx)
-	{
-		return &UartHandle;
-	} else
-	{
-		return NULL;
-	}
 }
 
 /**
