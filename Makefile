@@ -19,7 +19,7 @@ export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
 export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/Inc
 export IFLAGS+= -I$(DRIVERS)/Device/ST/STM32F4xx/Include/
-export IFLAGS+= -Iquote$(PROJECT_ROOT)/Inc/
+export IFLAGS+= -I$(PROJECT_ROOT)/Inc/
 
 # Set flags
 export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
@@ -40,11 +40,11 @@ bsp-objects:
 	
 project-files:
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/*.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/startup_stm32f411xe.s
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/startup_ARMCM4.S
 	mv *.o objects
 	
-link: hal-objects bsp-objects project-files
+link: project-files
 	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf objects/*.o
 	
 clean:
-	rm -f image.elf *.o
+	rm -f image.elf objects/*.o
