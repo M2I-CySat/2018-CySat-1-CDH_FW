@@ -87,7 +87,9 @@ int main(void)
   /* Configure the system clock to 100 MHz */
   SystemClock_Config();
   
-  UART_Initialize();
+  if(UART_Initialize()) {
+	  Error_Handler();
+  }
   
   /* Output a message on Hyperterminal using printf function */
   uputs("\r\nUART Printf Example: using custom printf & friends implementation\n\r", UART_GetDebug());
