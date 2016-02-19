@@ -17,7 +17,7 @@ export PROJECT_ROOT=./
 export IFLAGS=-I$(DRIVERS)/BSP/STM32F4xx-Nucleo/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
-export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/Inc
+export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/inc
 export IFLAGS+= -I$(DRIVERS)/Device/ST/STM32F4xx/Include/
 export IFLAGS+= -I$(PROJECT_ROOT)/Inc/
 
@@ -39,14 +39,13 @@ bsp-objects:
 	mv *.o objects
 	
 project-files:
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/*.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/drivers/*.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/applications/*.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/src/*.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/src/drivers/*.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/startup_ARMCM4.S
 	mv *.o objects
 	
 link: project-files
-	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf objects/*.o
+	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf objects/*.o -L ./lib -lRTX_CM4
 	
 clean:
 	rm -f image.elf objects/*.o

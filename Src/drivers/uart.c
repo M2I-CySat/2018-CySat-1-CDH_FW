@@ -3,7 +3,7 @@
  * Does initialization and holds UART handles
  */
 
-#include <uart.h>
+#include <drivers/uart.h>
 #include <error.h>
  
 enum {

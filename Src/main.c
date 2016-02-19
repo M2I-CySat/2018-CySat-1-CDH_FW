@@ -39,7 +39,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <printf.h>
-#include <uart.h>
+#include <drivers/uart.h>
+#include <cmsis_os.h>
 
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
@@ -96,6 +97,10 @@ int main(void)
   dbg_printf("Testing %s interpolation", "string");
   dbg_printf("Debug Printf simplifies things.");
   uprintf(UART_GetDebug(), "For %s you have to use uprintf\r\n", "full fprintf");
+ 
+  osThreadId id;
+  id = osThreadGetId();
+  dbg_printf("Main thread ID: %d\r\n", id);
 
   /* Infinite loop */ 
   while (1)

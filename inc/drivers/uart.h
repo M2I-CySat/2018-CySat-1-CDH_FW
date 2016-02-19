@@ -2,6 +2,8 @@
  * 
  * Manages UARTs and holds on to handles
  */
+#ifndef __UART_H
+#define __UART_H
  
 #include <stm32f4xx_hal.h>
 #include <stdint.h>
@@ -39,3 +41,5 @@ inline UART_HandleTypeDef * UART_GetDebugHandle()
 #define USART2_RX_PIN                    GPIO_PIN_3
 #define USART2_RX_GPIO_PORT              GPIOA 
 #define USART2_RX_AF                     GPIO_AF7_USART2
+
+#endif

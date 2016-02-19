@@ -6,7 +6,7 @@
 #include <printf.h>
 #include <error.h>
 
-#include <uart.h>
+#include <drivers/uart.h>
 
 /* The static printf() buffer */
 
