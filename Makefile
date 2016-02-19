@@ -40,6 +40,8 @@ bsp-objects:
 	
 project-files:
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/*.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/drivers/*.c
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/Src/applications/*.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/startup_ARMCM4.S
 	mv *.o objects
 	
