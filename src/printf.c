@@ -17,6 +17,10 @@ static const char * thread_names[MAX_THREADS];
 static osThreadId thread_ids[MAX_THREADS];
 static size_t num_threads_defined = 0;
 
+/* Mutex for protecting the sprintf buffer */
+osMutexDef(sprintf_mutex);
+osMutexId(sprintf_mutex_id);
+
 /* Static functions */
 static int lockBuffer();
 static int releaseBuffer();
@@ -111,14 +115,25 @@ int uputs(const char * s, USART_TypeDef *uart)
 	return UART_Write(uart, (uint8_t *)s, strlen(s));
 }
 
+int PRINTF_Initialize()
+{
+  sprintf_mutex_id = osMutexCreate(osMutex(sprintf_mutex));
+  
+  if (sprintf_mutex_id == NULL) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 static int lockBuffer()
 {
-	/* No RTOS for now */
+	osMutexWait(sprintf_mutex_id, osWaitForever);
 	return 1;
 }
 
 static int releaseBuffer()
 {
-	/* No RTOS for now */
+	osMutexRelease(sprintf_mutex_id);
 	return 1;
 }

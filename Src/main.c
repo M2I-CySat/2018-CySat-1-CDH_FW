@@ -70,12 +70,17 @@ int main(void)
   int tmp;
   tmp = SCB->AIRCR;
   HAL_Init();
+  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
   
   /* Configure the system clock to 100 MHz */
   SystemClock_Config();
   
   if(UART_Initialize()) {
 	  ERROR_MiscHardware("UART did not initialize properly!");
+  }
+  
+  if (PRINTF_Initialize()) {
+    ERROR_MiscRTOS("PRINTF did not initialize properly!");
   }
   
   dbg_add_thread(osThreadGetId(), "init");

@@ -14,7 +14,7 @@ UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart);
 int UART_Initialize();
 
 /* UART Transmit Wrapper */
-ssize_t UART_Write(USART_TypeDef * usart, uint8_t * data, uint16_t size);
+ssize_t UART_Write(USART_TypeDef * usart, uint8_t * data, size_t size);
 
 /* Get the debug UART */
 USART_TypeDef * UART_GetDebug(); 
