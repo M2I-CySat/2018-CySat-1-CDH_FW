@@ -28,6 +28,8 @@ export CFLAGS+= -mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 #Bitchy nag-nag mode settings
 export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11
 
+build: link
+
 all: hal-objects project-files link
 
 hal-objects:

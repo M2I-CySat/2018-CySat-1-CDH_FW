@@ -35,45 +35,29 @@
   *
   ******************************************************************************
   */
-
+  
+/* Modified for CySat Initialization
+ * (C) 2016 Jake Drahos <drahos@iastate.edu>
+ *
+ */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <printf.h>
 #include <drivers/uart.h>
 #include <cmsis_os.h>
+#include <error.h>
 
-/** @addtogroup STM32F4xx_HAL_Examples
-  * @{
-  */
+#include <init.h>
 
-/** @addtogroup UART_Printf
-  * @{
-  */ 
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* UART handler declaration */
+/* UART handle declaration */
 UART_HandleTypeDef UartHandle;
 
-/* Private function prototypes -----------------------------------------------*/
-#ifdef __GNUC__
-  /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
-     set to 'Yes') calls __io_putchar() */
-  #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
-#else
-  #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /* __GNUC__ */
+/* Static functions */
 static void SystemClock_Config(void);
-static void Error_Handler(void);
-
-/* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  Main program
-  * @param  None
-  * @retval None
+  * Main entry point. Does some setup, then calls
+  * the actual init() application.
   */
 int main(void)
 {
@@ -91,8 +75,10 @@ int main(void)
   SystemClock_Config();
   
   if(UART_Initialize()) {
-	  Error_Handler();
+	  ERROR_MiscHardware("UART did not initialize properly!");
   }
+  
+  dbg_add_thread(osThreadGetId(), "init");
   
   /* Output a message on Hyperterminal using printf function */
   uputs("\r\nUART Printf Example: using custom printf & friends implementation\n\r", UART_GetDebug());
@@ -102,11 +88,15 @@ int main(void)
  
   osThreadId id;
   id = osThreadGetId();
-  dbg_printf("Main thread ID: %d\r\n", id);
+  dbg_printf("Main thread ID: %d", id);
+  
+  /* Call primary MCU initialization */
+  INIT_Init();
 
   /* Infinite loop */ 
   while (1)
   {
+    osSignalWait(0,osWaitForever);
   }
 }
 
@@ -155,7 +145,7 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLQ = 7;
   if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
-    Error_Handler();
+    ERROR_MiscHardware("SystemClock_Config did not work!");
   }
   
   /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
@@ -167,42 +157,9 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;  
   if(HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
-    Error_Handler();
+    ERROR_MiscHardware("SystemClock_Config did not work!");
   }
 }
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-static void Error_Handler(void)
-{
-  while(1)
-  {
-  }
-}
-
-#ifdef  USE_FULL_ASSERT
-
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t* file, uint32_t line)
-{ 
-  /* User can add his own implementation to report the file name and line number,
-     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
-}
-#endif
 
 /**
   * @}

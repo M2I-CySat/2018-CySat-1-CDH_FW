@@ -23,3 +23,9 @@ void ERROR_NotImplemented(char * msg)
 	while(1) {
 	}
 }
+
+void ERROR_MiscHardware(char * msg)
+{
+	while(1) {
+	}
+}

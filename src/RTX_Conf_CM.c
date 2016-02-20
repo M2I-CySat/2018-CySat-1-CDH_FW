@@ -48,21 +48,21 @@
 //   <i> Defines max. number of threads that will run at the same time.
 //   <i> Default: 6
 #ifndef OS_TASKCNT
- #define OS_TASKCNT     6
+ #define OS_TASKCNT     12
 #endif
 
 //   <o>Default Thread stack size [bytes] <64-4096:8><#/4>
 //   <i> Defines default stack size for threads with osThreadDef stacksz = 0
 //   <i> Default: 200
 #ifndef OS_STKSIZE
- #define OS_STKSIZE     50
+ #define OS_STKSIZE     512
 #endif
 
 //   <o>Main Thread stack size [bytes] <64-4096:8><#/4>
 //   <i> Defines stack size for main thread.
 //   <i> Default: 200
 #ifndef OS_MAINSTKSIZE
- #define OS_MAINSTKSIZE 50
+ #define OS_MAINSTKSIZE 512
 #endif
 
 //   <o>Number of threads with user-provided stack size <0-250>
@@ -108,7 +108,7 @@
 //   <i> Defines the timer clock value.
 //   <i> Default: 12000000  (12MHz)
 #ifndef OS_CLOCK
- #define OS_CLOCK       12000000
+ #define OS_CLOCK       1000000000
 #endif
 
 //   <o>Timer tick value [us] <1-1000000>

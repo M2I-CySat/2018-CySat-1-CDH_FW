@@ -12,9 +12,35 @@
 
 static char printf_buffer[PRINTF_BUFFER_SIZE];
 
+#define MAX_THREADS 16
+static const char * thread_names[MAX_THREADS];
+static osThreadId thread_ids[MAX_THREADS];
+static size_t num_threads_defined = 0;
+
 /* Static functions */
 static int lockBuffer();
 static int releaseBuffer();
+
+size_t dbg_add_thread(osThreadId id, const char * name)
+{
+  if (num_threads_defined < MAX_THREADS) {
+    thread_ids[num_threads_defined] = id;
+    thread_names[num_threads_defined] = name;
+    return ++num_threads_defined;
+  } else {
+    return -1;
+  }
+}
+
+const char * dbg_thread_name(osThreadId id)
+{
+  for(size_t i = 0; i < num_threads_defined; i++) {
+    if (thread_ids[i] == id) {
+      return thread_names[i];
+    }
+  }
+  return NULL;
+}
 
 int uprintf(USART_TypeDef *uart, const char *format_string, ...)
 {
@@ -32,10 +58,19 @@ int uprintf(USART_TypeDef *uart, const char *format_string, ...)
 
 int dbg_printf(const char *format_string, ...)
 {
-	USART_TypeDef * dbgUart = UART_GetDebug();
-	
+	USART_TypeDef * dbgUart;
+  dbgUart = UART_GetDebug();
+  
 	/* Print severity and thread information */
-	uputs("[DEBUG] ", dbgUart);
+  const char * name;
+  osThreadId id;
+  id = osThreadGetId();
+  name = dbg_thread_name(id);
+  if (name != NULL) {
+    uprintf(dbgUart, "[DBG:%s] ", name);
+  } else {
+    uprintf(dbgUart, "[DBG:%d] ", id);
+  }
 	
 	va_list args;
 	va_start(args, format_string);
