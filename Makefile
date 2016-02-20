@@ -43,7 +43,7 @@ bsp-objects:
 project-files:
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/src/*.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/src/drivers/*.c
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/startup_ARMCM4.S
+	$(CC) $(CFLAGS) $(IFLAGS) -c $(PROJECT_ROOT)/startup_STM32F4.S
 	mv *.o objects
 	
 link: project-files

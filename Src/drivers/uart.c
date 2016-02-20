@@ -8,7 +8,7 @@
 #include <cmsis_os.h>
 #include <stdint.h>
 
-#define UART_FIFO_SIZE 128
+#define UART_FIFO_SIZE 8
 #define UART_INTERRUPT_PRIORITY 8
 #define UART_INTERRUPT_SUBPRIORITY 0
  
@@ -97,8 +97,8 @@ ssize_t UART_Write(USART_TypeDef *uart, uint8_t * data, size_t size)
 	uartHandle = UART_GetHandle(uart);
 	for(size_t i = 0; i < size; i++) {	
     osMessagePut(uart2_tx_q_id, data[i], osWaitForever);
+    __HAL_UART_ENABLE_IT(uartHandle, UART_IT_TXE);
   }
-  __HAL_UART_ENABLE_IT(uartHandle, UART_IT_TXE);
 	
 	return size;
 }
