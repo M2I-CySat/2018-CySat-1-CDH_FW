@@ -14,7 +14,7 @@ export DRIVERS=../Drivers
 export PROJECT_ROOT=./
 
 # Include Paths
-export IFLAGS=-I$(DRIVERS)/BSP/STM32F4xx-Nucleo/
+#export IFLAGS=-I$(DRIVERS)/BSP/STM32F4xx-Nucleo/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
 export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/inc
@@ -28,7 +28,7 @@ export CFLAGS+= -mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 #Bitchy nag-nag mode settings
 export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -std=gnu11
 
-all: hal-objects project-files bsp-objects link
+all: hal-objects project-files link
 
 hal-objects:
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(DRIVERS)/STM32F4xx_HAL_Driver/Src/*.c
