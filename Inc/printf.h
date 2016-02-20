@@ -14,9 +14,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/* Initialization Function */
-int PRINTF_Initialize();
-
 /* Call printf to a specific uart */
 int uprintf(USART_TypeDef *uart, const char *format_string, ...);
 

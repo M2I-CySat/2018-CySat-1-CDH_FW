@@ -5,12 +5,6 @@
 
 #include <drivers/uart.h>
 #include <error.h>
-#include <cmsis_os.h>
-#include <stdint.h>
-
-#define UART_FIFO_SIZE 8
-#define UART_INTERRUPT_PRIORITY 8
-#define UART_INTERRUPT_SUBPRIORITY 0
  
 enum {
 	INDEX_USART1,
@@ -25,9 +19,6 @@ static void MspInitUART2();
 
 static void MspDeInitUART2();
 
-/* Message Queues for RX/TX FIFOs */
-osMessageQDef(uart2_tx_q, UART_FIFO_SIZE, uint32_t);
-osMessageQId uart2_tx_q_id;
 
 UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
 {
@@ -80,49 +71,18 @@ int UART_Initialize()
 	}
 	
 	initialized[INDEX_USART2] = 1;
-  
-  /* Initialize message queues */
-  uart2_tx_q_id = osMessageCreate(osMessageQ(uart2_tx_q), NULL);
-  
-  if ((uart2_tx_q_id == NULL)) {
-    return -1;
-  }
 	
 	return 0;
 }
 
-ssize_t UART_Write(USART_TypeDef *uart, uint8_t * data, size_t size)
+ssize_t UART_Write(USART_TypeDef *uart, uint8_t * data, uint16_t size)
 {
 	UART_HandleTypeDef *uartHandle;
 	uartHandle = UART_GetHandle(uart);
-	for(size_t i = 0; i < size; i++) {	
-    osMessagePut(uart2_tx_q_id, data[i], osWaitForever);
-    __HAL_UART_ENABLE_IT(uartHandle, UART_IT_TXE);
-  }
+	
+	HAL_UART_Transmit(uartHandle, data, size, 0xFFFF);
 	
 	return size;
-}
-
-/* Interrupt Handlers */
-
-/* USART2 (Debug, TX only) */
-void USART2_IRQHandler()
-{
-  UART_HandleTypeDef *uartHandle;
-  uartHandle = UART_GetHandle(USART2);
-  
-  if(__HAL_UART_GET_IT_SOURCE(uartHandle, UART_IT_TXE) != RESET) {
-    osEvent event;
-    event = osMessageGet(uart2_tx_q_id, 0);
-    if (event.status == osOK) {
-      /* No byte available */
-      __HAL_UART_DISABLE_IT(uartHandle, UART_IT_TXE);
-    } else if (event.status == osEventMessage) {
-      uartHandle->Instance->DR = event.value.v;
-    } else {
-      ERROR_MiscRTOS("ISR/Mailbox error (UART2)!");
-    }
-  }
 }
 
 /*------------- MSP Initialization -------------------
@@ -167,10 +127,6 @@ static void MspInitUART2()
   GPIO_InitStruct.Alternate = USART2_RX_AF;
     
   HAL_GPIO_Init(USART2_RX_GPIO_PORT, &GPIO_InitStruct);
-  
-  /* NVIC Configuration */
-  HAL_NVIC_SetPriority(USART2_IRQn, UART_INTERRUPT_PRIORITY, UART_INTERRUPT_SUBPRIORITY);
-  HAL_NVIC_EnableIRQ(USART2_IRQn);
 }
 
 /* Disable the Peripheral's clock
