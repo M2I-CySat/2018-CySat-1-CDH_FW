@@ -26,7 +26,7 @@ export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
 export CFLAGS+= -mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 
 #Bitchy nag-nag mode settings
-export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -std=gnu11
+export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11
 
 all: hal-objects project-files link
 

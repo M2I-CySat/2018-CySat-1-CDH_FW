@@ -83,6 +83,8 @@ int main(void)
        - Set NVIC Group Priority to 4
        - Global MSP (MCU Support Package) initialization
      */
+  int tmp;
+  tmp = SCB->AIRCR;
   HAL_Init();
   
   /* Configure the system clock to 100 MHz */
