@@ -1,12 +1,10 @@
 /* CySat printf and friends */
 
-#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <printf.h>
 #include <error.h>
-
-#include <drivers/uart.h>
 
 /* The static printf() buffer */
 
@@ -42,7 +40,7 @@ const char * dbg_thread_name(osThreadId id)
   return NULL;
 }
 
-int uprintf(USART_TypeDef *uart, const char *format_string, ...)
+int uprintf(enum UART_Uart uart, const char *format_string, ...)
 {
 	va_list args;
 	va_start(args, format_string);
@@ -58,7 +56,7 @@ int uprintf(USART_TypeDef *uart, const char *format_string, ...)
 
 int dbg_printf(const char *format_string, ...)
 {
-	USART_TypeDef * dbgUart;
+	enum UART_Uart dbgUart;
   dbgUart = UART_GetDebug();
   
 	/* Print severity and thread information */
@@ -86,7 +84,7 @@ int dbg_printf(const char *format_string, ...)
 	return retval;
 }
 
-int vuprintf(USART_TypeDef *uart, const char *format_string, va_list args)
+int vuprintf(enum UART_Uart uart, const char *format_string, va_list args)
 {
 	if (!lockBuffer()){
 		ERROR_ResourceFrozen("Unable to obtain printf buffer mutex");
@@ -106,7 +104,7 @@ int vuprintf(USART_TypeDef *uart, const char *format_string, va_list args)
 	return retval;
 }
 
-int uputs(const char * s, USART_TypeDef *uart)
+int uputs(const char * s, enum UART_Uart uart)
 {	
 	return UART_Write(uart, (uint8_t *)s, strlen(s));
 }

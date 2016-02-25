@@ -4,7 +4,26 @@
  */
 
 #include <drivers/uart.h>
+#include <stm32f4xx_hal.h>
 #include <error.h>
+
+
+/*----------------- MSP Configuration --------------------*/
+/* USART2 MSP Configuration */
+#define USART2_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE();
+#define USART2_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USART2_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+
+#define USART2_FORCE_RESET()             __HAL_RCC_USART2_FORCE_RESET()
+#define USART2_RELEASE_RESET()           __HAL_RCC_USART2_RELEASE_RESET()
+
+/* Definition for USART2 Pins */
+#define USART2_TX_PIN                    GPIO_PIN_2
+#define USART2_TX_GPIO_PORT              GPIOA
+#define USART2_TX_AF                     GPIO_AF7_USART2
+#define USART2_RX_PIN                    GPIO_PIN_3
+#define USART2_RX_GPIO_PORT              GPIOA
+#define USART2_RX_AF                     GPIO_AF7_USART2
  
 enum {
 	INDEX_USART1,
@@ -19,8 +38,11 @@ static void MspInitUART2();
 
 static void MspDeInitUART2();
 
+static USART_TypeDef * uartToUsart(enum UART_Uart u);
 
-UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
+static UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart);
+
+static UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
 {
 	if (usart == USART1) {
 		if (!initialized[INDEX_USART1]) {
@@ -42,10 +64,10 @@ UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
 	}
 }
 
-USART_TypeDef * UART_GetDebug()
+enum UART_Uart UART_GetDebug()
 {
 	/* Determine the debug uart */
-	return USART2;
+	return UART_2;
 }
 
 int UART_Initialize()
@@ -75,14 +97,30 @@ int UART_Initialize()
 	return 0;
 }
 
-ssize_t UART_Write(USART_TypeDef *uart, uint8_t * data, uint16_t size)
+ssize_t UART_Write(enum UART_Uart uart, uint8_t * data, uint16_t size)
 {
 	UART_HandleTypeDef *uartHandle;
-	uartHandle = UART_GetHandle(uart);
+	uartHandle = UART_GetHandle(uartToUsart(uart));
 	
 	HAL_UART_Transmit(uartHandle, data, size, 0xFFFF);
 	
 	return size;
+}
+
+static USART_TypeDef * uartToUsart(enum UART_Uart u)
+{
+	switch (u) {
+		case UART_1:
+			return USART1;
+		case UART_2:
+			return USART2;
+		case UART_3:
+			return USART6;
+		default:
+			ERROR_NotImplemented("Bad UART");
+	}
+
+	return NULL;
 }
 
 /*------------- MSP Initialization -------------------

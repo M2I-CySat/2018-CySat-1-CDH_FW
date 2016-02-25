@@ -15,10 +15,10 @@
 #include <stdlib.h>
 
 /* Call printf to a specific uart */
-int uprintf(USART_TypeDef *uart, const char *format_string, ...);
+int uprintf(enum UART_Uart u, const char *format_string, ...);
 
 /* Same but with args list */
-int vuprintf(USART_TypeDef *uart, const char *format_string, va_list args);
+int vuprintf(enum UART_Uart u, const char *format_string, va_list args);
 
 /* Wraps uprintf() and prints to the debug UART with thread information if available */
 int dbg_printf(const char *format_string, ...);
@@ -30,7 +30,7 @@ size_t dbg_add_thread(osThreadId id, const char * name);
 const char * dbg_thread_name(osThreadId id);
 
 /* UART equivalent of fputs */
-int uputs(const char * s, USART_TypeDef *uart);
+int uputs(const char * s, enum UART_Uart uart);
 
 /* One shared buffer is used for all printf's across all tasks.
 * This buffer is only used for formatting; it is atomically passed to
