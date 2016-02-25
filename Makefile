@@ -17,9 +17,9 @@ export PROJECT_ROOT=./
 #export IFLAGS=-I$(DRIVERS)/BSP/STM32F4xx-Nucleo/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
-export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/inc
+export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/Inc
 export IFLAGS+= -I$(DRIVERS)/Device/ST/STM32F4xx/Include/
-export IFLAGS+= -I$(PROJECT_ROOT)/Inc/
+export IFLAGS+= -I$(PROJECT_ROOT)/inc/
 
 # Set flags
 export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
