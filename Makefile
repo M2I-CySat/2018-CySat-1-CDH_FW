@@ -7,11 +7,11 @@ export CC=arm-none-eabi-gcc
 export AS=arm-none-eabi-as
 export OBJDUMP=arg-none-eabi-objdump
 
-# Drivers path
-export DRIVERS=../Drivers
-
 # Project root
-export PROJECT_ROOT=./
+export PROJECT_ROOT=.
+
+# Drivers path
+export DRIVERS=$(PROJECT_ROOT)/vendor/Drivers
 
 # Include Paths
 #export IFLAGS=-I$(DRIVERS)/BSP/STM32F4xx-Nucleo/
@@ -47,7 +47,7 @@ project-files:
 	mv *.o objects
 	
 link: project-files
-	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf objects/*.o -L ./lib -lRTX_CM4
+	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf objects/*.o -L $(PROJECT_ROOT)/vendor/lib -lRTX_CM4
 	
 clean:
 	rm -f image.elf objects/*.o
