@@ -30,8 +30,8 @@ export CFLAGS+= -mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 # Bitchy nag-nag mode settings
 export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11
 
-# Source file definitions
-
+###### CONFIGURATION #######
+#Source file definitions
 # Files is src
 export APPLICATION_FILES=main.c main.c printf.c error.c RTX_Conf_CM.c init.c
 
@@ -39,26 +39,32 @@ export APPLICATION_FILES=main.c main.c printf.c error.c RTX_Conf_CM.c init.c
 export DRIVER_FILES=uart.c stm32f4xx_it.c system_stm32f4xx.c
 
 # HAL Requirements
+export HAL_MODULES=gpio uart rcc dma cortex
 
 # Startup
 export STARTUP=startup_STM32F411.S
-export STARTUP_OBJECT=objects/startup_STM32F411.o
+
+###### END CONFIGURATION ######
 
 # All ojbects
 export ALL_OBJECTS=objects/*.o objects/hal/*.o objects/drivers/*.o
 
+export STARTUP_OBJECT=objects/$(subst .S,.o,$(STARTUP))
+
+export HAL_FILES=stm32f4xx_hal.c $(foreach module,$(HAL_MODULES),stm32f4xx_hal_$(module).c)
+
 export APPLICATION_OBJECTS=$(subst .c,.o,$(APPLICATION_FILES))
 export DRIVER_OBJECTS=$(subst .c,.o,$(DRIVER_FILES))
+export HAL_OBJECTS=$(subst .c,.o,$(HAL_FILES))
 
 export APPLICATION_OBJECTS_EXPANDED= $(foreach object,$(APPLICATION_OBJECTS),objects/$(object))
 export DRIVER_OBJECTS_EXPANDED= $(foreach object,$(DRIVER_OBJECTS),objects/drivers/$(object))
-
-export HAL_FLAG= objects/hal_built
+export HAL_OBJECTS_EXPANDED= $(foreach object,$(HAL_OBJECTS),objects/hal/$(object))
 
 all: hal applications drivers startup
 	$(CC) $(CFLAGS) -T stm32f411re.ld -o image.elf $(ALL_OBJECTS) -L $(PROJECT_ROOT)/vendor/lib -lRTX_CM4
 	
-hal: $(HAL_FLAG)
+hal: $(HAL_OBJECTS_EXPANDED)
 
 applications: $(APPLICATION_OBJECTS_EXPANDED)
 
@@ -72,13 +78,11 @@ objects/%.o: src/%.c
 objects/drivers/%.o: src/drivers/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
+objects/hal/%.o: $(DRIVERS)/STM32F4xx_HAL_Driver/Src/%.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
+
 $(STARTUP_OBJECT): $(STARTUP)
 	$(CC) $(CFLAGS) $(IFLAGS) -c $(STARTUP) -o $(STARTUP_OBJECT)
 
-$(HAL_FLAG):
-	$(CC) $(CFLAGS) $(IFLAGS) -c $(DRIVERS)/STM32F4xx_HAL_Driver/Src/*.c
-	mv *.o objects/hal/
-	touch objects/hal_built
-	
 clean:
-	rm -f image.elf $(ALL_OBJECTS) objects/hal_built
+	rm -f image.elf $(ALL_OBJECTS)
