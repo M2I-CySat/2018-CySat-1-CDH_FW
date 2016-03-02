@@ -15,9 +15,8 @@ static const char * thread_names[MAX_THREADS];
 static osThreadId thread_ids[MAX_THREADS];
 static size_t num_threads_defined = 0;
 
-/* Static functions */
-static int lockBuffer();
-static int releaseBuffer();
+static osMutexId buffer_lock_id;
+osMutexDef(buffer_lock);
 
 size_t dbg_add_thread(osThreadId id, const char * name)
 {
@@ -38,6 +37,16 @@ const char * dbg_thread_name(osThreadId id)
 		}
 	}
 	return NULL;
+}
+
+int PRINTF_Initialize()
+{
+	buffer_lock_id = osMutexCreate(osMutex(buffer_lock));
+	if (buffer_lock_id == NULL) {
+		ERROR_MiscRTOS("Failed to create printf mutex");
+		return -1;
+	}
+	return 0;
 }
 
 int uprintf(enum UART_Uart uart, const char *format_string, ...)
@@ -86,7 +95,7 @@ int dbg_printf(const char *format_string, ...)
 
 int vuprintf(enum UART_Uart uart, const char *format_string, va_list args)
 {
-	if (!lockBuffer()){
+	if (osMutexWait(buffer_lock_id, osWaitForever) != osOK){
 		ERROR_ResourceFrozen("Unable to obtain printf buffer mutex");
 	}
 
@@ -97,26 +106,13 @@ int vuprintf(enum UART_Uart uart, const char *format_string, va_list args)
 	int retval;
 	retval = uputs(printf_buffer, uart);
 
-	if (!releaseBuffer()){
+	if (osMutexRelease(buffer_lock_id) != osOK){
 		ERROR_MiscRTOS("Unable to release printf buffer mutex");
 	}
-
 	return retval;
 }
 
 int uputs(const char * s, enum UART_Uart uart)
 {	
 	return UART_Write(uart, (uint8_t *)s, strlen(s));
-}
-
-static int lockBuffer()
-{
-	/* No RTOS for now */
-	return 1;
-}
-
-static int releaseBuffer()
-{
-	/* No RTOS for now */
-	return 1;
 }

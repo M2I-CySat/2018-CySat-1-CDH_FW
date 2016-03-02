@@ -6,6 +6,7 @@
 #include <drivers/uart.h>
 #include <stm32f4xx_hal.h>
 #include <error.h>
+#include <cmsis_os.h>
 
 
 /*----------------- MSP Configuration --------------------*/
@@ -30,6 +31,15 @@ enum {
 	INDEX_USART2,
 	INDEX_USART6
 };
+
+osMutexId usart1_mutex_id;
+osMutexId usart2_mutex_id;
+osMutexId usart6_mutex_id;
+
+osMutexDef(usart1_mutex);
+osMutexDef(usart2_mutex);
+osMutexDef(usart6_mutex);
+
 
 UART_HandleTypeDef handles[3];
 int initialized[3];
@@ -72,6 +82,15 @@ enum UART_Uart UART_GetDebug()
 
 int UART_Initialize()
 {
+	usart1_mutex_id = osMutexCreate(osMutex(usart1_mutex));
+	usart2_mutex_id = osMutexCreate(osMutex(usart2_mutex));
+	usart6_mutex_id = osMutexCreate(osMutex(usart6_mutex));
+
+	if ((usart1_mutex_id == NULL) || (usart2_mutex_id == NULL) ||
+			(usart6_mutex_id == NULL)) {
+		ERROR_MiscRTOS("Failed to create a uart mutex");
+	}
+
 	/* UART2 configured as follow:
 	  - Word Length = 8 Bits
 	  - Stop Bit = One Stop bit
@@ -101,8 +120,40 @@ ssize_t UART_Write(enum UART_Uart uart, uint8_t * data, uint16_t size)
 {
 	UART_HandleTypeDef *uartHandle;
 	uartHandle = UART_GetHandle(uartToUsart(uart));
+
+	if (uartHandle == &handles[INDEX_USART1]) {
+		if (osMutexWait(usart1_mutex_id, osWaitForever) != osOK) {
+			ERROR_MiscRTOS("Mutex wait failed");
+		}
+	} else if (uartHandle == &handles[INDEX_USART2]) {
+		if (osMutexWait(usart2_mutex_id, osWaitForever) != osOK) {
+			ERROR_MiscRTOS("Mutex wait failed");
+		}
+	} else if (uartHandle == &handles[INDEX_USART6]) {
+		if (osMutexWait(usart6_mutex_id, osWaitForever) != osOK) {
+			ERROR_MiscRTOS("Mutex wait failed");
+		}
+	} else {
+		ERROR_NotImplemented("Invalid UART for mutex");
+	}
 	
 	HAL_UART_Transmit(uartHandle, data, size, 0xFFFF);
+
+	if (uartHandle == &handles[INDEX_USART1]) {
+		if (osMutexRelease(usart1_mutex_id) != osOK) {
+			ERROR_MiscRTOS("Mutex release failed");
+		}
+	} else if (uartHandle == &handles[INDEX_USART2]) {
+		if (osMutexRelease(usart2_mutex_id) != osOK) {
+			ERROR_MiscRTOS("Mutex release failed");
+		}
+	} else if (uartHandle == &handles[INDEX_USART6]) {
+		if (osMutexRelease(usart6_mutex_id) != osOK) {
+			ERROR_MiscRTOS("Mutex release failed");
+		}
+	} else {
+		ERROR_NotImplemented("Invalid UART for mutex");
+	}
 	
 	return size;
 }

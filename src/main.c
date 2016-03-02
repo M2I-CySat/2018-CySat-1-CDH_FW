@@ -51,6 +51,10 @@ int main(void)
 	/* Configure the system clock to 100 MHz */
 	SystemClock_Config();
 
+	if (PRINTF_Initialize()) {
+		ERROR_Misc("Printf initialization failed");
+	}
+
 	if (UART_Initialize()) {
 		ERROR_MiscHardware("UART did not initialize properly!");
 	}

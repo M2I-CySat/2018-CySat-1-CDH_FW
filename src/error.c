@@ -29,3 +29,9 @@ void ERROR_MiscHardware(char * msg)
 	for (;;) {
 	}
 }
+
+void ERROR_Misc(char * msg)
+{
+	for (;;) {
+	}
+}

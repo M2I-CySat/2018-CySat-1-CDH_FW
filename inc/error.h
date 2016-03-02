@@ -12,4 +12,7 @@ void ERROR_Uninitialized(char * msg);
 void ERROR_NotImplemented(char * msg);
 void ERROR_MiscHardware(char * msg);
 
+/* Generic Error */
+void ERROR_Misc(char * msg);
+
 #endif

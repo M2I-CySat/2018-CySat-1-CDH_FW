@@ -32,6 +32,8 @@ const char * dbg_thread_name(osThreadId id);
 /* UART equivalent of fputs */
 int uputs(const char * s, enum UART_Uart uart);
 
+int PRINTF_Initialize();
+
 /* One shared buffer is used for all printf's across all tasks.
 * This buffer is only used for formatting; it is atomically passed to
 * the UART drivers.
