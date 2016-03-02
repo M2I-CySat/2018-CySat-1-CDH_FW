@@ -21,66 +21,66 @@ static int releaseBuffer();
 
 size_t dbg_add_thread(osThreadId id, const char * name)
 {
-  if (num_threads_defined < MAX_THREADS) {
-    thread_ids[num_threads_defined] = id;
-    thread_names[num_threads_defined] = name;
-    return ++num_threads_defined;
-  } else {
-    return -1;
-  }
+	if (num_threads_defined < MAX_THREADS) {
+		thread_ids[num_threads_defined] = id;
+		thread_names[num_threads_defined] = name;
+		return ++num_threads_defined;
+	} else {
+		return -1;
+	}
 }
 
 const char * dbg_thread_name(osThreadId id)
 {
-  for(size_t i = 0; i < num_threads_defined; i++) {
-    if (thread_ids[i] == id) {
-      return thread_names[i];
-    }
-  }
-  return NULL;
+	for(size_t i = 0; i < num_threads_defined; i++) {
+		if (thread_ids[i] == id) {
+			return thread_names[i];
+		}
+	}
+	return NULL;
 }
 
 int uprintf(enum UART_Uart uart, const char *format_string, ...)
 {
 	va_list args;
 	va_start(args, format_string);
-	
+
 	/* Format into the buffer */
 	int retval;
 	retval = vuprintf(uart, format_string, args);
-	
+
 	va_end(args);
-	
+
 	return retval;
 }
 
 int dbg_printf(const char *format_string, ...)
 {
 	enum UART_Uart dbgUart;
-  dbgUart = UART_GetDebug();
-  
+	dbgUart = UART_GetDebug();
+
 	/* Print severity and thread information */
-  const char * name;
-  osThreadId id;
-  id = osThreadGetId();
-  name = dbg_thread_name(id);
-  if (name != NULL) {
-    uprintf(dbgUart, "[DBG:%s] ", name);
-  } else {
-    uprintf(dbgUart, "[DBG:%d] ", id);
-  }
-	
+	const char * name;
+	osThreadId id;
+	id = osThreadGetId();
+	name = dbg_thread_name(id);
+	if (name != NULL) {
+		uprintf(dbgUart, "[DBG:%s] ", name);
+	} else {
+		uprintf(dbgUart, "[DBG:%d] ", id);
+	}
+
 	va_list args;
 	va_start(args, format_string);
-	
+
 	int retval;
 	retval = vuprintf(dbgUart, format_string, args);
-	
+
 	va_end(args);
-	
+
 	uputs("\r\n", dbgUart);
 
-	
+
 	return retval;
 }
 
@@ -89,18 +89,18 @@ int vuprintf(enum UART_Uart uart, const char *format_string, va_list args)
 	if (!lockBuffer()){
 		ERROR_ResourceFrozen("Unable to obtain printf buffer mutex");
 	}
-	
+
 	/* Format into the buffer */
 	vsnprintf(printf_buffer, PRINTF_BUFFER_SIZE, format_string, args);
-	
+
 	/* Print the buffer */
 	int retval;
 	retval = uputs(printf_buffer, uart);
-	
+
 	if (!releaseBuffer()){
 		ERROR_MiscRTOS("Unable to release printf buffer mutex");
 	}
-	
+
 	return retval;
 }
 

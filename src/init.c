@@ -10,5 +10,5 @@
  
 void INIT_Init()
 {
-  dbg_printf("Performing PRI MCU initialization.");
+	dbg_printf("Performing PRI MCU initialization.");
 }
