@@ -9,9 +9,9 @@
 #include <unistd.h>
 
 enum UART_Uart {
-	UART_1,
-	UART_2,
-	UART_3
+	UART_Uart_1,
+	UART_Uart_2,
+	UART_Uart_3
 };
  
 

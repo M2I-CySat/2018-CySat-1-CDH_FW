@@ -67,7 +67,7 @@ static UART_HandleTypeDef * UART_GetHandle(USART_TypeDef * usart)
 enum UART_Uart UART_GetDebug()
 {
 	/* Determine the debug uart */
-	return UART_2;
+	return UART_Uart_2;
 }
 
 int UART_Initialize()
@@ -110,11 +110,11 @@ ssize_t UART_Write(enum UART_Uart uart, uint8_t * data, uint16_t size)
 static USART_TypeDef * uartToUsart(enum UART_Uart u)
 {
 	switch (u) {
-		case UART_1:
+		case UART_Uart_1:
 			return USART1;
-		case UART_2:
+		case UART_Uart_2:
 			return USART2;
-		case UART_3:
+		case UART_Uart_3:
 			return USART6;
 		default:
 			ERROR_NotImplemented("Bad UART");

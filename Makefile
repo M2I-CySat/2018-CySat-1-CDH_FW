@@ -33,10 +33,12 @@ export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unus
 # Source file definitions
 
 # Files is src
-export APPLICATION_OBJECTS=main.o main.o printf.o error.o RTX_Conf_CM.o init.o
+export APPLICATION_FILES=main.c main.c printf.c error.c RTX_Conf_CM.c init.c
 
 # Files in src/drivers
-export DRIVER_OBJECTS=uart.o stm32f4xx_it.o system_stm32f4xx.o
+export DRIVER_FILES=uart.c stm32f4xx_it.c system_stm32f4xx.c
+
+# HAL Requirements
 
 # Startup
 export STARTUP=startup_STM32F411.S
@@ -45,6 +47,8 @@ export STARTUP_OBJECT=objects/startup_STM32F411.o
 # All ojbects
 export ALL_OBJECTS=objects/*.o objects/hal/*.o objects/drivers/*.o
 
+export APPLICATION_OBJECTS=$(subst .c,.o,$(APPLICATION_FILES))
+export DRIVER_OBJECTS=$(subst .c,.o,$(DRIVER_FILES))
 
 export APPLICATION_OBJECTS_EXPANDED= $(foreach object,$(APPLICATION_OBJECTS),objects/$(object))
 export DRIVER_OBJECTS_EXPANDED= $(foreach object,$(DRIVER_OBJECTS),objects/drivers/$(object))
