@@ -1,3 +1,4 @@
 *.o
 image.elf
 *.swp
+hal_built
