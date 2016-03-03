@@ -1,6 +1,7 @@
 #include <drivers/nichrome.h>
 #include <stm32f4xx_hal.h>
 #include <error.h>
+#include <printf.h>
 
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner);
 static int get_pin_for_burner(enum NICHROME_Burner);
@@ -20,6 +21,11 @@ int NICHROME_Init() {
  	* 2)
  	*/
 
+	/* Hacky RCC initialization - ideally handled with some
+	 * defines
+	 */
+	__HAL_RCC_GPIOA_CLK_ENABLE();
+
 	for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_6; burner++) {
 		/* Get Register and Pin for this burner */
 		GPIO_TypeDef* GPIOx = get_GPIO_for_burner(burner);
@@ -33,6 +39,7 @@ int NICHROME_Init() {
 
 		/* Initialize the GPIO for this burner */
 		HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
+	}
 	
 
 	return 1;
@@ -49,7 +56,7 @@ void NICHROME_Off (enum NICHROME_Burner burner) {
     dbg_printf("Turning Nichrome off (%d)", burner+1);
 	GPIO_TypeDef* gpiox =  get_GPIO_for_burner(burner);
     int pin = get_pin_for_burner(burner);
-	HAL_GPIO_WritePin(gpiox, pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(gpiox, pin, GPIO_PIN_RESET);
 }
 
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner burner) {
