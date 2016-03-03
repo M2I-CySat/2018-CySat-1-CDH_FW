@@ -33,19 +33,23 @@ int NICHROME_Init() {
 
 		/* Initialize the GPIO for this burner */
 		HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
-	}
+	
 
 	return 1;
 }
 
 void NICHROME_On(enum NICHROME_Burner burner) {
-    GPIO_TypeDef* gpiox =  get_GPIO_for_burner(burner);
+    dbg_printf("Turning Nichrome on (%d)", burner+1);
+	GPIO_TypeDef* gpiox =  get_GPIO_for_burner(burner);
     int pin = get_pin_for_burner(burner);
+	HAL_GPIO_WritePin(gpiox, pin, GPIO_PIN_SET);
 }
 
 void NICHROME_Off (enum NICHROME_Burner burner) {
-    GPIO_TypeDef* gpiox =  get_GPIO_for_burner(burner);
+    dbg_printf("Turning Nichrome off (%d)", burner+1);
+	GPIO_TypeDef* gpiox =  get_GPIO_for_burner(burner);
     int pin = get_pin_for_burner(burner);
+	HAL_GPIO_WritePin(gpiox, pin, GPIO_PIN_SET);
 }
 
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner burner) {
