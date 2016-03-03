@@ -18,6 +18,9 @@ static size_t num_threads_defined = 0;
 static osMutexId buffer_lock_id;
 osMutexDef(buffer_lock);
 
+static osMutexId dbg_lock_id;
+osMutexDef(dbg_lock);
+
 size_t dbg_add_thread(osThreadId id, const char * name)
 {
 	if (num_threads_defined < MAX_THREADS) {
@@ -46,6 +49,12 @@ int PRINTF_Initialize()
 		ERROR_MiscRTOS("Failed to create printf mutex");
 		return -1;
 	}
+
+	dbg_lock_id = osMutexCreate(osMutex(dbg_lock));
+	if (dbg_lock_id == NULL) {
+		ERROR_MiscRTOS("Failed to create printf mutex");
+		return -1;
+	}
 	return 0;
 }
 
@@ -68,6 +77,10 @@ int dbg_printf(const char *format_string, ...)
 	enum UART_Uart dbgUart;
 	dbgUart = UART_GetDebug();
 
+	if (osMutexWait(dbg_lock_id, osWaitForever) != osOK) {
+		ERROR_MiscRTOS("Failed to obtain mutex");
+	}
+
 	/* Print severity and thread information */
 	const char * name;
 	osThreadId id;
@@ -89,6 +102,9 @@ int dbg_printf(const char *format_string, ...)
 
 	uputs("\r\n", dbgUart);
 
+	if (osMutexRelease(dbg_lock_id) != osOK) {
+		ERROR_MiscRTOS("Failed to release mutex");
+	}
 
 	return retval;
 }
