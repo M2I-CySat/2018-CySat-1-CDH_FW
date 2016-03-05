@@ -26,7 +26,10 @@ int NICHROME_Init() {
 	 */
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_6; burner++) {
+	dbg_printf("Initializing NICHROME BURNERS...");
+	// TODO: Restore full burner init (currently avoids unimplmented errors with 2-6) BCSK
+	// for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_6; burner++) {
+	for (int burner = NICHROME_Burner_1; burner == NICHROME_Burner_1; burner++) {
 		/* Get Register and Pin for this burner */
 		GPIO_TypeDef* GPIOx = get_GPIO_for_burner(burner);
 		int pin = get_pin_for_burner(burner);
@@ -35,13 +38,14 @@ int NICHROME_Init() {
 		GPIO_InitStruct.Pin = pin;
 		GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 		GPIO_InitStruct.Pull = GPIO_PULLUP;
-		GPIO_InitStruct.Speed = GPIO_SPEED_FAST; 		
+		GPIO_InitStruct.Speed = GPIO_SPEED_FAST;
 
+		dbg_printf("Initializing Burner (%d)...", burner+1);
 		/* Initialize the GPIO for this burner */
 		HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
 	}
-	
 
+	dbg_printf("NICHROME BURNERS Ready");
 	return 1;
 }
 

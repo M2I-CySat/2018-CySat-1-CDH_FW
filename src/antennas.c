@@ -24,6 +24,7 @@ static void antenna_thread(void const *params)
 {
 	dbg_add_thread(osThreadGetId(), "antenna");
 	dbg_printf("Thread started");
+	NICHROME_Init();
 	NICHROME_On(NICHROME_Burner_1);
 	osDelay(5000);
 	NICHROME_Off(NICHROME_Burner_1);
