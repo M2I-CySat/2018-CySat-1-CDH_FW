@@ -5,11 +5,10 @@
 
 /*------------------ Definiton for GPIO Registers and pins -----------------*/
 #define NICHROME_BURNER_1_GPIO_PORT GPIOA
-#define NICHROME_BURNER_1_PIN 5
+#define NICHROME_BURNER_1_PIN GPIO_PIN_5
 
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner);
 static int get_pin_for_burner(enum NICHROME_Burner);
-static GPIO_InitTypeDef GPIO_InitStruct;
 
 int NICHROME_Initialize() {
 	/*
@@ -26,6 +25,8 @@ int NICHROME_Initialize() {
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
 	for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_1; burner++) {
+		GPIO_InitTypeDef GPIO_InitStruct;
+
 		/* Get Register and Pin for this burner */
 		GPIO_TypeDef* GPIOx = get_GPIO_for_burner(burner);
 		int pin = get_pin_for_burner(burner);
@@ -57,6 +58,7 @@ void NICHROME_Off (enum NICHROME_Burner burner) {
     int pin = get_pin_for_burner(burner);
 	HAL_GPIO_WritePin(gpiox, pin, GPIO_PIN_RESET);
 }
+
 
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner burner) {
     switch (burner) {
@@ -101,8 +103,6 @@ static int get_pin_for_burner(enum NICHROME_Burner burner) {
 			break;
 
 		case NICHROME_Burner_3:
-			ERROR_NotImplemented("No GPIO Pin is defined");
-			break;
 
 		case NICHROME_Burner_4:
 			ERROR_NotImplemented("No GPIO Pin is defined");
