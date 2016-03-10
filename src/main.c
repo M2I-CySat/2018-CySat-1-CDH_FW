@@ -32,6 +32,7 @@
 #include "main.h"
 #include <printf.h>
 #include <drivers/uart.h>
+#include <drivers/nichrome.h>
 #include <cmsis_os.h>
 #include <error.h>
 
@@ -57,6 +58,10 @@ int main(void)
 
 	if (UART_Initialize()) {
 		ERROR_MiscHardware("UART did not initialize properly!");
+	}
+
+	if (NICHROME_Initialize()) {
+		ERROR_MiscHardware("Nichrome did not initialize properly!");
 	}
 
 	dbg_add_thread(osThreadGetId(), "init");

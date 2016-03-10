@@ -13,7 +13,7 @@ enum NICHROME_Burner {
 };
 
 /* Function Prototypes */
-int NICHROME_Init();
+int NICHROME_Initialize();
 void NICHROME_On(enum NICHROME_Burner);
 void NICHROME_Off(enum NICHROME_Burner);
 

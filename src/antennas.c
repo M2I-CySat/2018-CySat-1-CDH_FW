@@ -27,7 +27,7 @@ static void antenna_thread(void const *params)
 	NICHROME_On(NICHROME_Burner_1);
 	osDelay(5000);
 	NICHROME_Off(NICHROME_Burner_1);
-	NICHROME_On(NICHROME_Burner_2);
-	osDelay(5000);
-	NICHROME_Off(NICHROME_Burner_2);
+	//NICHROME_On(NICHROME_Burner_2);
+	//osDelay(5000);
+	//NICHROME_Off(NICHROME_Burner_2);
 }

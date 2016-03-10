@@ -3,11 +3,15 @@
 #include <error.h>
 #include <printf.h>
 
+/*------------------ Definiton for GPIO Registers and pins -----------------*/
+#define NICHROME_BURNER_1_GPIO_PORT GPIOA
+#define NICHROME_BURNER_1_PIN 5
+
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner);
 static int get_pin_for_burner(enum NICHROME_Burner);
 static GPIO_InitTypeDef GPIO_InitStruct;
 
-int NICHROME_Init() {
+int NICHROME_Initialize() {
 	/*
 	 *TODO
 	 * -GPIO Initialization via HAL
@@ -15,18 +19,13 @@ int NICHROME_Init() {
 	 * -Initializes the perhiperal
 	 */
 
-	/* 
- 	* Questions:
- 	* 1) Does HAL_Init() need to be called here?
- 	* 2)
- 	*/
 
 	/* Hacky RCC initialization - ideally handled with some
 	 * defines
 	 */
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 
-	for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_6; burner++) {
+	for (int burner = NICHROME_Burner_1; burner <= NICHROME_Burner_1; burner++) {
 		/* Get Register and Pin for this burner */
 		GPIO_TypeDef* GPIOx = get_GPIO_for_burner(burner);
 		int pin = get_pin_for_burner(burner);
@@ -42,7 +41,7 @@ int NICHROME_Init() {
 	}
 	
 
-	return 1;
+	return 0;
 }
 
 void NICHROME_On(enum NICHROME_Burner burner) {
@@ -62,7 +61,7 @@ void NICHROME_Off (enum NICHROME_Burner burner) {
 static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner burner) {
     switch (burner) {
         case NICHROME_Burner_1:
-           return GPIOA;
+           return NICHROME_BURNER_1_GPIO_PORT;
 
 	    case NICHROME_Burner_2:
 			//TODO Return a register. For now, throw error
@@ -95,7 +94,7 @@ static GPIO_TypeDef* get_GPIO_for_burner(enum NICHROME_Burner burner) {
 static int get_pin_for_burner(enum NICHROME_Burner burner) {
 	switch(burner) {
 		case NICHROME_Burner_1:
-			return GPIO_PIN_5;
+			return NICHROME_BURNER_1_PIN;
 
 		case NICHROME_Burner_2:
 			ERROR_NotImplemented("No GPIO Pin is defined");
