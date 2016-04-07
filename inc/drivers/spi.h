@@ -30,7 +30,7 @@ int SPI_FullDuplex(SPI_TypeDef instance, uint8_t * rxBuffer, uint8_t * txBuffer,
 #define SPI_MEM_TX_DMA_STREAM DMA1_Stream4
 
 #define SPI_MEM_RX_DMA_CHANNEL DMA_Channel0
-#define SPI_MEM_tX_DMA_CHANNEL DMA_Channel0
+#define SPI_MEM_TX_DMA_CHANNEL DMA_Channel0
 
 #define SPI_SYSALT_RX_DMA_STREAM DMA2_Stream2
 #define SPI_SYSALT_TX_DMA_STREAM DMA2_Stream3
