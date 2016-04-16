@@ -5,10 +5,12 @@
  */
 
 #include <stdint.h>
+#include <stm32f4xx_hal_dma.h>
+#include <stm32f4xx_hal_spi.h>
 
-int SPI_Transmit(SPI_TypeDef instance, uint8_t * buffer, size_t len);
-int SPI_Receive(SPI_TypeDef instance, uint8_t * buffer, size_t len);
-int SPI_FullDuplex(SPI_TypeDef instance, uint8_t * rxBuffer, uint8_t * txBuffer, size_t len);
+int SPI_Transmit(SPI_HandleTypeDef * hspi, uint8_t * buffer, size_t len);
+int SPI_Receive(SPI_HandleTypeDef * hspi, uint8_t * buffer, size_t len);
+int SPI_FullDuplex(SPI_HandleTypeDef * hspi, uint8_t * rxBuffer, uint8_t * txBuffer, size_t len);
 
 /* Defines wrapping SPI functions for convenience */
 #define SPI_MEM SPI2
@@ -24,18 +26,11 @@ int SPI_FullDuplex(SPI_TypeDef instance, uint8_t * rxBuffer, uint8_t * txBuffer,
 #define SYSALT_Receive(buffer, len) SPI_Receive(SPI_SYSALT, buffer, len)
 #define SYSALT_FullDuplex(rxBuffer, txBuffer, len) SPI_FullDuplex(SPI_SYSALT, rxBuffer, txBuffer, len)
 
+/* Handles */
+static DMA_HandleTypeDef * SPI_MEM_DMA_TX_HANDLE;
+static DMA_HandleTypeDef * SPI_MEM_DMA_RX_HANDLE;
 
-/* DMA Associations */
-#define SPI_MEM_RX_DMA_STREAM DMA1_Stream3
-#define SPI_MEM_TX_DMA_STREAM DMA1_Stream4
-
-#define SPI_MEM_RX_DMA_CHANNEL DMA_Channel0
-#define SPI_MEM_TX_DMA_CHANNEL DMA_Channel0
-
-#define SPI_SYSALT_RX_DMA_STREAM DMA2_Stream2
-#define SPI_SYSALT_TX_DMA_STREAM DMA2_Stream3
-
-#define SPI_SYSALT_RX_DMA_CHANNEL DMA_Channel3
-#define SPI_SYSALT_TX_DMA_CHANNEL DMA_Channel3
+static DMA_HandleTypeDef * SPI_SYSALT_DMA_TX_HANDLE;
+static DMA_HandleTypeDef * SPI_SYSALT_DMA_RX_HANDLE;
 
 #endif

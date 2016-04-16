@@ -40,6 +40,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_it.h"    
+#include "drivers/spi.h"
+#include "stm32f4xx_hal_spi.h"
+#include "stm32f4xx_hal_dma.h"
 
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{
@@ -145,6 +148,15 @@ void DebugMon_Handler(void)
 {
 }*/
 
+void DMA1_Stream3_IRQHandler()
+{
+	HAL_DMA_IRQHandler(SPI_MEM_DMA_TX_HANDLE);
+}
+
+void DMA1_Stream4_IRQHandler()
+{
+	HAL_DMA_IRQHandler(SPI_MEM_DMA_RX_HANDLE);
+}
 
 /**
   * @}

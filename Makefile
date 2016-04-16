@@ -28,7 +28,7 @@ export CFLAGS= --specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
 export CFLAGS+= -mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 
 # Bitchy nag-nag mode settings
-export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11
+export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11 -Wno-unused-function
 
 ###### CONFIGURATION #######
 #Source file definitions
@@ -36,7 +36,7 @@ export CFLAGS+= -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unus
 export APPLICATION_FILES=main.c main.c printf.c error.c RTX_Conf_CM.c init.c antennas.c
 
 # Files in src/drivers
-export DRIVER_FILES=uart.c stm32f4xx_it.c system_stm32f4xx.c nichrome.c
+export DRIVER_FILES=uart.c stm32f4xx_it.c system_stm32f4xx.c nichrome.c spi.c
 
 # HAL Requirements
 export HAL_MODULES=gpio uart rcc dma cortex

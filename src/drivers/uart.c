@@ -11,7 +11,7 @@
 
 /*----------------- MSP Configuration --------------------*/
 /* USART2 MSP Configuration */
-#define USART2_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE();
+#define USART2_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE()
 #define USART2_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
 #define USART2_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
 
