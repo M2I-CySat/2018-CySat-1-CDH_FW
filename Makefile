@@ -39,7 +39,7 @@ export APPLICATION_FILES=main.c main.c printf.c error.c RTX_Conf_CM.c init.c ant
 export DRIVER_FILES=uart.c stm32f4xx_it.c system_stm32f4xx.c nichrome.c spi.c
 
 # HAL Requirements
-export HAL_MODULES=gpio uart rcc dma cortex
+export HAL_MODULES=gpio uart rcc dma cortex spi
 
 # Startup
 export STARTUP=startup_STM32F411.S

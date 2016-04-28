@@ -1,10 +1,10 @@
 /* CySat SPI driver */
 
 #include <drivers/spi.h>
-#include <signals.h>
 #include <error.h>
 #include "stm32f4xx_hal_spi.h"
 #include "stm32f4xx_hal_dma.h"
+#include "stm32f4xx_hal_rcc.h"
 #include "cmsis_os.h"
 
 osMutexId mem_mutex_id;
@@ -12,9 +12,6 @@ osMutexDef(mem_mutex);
 
 osMutexId sysalt_mutex_id;
 osMutexDef(sysalt_mutex);
-
-static osThreadId mem_blocked_thread;
-static osThreadId sysalt_blocked_thread;
 
 static SPI_HandleTypeDef mem_handle;
 static SPI_HandleTypeDef sysalt_handle;
@@ -32,14 +29,14 @@ static DMA_HandleTypeDef sysalt_dma_rx_handle;
 #define SPI_MEM_RX_DMA_STREAM DMA1_Stream3
 #define SPI_MEM_TX_DMA_STREAM DMA1_Stream4
 
-#define SPI_MEM_RX_DMA_CHANNEL DMA_Channel0
-#define SPI_MEM_TX_DMA_CHANNEL DMA_Channel0
+#define SPI_MEM_RX_DMA_CHANNEL DMA_CHANNEL_0
+#define SPI_MEM_TX_DMA_CHANNEL DMA_CHANNEL_0
 
 #define SPI_SYSALT_RX_DMA_STREAM DMA2_Stream2
 #define SPI_SYSALT_TX_DMA_STREAM DMA2_Stream3
 
-#define SPI_SYSALT_RX_DMA_CHANNEL DMA_Channel3
-#define SPI_SYSALT_TX_DMA_CHANNEL DMA_Channel3
+#define SPI_SYSALT_RX_DMA_CHANNEL DMA_CHANNEL_3
+#define SPI_SYSALT_TX_DMA_CHANNEL DMA_CHANNEL_3
 
 #define SPI_MEM_MOSI_GPIO GPIOB
 #define SPI_MEM_MISO_GPIO GPIOB
@@ -76,23 +73,23 @@ static void sysalt_tx_cplt_cb();
 static void sysalt_rx_cplt_cb();
 
 static osMutexId getSPIMutex(SPI_HandleTypeDef * hspi);
-static void storeSPIThreadId(SPI_HandleTypeDef * hspi);
-static osThreadId getSPIThreadId(SPI_HandleTypeDef * hspi);
 
 int SPI_Initialize()
 {
-	mem_handle.Init.SPI_BaudRatePrescalar =SPI_BaudRatePrescalar_4;
-	mem_handle.Init.SPI_CPOL = SPI_CPOL_LOW;
-	mem_handle.Init.SPI_CPHA = SPI_CPHA_1Edge;
-	mem_handle.Init.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_set;
-	mem_handle.Init.SPI_DataSize = SPI_DataSize_8b;
-	mem_handle.Init.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
-	mem_handle.Init.SPI_FirstBit = SPI_FirstBit_MSB;
-	mem_handle.Init.SPI_Mode = SPI_Mode_Master;
+	mem_handle.Init.Mode = SPI_MODE_MASTER;
+	mem_handle.Init.Direction = SPI_DIRECTION_2LINES;
+	mem_handle.Init.DataSize = SPI_DATASIZE_8BIT;
+	mem_handle.Init.CLKPolarity = SPI_POLARITY_LOW;
+	mem_handle.Init.CLKPhase = SPI_PHASE_1EDGE;
+	mem_handle.Init.NSS = SPI_NSS_SOFT;
+	mem_handle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+	mem_handle.Init.FirstBit = SPI_FIRSTBIT_MSB;
+	mem_handle.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+	mem_handle.Init.CRCPolynomial = 0;
 
-	mem_handle.instance = SPI_MEM;
+	mem_handle.Instance = SPI_MEM;
 	
-	HAL_SPI_Init(SPI_MEM);
+	HAL_SPI_Init(&mem_handle);
 
 	mem_mutex_id = osMutexCreate(osMutex(mem_mutex));
 	if (mem_mutex_id == NULL) {
@@ -118,15 +115,11 @@ int SPI_Transmit(SPI_HandleTypeDef* hspi, uint8_t * buffer, size_t len)
 	
 	/* Go! */
 
-	/* set thread ID in a static variable */
-	storeSPIThreadId(instance);
-
-	/* wait_signal SPI_COMPLETE */
-	// osSignalWait();
+	/* TODO: Semaphore */
 
 	/* Release mutex */
 	if (osMutexRelease(mutex) != osOK) {
-		Error_MiscRTOS("Mutex was not released successfully");
+		ERROR_MiscRTOS("Mutex was not released successfully");
 	}
 	
 	/* Return success */
@@ -135,39 +128,12 @@ int SPI_Transmit(SPI_HandleTypeDef* hspi, uint8_t * buffer, size_t len)
 
 int SPI_Receive(SPI_HandleTypeDef * hspi, uint8_t * buffer, size_t len)
 {
-	/* Lock mutex for this particular SPI instance */
-	
-	/* 1. Retrieve the DMA stream associated with transmit of instance
-	 * 2. Make sure the DMA is disabled
-	 * 3. Set up the DMA
-	 * 	a. PeripheralBaseAddr = instance->DR
-	 * 	b. MemoryBaseAddr = buffer
-	 * 	c. Direction = MemoryToPeripheral
-	 * 	d. MemoryInc = yes
-	 * 	e. PeripheralInc = no
-	 * 	f. Set channel (retrieve channel associated with instance)
-	 *	g. Other options (datasize, mode, priority)
-	 */
-
-	/* Initialiaze DMA */
-
-	/* Go! */
-
-	/* set thread ID in a static variable */
-
-	/* wait_signal SPI_COMPLETE */
-
-	/* Tear down DMA */
-
-	/* Release mutex */
-	
-	/* Return success */
 	return 0;
 }
 
 void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 {
-	if (hspi == mem_handle) {
+	if (hspi == &mem_handle) {
 		/* Enable peripheral clocks */
 		SPI_MEM_CLK_ENABLE();
 		SPI_MEM_MOSI_CLK_ENABLE();
@@ -183,51 +149,55 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 		SPI_MEM_DMA_TX_CLK_ENABLE();
 		
 		/* Configure DMA parameters */
-		mem_dma_tx_handle.Init.DMA_PeriperalBaseAddr = (uint32_t) &(hspi->DR);
-		mem_dma_tx_handle.Init.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-		mem_dma_tx_handle.Init.DMA_BufferSize = len;
-		mem_dma_tx_handle.Init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-		mem_dma_tx_handle.Init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-		mem_dma_tx_handle.Init.DMA_PheriperalDataSize = DMA_PeripheralDataSize_Byte;
-		mem_dma_tx_handle.Init.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-		mem_dma_tx_handle.Init.DMA_Mode = DMA_Mode_Normal;
-		mem_dma_tx_handle.Init.DMA_Priority - DMA_Priority_VeryHigh;
-		mem_dma_tx_handle.Init.DMA_Channel SPI_MEM_TX_DMA_CHANNEL;
+		mem_dma_rx_handle.Init.Direction = DMA_MEMORY_TO_PERIPH;
+		mem_dma_rx_handle.Init.PeriphInc = DMA_PINC_DISABLE;
+		mem_dma_rx_handle.Init.MemInc = DMA_MINC_ENABLE;
+		mem_dma_rx_handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		mem_dma_rx_handle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+		mem_dma_rx_handle.Init.Mode = DMA_NORMAL;
+		mem_dma_rx_handle.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+		mem_dma_rx_handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		mem_dma_rx_handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
+		mem_dma_rx_handle.Init.MemBurst = DMA_MBURST_SINGLE;
+		mem_dma_rx_handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+		mem_dma_tx_handle.Init.Channel = SPI_MEM_TX_DMA_CHANNEL;
 
 		/* Set instance */
-		mem_dma_tx_handle.instance = SPI_MEM_TX_DMA_STREAM;
+		mem_dma_tx_handle.Instance = SPI_MEM_TX_DMA_STREAM;
 		/* TODO: Error callback */
 
 		/* Callbacks */
-		mem_dma_tx_handle.XferCptlCallback = mem_tx_cptl_cb;
+		mem_dma_tx_handle.XferCpltCallback = mem_tx_cplt_cb;
 
 		/* Configure */
-		HAL_DMA_INIT(&mem_dma_tx_handle);
+		HAL_DMA_Init(&mem_dma_tx_handle);
 
 		/* RX */
 		SPI_MEM_DMA_RX_CLK_ENABLE();
 		
 		/* Configure DMA parameters */
-		mem_dma_rx_handle.Init.DMA_PeriperalBaseAddr = (uint32_t) &(hspi->DR);
-		mem_dma_rx_handle.Init.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-		mem_dma_rx_handle.Init.DMA_BufferSize = len;
-		mem_dma_rx_handle.Init.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-		mem_dma_rx_handle.Init.DMA_MemoryInc = DMA_MemoryInc_Enable;
-		mem_dma_rx_handle.Init.DMA_PheriperalDataSize = DMA_PeripheralDataSize_Byte;
-		mem_dma_rx_handle.Init.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
-		mem_dma_rx_handle.Init.DMA_Mode = DMA_Mode_Normal;
-		mem_dma_rx_handle.Init.DMA_Priority - DMA_Priority_VeryHigh;
-		mem_dma_rx_handle.Init.DMA_Channel SPI_MEM_RX_DMA_CHANNEL;
+		mem_dma_rx_handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
+		mem_dma_rx_handle.Init.PeriphInc = DMA_PINC_DISABLE;
+		mem_dma_rx_handle.Init.MemInc = DMA_MINC_ENABLE;
+		mem_dma_rx_handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+		mem_dma_rx_handle.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+		mem_dma_rx_handle.Init.Mode = DMA_NORMAL;
+		mem_dma_rx_handle.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+		mem_dma_rx_handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+		mem_dma_rx_handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
+		mem_dma_rx_handle.Init.MemBurst = DMA_MBURST_SINGLE;
+		mem_dma_rx_handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+		mem_dma_rx_handle.Init.Channel = SPI_MEM_RX_DMA_CHANNEL;
 
 		/* Set instance */
-		mem_dma_rx_handle.instance = SPI_MEM_RX_DMA_STREAM;
+		mem_dma_rx_handle.Instance = SPI_MEM_RX_DMA_STREAM;
 		/* TODO: Error callback */
 
 		/* Callbacks */
-		mem_dma_rx_handle.XferCptlCallback = mem_rx_cptl_cb;
+		mem_dma_rx_handle.XferCpltCallback = mem_rx_cplt_cb;
 
 		/* Configure */
-		HAL_DMA_INIT(&mem_dma_rx_handle);
+		HAL_DMA_Init(&mem_dma_rx_handle);
 
 		/* Associate DMA streams with SPI handle */
 		hspi->hdmatx = &mem_dma_tx_handle;
@@ -242,27 +212,6 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
 	} else {
 		ERROR_NotImplemented("Bad SPI handle");
 	}
-}
-
-static void storeSPIThreadId(SPI_HandleTypeDef* hspi) {
-	if (hspi == &mem_handle) {
-		mem_blocked_thread = osGetThreadId();
-	} if (hspi == &sysalt_handle) {
-		sysalt_blocked_thread = osGetThreadId();
-	} else {
-		ERROR_NotImplemented("Bad SPI hspi");
-	}
-}
-
-static osThreadId getSPIThreadId(SPI_HandleTypeDef* hspi) {
-	if (hspi == &mem_handle) {
-		return mem_blocked_thread;
-	} if (hspi == &sysalt_handle) {
-		return sysalt_blocked_thread;
-	} else {
-		ERROR_NotImplemented("Bad SPI hspi");
-	}
-	return NULL;
 }
 
 static osMutexId getSPIMutex(SPI_HandleTypeDef * hspi)
@@ -281,4 +230,11 @@ static osMutexId getSPIMutex(SPI_HandleTypeDef * hspi)
 static void mem_tx_cplt_cb()
 {
 	/* todo: tx complete */
+	return;
+}
+
+static void mem_rx_cplt_cb()
+{
+	/* todo: tx complete */
+	return;
 }
