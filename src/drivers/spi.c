@@ -13,6 +13,12 @@ osMutexDef(mem_mutex);
 osMutexId sysalt_mutex_id;
 osMutexDef(sysalt_mutex);
 
+osSemaphoreId mem_semph_id;
+osSemaphoreDef(mem_semph);
+
+osSemaphoreId sysalt_semph_id;
+osSemaphoreDef(sysalt_semph);
+
 static SPI_HandleTypeDef mem_handle;
 static SPI_HandleTypeDef sysalt_handle;
 
@@ -73,6 +79,7 @@ static void sysalt_tx_cplt_cb();
 static void sysalt_rx_cplt_cb();
 
 static osMutexId getSPIMutex(SPI_HandleTypeDef * hspi);
+static osSemaphoreId getSPISemaphore(SPI_HandleTypeDef * hspi);
 
 int SPI_Initialize()
 {
@@ -101,6 +108,17 @@ int SPI_Initialize()
 		ERROR_MiscRTOS("Failed to create spi mutex");
 	}
 
+	/* Create semaphores */
+	mem_semph_id = osSemaphoreCreate(osSemaphore(mem_semph), 0);
+	if (mem_semph_id == NULL) {
+		ERROR_MiscRTOS("Failed to create spi semaphore");
+	}
+
+	sysalt_semph_id = osSemaphoreCreate(osSemaphore(sysalt_semph), 0);
+	if (sysalt_semph_id == NULL) {
+		ERROR_MiscRTOS("Failed to create spi semaphore");
+	}
+
 	return 0;
 }
 
@@ -115,7 +133,9 @@ int SPI_Transmit(SPI_HandleTypeDef* hspi, uint8_t * buffer, size_t len)
 	
 	/* Go! */
 
-	/* TODO: Semaphore */
+	if (osSemaphoreWait(getSPISemaphore(hspi), osWaitForever) != osOK) {
+		ERROR_MiscRTOS("Mutex was not released successfully");
+	}
 
 	/* Release mutex */
 	if (osMutexRelease(mutex) != osOK) {
@@ -127,6 +147,11 @@ int SPI_Transmit(SPI_HandleTypeDef* hspi, uint8_t * buffer, size_t len)
 }
 
 int SPI_Receive(SPI_HandleTypeDef * hspi, uint8_t * buffer, size_t len)
+{
+	return 0;
+}
+
+int SPI_FullDuplex(SPI_HandleTypeDef * hspi, uint8_t * txBuffer, uint8_t * rxBuffer, size_t len) 
 {
 	return 0;
 }
@@ -226,15 +251,27 @@ static osMutexId getSPIMutex(SPI_HandleTypeDef * hspi)
 	return NULL;
 }
 
+static osSemaphoreId getSPISemaphore(SPI_HandleTypeDef * hspi)
+{
+	if (hspi == &mem_handle) {
+		return mem_semph_id;
+	} else if (hspi == &sysalt_handle) {
+		return sysalt_semph_id;
+	} else {
+		ERROR_NotImplemented("Bad SPI handle");
+	}
+	return NULL;
+}
+
 /* Callbacks */
 static void mem_tx_cplt_cb()
 {
-	/* todo: tx complete */
+	osSemaphoreRelease(mem_semph_id);
 	return;
 }
 
 static void mem_rx_cplt_cb()
 {
-	/* todo: tx complete */
+	osSemaphoreRelease(mem_semph_id);
 	return;
 }
