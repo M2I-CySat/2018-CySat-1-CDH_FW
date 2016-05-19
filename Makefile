@@ -18,7 +18,6 @@ export DRIVERS=$(PROJECT_ROOT)/vendor/Drivers
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Include/
 export IFLAGS+= -I$(DRIVERS)/CMSIS/Device/ST/STM32F4xx/Include
 export IFLAGS+= -I$(DRIVERS)/STM32F4xx_HAL_Driver/Inc
-export IFLAGS+= -I$(DRIVERS)/Device/ST/STM32F4xx/Include/
 export IFLAGS+= -I$(PROJECT_ROOT)/inc/
 
 export CPPFLAGS= $(IFLAGS)
