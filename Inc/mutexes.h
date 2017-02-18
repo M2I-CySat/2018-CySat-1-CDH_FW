@@ -7,6 +7,7 @@
 
 /* Mutexes */
 extern osMutexId uart2_mutexHandle;
+extern osMutexId fmtbuf_mutexHandle;
 
 /* Semaphores */
 extern osMutexId uart2_txSemaphoreHandle;

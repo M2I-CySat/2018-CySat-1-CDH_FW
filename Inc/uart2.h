@@ -15,8 +15,8 @@ int UART2_LockMutex(uint32_t max_delay);
 int UART2_UnlockMutex();
 
 /* Read, write, printf */
-ssize_t UART2_Read(void *buf, size_t nbytes);
-ssize_t UART2_Write(void *buf, size_t nbytes);
-ssize_t UART2_Printf(char *fmt, ...);
+ssize_t UART2_Read(void * buf, size_t nbytes);
+ssize_t UART2_Write(void * buf, size_t nbytes);
+ssize_t UART2_Printf(const char * fmt, ...);
 
 #endif

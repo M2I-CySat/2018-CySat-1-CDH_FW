@@ -47,13 +47,14 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-#include "default_task.h"
 
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osThreadId heartbeatTaskHandle;
 osMutexId uart2_mutexHandle;
+osMutexId fmtbuf_mutexHandle;
 osSemaphoreId uart2_txSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
@@ -61,7 +62,8 @@ osSemaphoreId uart2_txSemaphoreHandle;
 /* USER CODE END Variables */
 
 /* Function prototypes -------------------------------------------------------*/
-void StartDefaultTask(void const * argument);
+void DefaultTask(void const * argument);
+extern void HeartbeatTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -78,10 +80,14 @@ void MX_FREERTOS_Init(void) {
        
   /* USER CODE END Init */
 
-  /* Create the recursive mutex(es) */
+  /* Create the mutex(es) */
   /* definition and creation of uart2_mutex */
   osMutexDef(uart2_mutex);
-  uart2_mutexHandle = osRecursiveMutexCreate(osMutex(uart2_mutex));
+  uart2_mutexHandle = osMutexCreate(osMutex(uart2_mutex));
+
+  /* definition and creation of fmtbuf_mutex */
+  osMutexDef(fmtbuf_mutex);
+  fmtbuf_mutexHandle = osMutexCreate(osMutex(fmtbuf_mutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -102,8 +108,12 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
+  osThreadDef(defaultTask, DefaultTask, osPriorityNormal, 0, 2048);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+
+  /* definition and creation of heartbeatTask */
+  osThreadDef(heartbeatTask, HeartbeatTask, osPriorityLow, 0, 128);
+  heartbeatTaskHandle = osThreadCreate(osThread(heartbeatTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -114,13 +124,17 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 }
 
-/* StartDefaultTask function */
-void StartDefaultTask(void const * argument)
+/* DefaultTask function */
+__weak void DefaultTask(void const * argument)
 {
 
-  /* USER CODE BEGIN StartDefaultTask */
-	DefaultTask();
-  /* USER CODE END StartDefaultTask */
+  /* USER CODE BEGIN DefaultTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END DefaultTask */
 }
 
 /* USER CODE BEGIN Application */

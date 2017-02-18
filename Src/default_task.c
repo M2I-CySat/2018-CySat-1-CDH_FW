@@ -1,9 +1,19 @@
-#include "default_task.h"
-
 #include "uart2.h"
+#include "cmsis_os.h"
 
-void DefaultTask()
+void DefaultTask(const void * arguments)
 {
-	UART2_Write("Hello, world!\r\n", 15);
+	UART2_Write(".", 1);
+	osDelay(1000);
+	UART2_Write(".", 1);
+	osDelay(1000);
+	UART2_Write(".", 1);
+	osDelay(1000);
+	UART2_Write(".", 1);
+	osDelay(1000);
+	UART2_Printf("Hello, ");
+	osDelay(1000);
+	UART2_Printf("World!\r\n");
+	UART2_Printf("Hello from Printf %d\r\n", 69);
 	for(;;);
 }

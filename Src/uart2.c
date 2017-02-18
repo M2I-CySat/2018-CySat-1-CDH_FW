@@ -1,3 +1,6 @@
+#include <stdarg.h>
+#include <stdio.h>
+
 #include "uart2.h" 
 #include "mutexes.h"
 
@@ -28,11 +31,11 @@ int UART2_UnlockMutex()
 
 ssize_t UART2_Write(void *buf, size_t nbytes)
 {
-	if (UART2_LockMutex(0)) {
+	if (UART2_LockMutex(osWaitForever)) {
 		return -1;
 	}
 
-	HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(
+	HAL_StatusTypeDef status = HAL_UART_Transmit_IT(
 			&huart6,
 			(uint8_t *) buf,
 			nbytes);
@@ -42,8 +45,32 @@ ssize_t UART2_Write(void *buf, size_t nbytes)
 	}
 
 	/* Wait for complete semaphore, then unlock mutex and return */
-	osSemaphoreWait(&uart2_txSemaphoreHandle, 0);
+	osSemaphoreWait(uart2_txSemaphoreHandle, osWaitForever);
 	UART2_UnlockMutex();
 
 	return nbytes;
+}
+
+#define FMT_BUFF_SIZE 512
+static char formatBuffer[FMT_BUFF_SIZE];
+
+ssize_t UART2_Printf(const char * fmt, ...)
+{
+	osStatus status;
+	
+	status =  osMutexWait(fmtbuf_mutexHandle, osWaitForever);	
+	if (status != osOK) {
+		/* TODO: Handle all error conditions */
+		return -1;
+	}
+
+	va_list args;
+	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+
+	if (len > 0) {
+		UART2_Write(formatBuffer, len);
+	}
+
+	osMutexRelease(fmtbuf_mutexHandle);
+	return len;
 }

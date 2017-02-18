@@ -25,7 +25,7 @@ FREERTOS_INCLUDES=CMSIS_RTOS include portable/GCC/ARM_CM4F/
 
 IFLAGS+=$(foreach include,$(FREERTOS_INCLUDES),-I$(FREERTOS_ROOT)/$(include))
 
-CPPFLAGS=$(IFLAGS)
+CPPFLAGS=$(IFLAGS) -D'__weak=__attribute((weak))'
 
 # Set flags
 CFLAGS=--specs=nosys.specs -mthumb -mcpu=cortex-m4 -mfloat-abi=hard
@@ -35,16 +35,17 @@ CFLAGS+=-mfpu=fpv4-sp-d16 -g -D$(MCU_MODEL)
 CFLAGS+=-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable -std=gnu11
 
 ###### CONFIGURATION #######
+# Startup
+STARTUP=startup_stm32f411xe.s
+
 # Source file definitions
-APPLICATION_FILES=dma.c gpio.c main.c freertos.c i2c.c spi.c stm32f4xx_hal_msp.c startup_stm32f411xe.s
+APPLICATION_FILES=dma.c gpio.c main.c freertos.c i2c.c spi.c stm32f4xx_hal_msp.c
 APPLICATION_FILES+=stm32f4xx_hal_timebase_TIM.c system_stm32f4xx.c stm32f4xx_it.c usart.c
-APPLICATION_FILES+=callbacks.c uart2.c default_task.c
+APPLICATION_FILES+=callbacks.c uart2.c default_task.c heartbeat_task.c
+APPLICATION_FILES+=$(STARTUP)
 
 # HAL Requirements
 HAL_MODULES=gpio uart rcc dma cortex spi i2c tim tim_ex
-
-# Startup
-STARTUP=startup_STM32F411.S
 
 # Targets (build these things)
 TARGETS=image.elf image.bin
@@ -68,6 +69,8 @@ ALL_OBJECTS=$(APPLICATION_OBJECTS_EXPANDED) $(HAL_OBJECTS_EXPANDED) $(FREERTOS_O
 
 # Buildoutputs
 BUILDOUTPUTS=$(foreach output,$(TARGETS),output/$(output))
+
+.PRECIOUS: $(ALL_OBJECTS)
 
 all: $(BUILDOUTPUTS)
 
