@@ -3,3 +3,5 @@ image.elf
 *.swp
 .ycm_extra_conf.pyc
 output
+.*
+*.tmp

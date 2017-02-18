@@ -73,6 +73,13 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, MEM_CS3_Pin|MEM_CS2_Pin|MEM_CS0_Pin|MEM_NWP_Pin 
+                          |MEM_NHOLD_Pin|MEM_CS1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin|SYS_RESET_Pin|NRST_S_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PCPin PCPin */
   GPIO_InitStruct.Pin = RADIO_TR_Pin|RADIO_RR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -94,13 +101,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, MEM_CS3_Pin|MEM_CS2_Pin|MEM_CS0_Pin|MEM_NWP_Pin 
-                          |MEM_NHOLD_Pin|MEM_CS1_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin|SYS_RESET_Pin|NRST_S_Pin, GPIO_PIN_RESET);
 
 }
 

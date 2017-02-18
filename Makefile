@@ -6,6 +6,7 @@ LDSCRIPT=STM32F411RETx_FLASH.ld
 # Toolchain
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
+GDB=arm-none-eabi-gdb
 
 # Project root (using pwd breaks windows builds)
 PROJECT_ROOT=.
@@ -37,6 +38,7 @@ CFLAGS+=-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-varia
 # Source file definitions
 APPLICATION_FILES=dma.c gpio.c main.c freertos.c i2c.c spi.c stm32f4xx_hal_msp.c startup_stm32f411xe.s
 APPLICATION_FILES+=stm32f4xx_hal_timebase_TIM.c system_stm32f4xx.c stm32f4xx_it.c usart.c
+APPLICATION_FILES+=callbacks.c uart2.c default_task.c
 
 # HAL Requirements
 HAL_MODULES=gpio uart rcc dma cortex spi i2c tim tim_ex
@@ -78,7 +80,7 @@ output/%.bin: output/%.elf
 objects/%.o: Src/%.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-objects/%.o: Src/%.s
+objects/%.o: startup/%.s
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
 objects/hal/%.o: $(DRIVERS)/STM32F4xx_HAL_Driver/Src/%.c
@@ -98,3 +100,9 @@ objects/rtos/%.o: $(FREERTOS_ROOT)/portable/MemMang/%.c
 
 clean:
 	rm -f $(BUILDOUTPUTS) $(ALL_OBJECTS)
+
+start-openocd:
+	openocd -f openocd.cfg
+
+debug: output/image.elf
+	$(GDB) -ex "target extended localhost:3333" output/image.elf

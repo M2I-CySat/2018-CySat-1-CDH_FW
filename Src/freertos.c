@@ -47,11 +47,14 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
+#include "default_task.h"
 
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
+osMutexId uart2_mutexHandle;
+osSemaphoreId uart2_txSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -75,9 +78,19 @@ void MX_FREERTOS_Init(void) {
        
   /* USER CODE END Init */
 
+  /* Create the recursive mutex(es) */
+  /* definition and creation of uart2_mutex */
+  osMutexDef(uart2_mutex);
+  uart2_mutexHandle = osRecursiveMutexCreate(osMutex(uart2_mutex));
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* definition and creation of uart2_txSemaphore */
+  osSemaphoreDef(uart2_txSemaphore);
+  uart2_txSemaphoreHandle = osSemaphoreCreate(osSemaphore(uart2_txSemaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -89,7 +102,7 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 256);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -106,11 +119,7 @@ void StartDefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN StartDefaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
+	DefaultTask();
   /* USER CODE END StartDefaultTask */
 }
 
