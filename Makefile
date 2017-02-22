@@ -108,4 +108,4 @@ start-openocd:
 	openocd -f openocd.cfg
 
 debug: output/image.elf
-	$(GDB) -ex "target extended localhost:3333" output/image.elf
+	$(GDB) -ex "target extended localhost:3333" -ex "load" output/image.elf

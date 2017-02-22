@@ -54,7 +54,6 @@
 osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
 osMutexId uart2_mutexHandle;
-osMutexId fmtbuf_mutexHandle;
 osSemaphoreId uart2_txSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
@@ -80,14 +79,10 @@ void MX_FREERTOS_Init(void) {
        
   /* USER CODE END Init */
 
-  /* Create the mutex(es) */
+  /* Create the recursive mutex(es) */
   /* definition and creation of uart2_mutex */
   osMutexDef(uart2_mutex);
-  uart2_mutexHandle = osMutexCreate(osMutex(uart2_mutex));
-
-  /* definition and creation of fmtbuf_mutex */
-  osMutexDef(fmtbuf_mutex);
-  fmtbuf_mutexHandle = osMutexCreate(osMutex(fmtbuf_mutex));
+  uart2_mutexHandle = osRecursiveMutexCreate(osMutex(uart2_mutex));
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -112,7 +107,7 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of heartbeatTask */
-  osThreadDef(heartbeatTask, HeartbeatTask, osPriorityLow, 0, 128);
+  osThreadDef(heartbeatTask, HeartbeatTask, osPriorityNormal, 0, 128);
   heartbeatTaskHandle = osThreadCreate(osThread(heartbeatTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */

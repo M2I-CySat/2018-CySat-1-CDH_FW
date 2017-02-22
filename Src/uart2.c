@@ -13,9 +13,8 @@ int UART2_LockMutex(uint32_t max_delay)
 {
 	osStatus status;
 	
-	status =  osMutexWait(uart2_mutexHandle, max_delay);	
+	status =  osRecursiveMutexWait(uart2_mutexHandle, max_delay);	
 	if (status != osOK) {
-		/* TODO: Handle all error conditions */
 		return -1;
 	}
 	return 0;
@@ -23,7 +22,7 @@ int UART2_LockMutex(uint32_t max_delay)
 
 int UART2_UnlockMutex()
 {
-	if (osMutexRelease(uart2_mutexHandle) != osOK) {
+	if (osRecursiveMutexRelease(uart2_mutexHandle) != osOK) {
 		return -1;
 	}
 	return 0;
@@ -35,7 +34,10 @@ ssize_t UART2_Write(void *buf, size_t nbytes)
 		return -1;
 	}
 
-	HAL_StatusTypeDef status = HAL_UART_Transmit_IT(
+	/* Ensure semaphore is down (they initialize up...)*/
+	osSemaphoreWait(uart2_txSemaphoreHandle, 0);
+
+	HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(
 			&huart6,
 			(uint8_t *) buf,
 			nbytes);
@@ -56,10 +58,7 @@ static char formatBuffer[FMT_BUFF_SIZE];
 
 ssize_t UART2_Printf(const char * fmt, ...)
 {
-	osStatus status;
-	
-	status =  osMutexWait(fmtbuf_mutexHandle, osWaitForever);	
-	if (status != osOK) {
+	if (UART2_LockMutex(osWaitForever)) {
 		/* TODO: Handle all error conditions */
 		return -1;
 	}
@@ -71,6 +70,7 @@ ssize_t UART2_Printf(const char * fmt, ...)
 		UART2_Write(formatBuffer, len);
 	}
 
-	osMutexRelease(fmtbuf_mutexHandle);
+	UART2_UnlockMutex();
+
 	return len;
 }

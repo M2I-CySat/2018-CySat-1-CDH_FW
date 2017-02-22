@@ -11,6 +11,7 @@ extern osMutexId fmtbuf_mutexHandle;
 
 /* Semaphores */
 extern osMutexId uart2_txSemaphoreHandle;
+extern osMutexId testSemHandle;
 
 
 #endif

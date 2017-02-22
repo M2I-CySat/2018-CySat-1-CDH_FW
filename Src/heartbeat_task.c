@@ -1,14 +1,14 @@
 #include "uart2.h"
 #include <stdint.h>
 #include "cmsis_os.h"
+#include "mutexes.h"
 
 void HeartbeatTask(const void * arguments)
 {
-	osDelay(15000);
-	UART2_Printf("Hartbeat task started!\r\n", 69);
-	uint32_t hb = 0;
+	osDelay(1000);
+	UART2_Printf("Heartbeat task started!");
 	for(;;) {
-		UART2_Printf("HB: %d\r\n", hb);
-		osDelay(1500);
+		osDelay(2000);
+		UART2_Printf("HB\r\n");
 	}
 }
