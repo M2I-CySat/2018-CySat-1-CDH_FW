@@ -41,7 +41,7 @@ STARTUP=startup_stm32f411xe.s
 # Source file definitions
 APPLICATION_FILES=dma.c gpio.c main.c freertos.c i2c.c spi.c stm32f4xx_hal_msp.c
 APPLICATION_FILES+=stm32f4xx_hal_timebase_TIM.c system_stm32f4xx.c stm32f4xx_it.c usart.c
-APPLICATION_FILES+=callbacks.c uart2.c default_task.c heartbeat_task.c
+APPLICATION_FILES+=callbacks.c uart2.c default_task.c heartbeat_task.c mem.c
 APPLICATION_FILES+=$(STARTUP)
 
 # HAL Requirements

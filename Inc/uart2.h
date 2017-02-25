@@ -18,5 +18,6 @@ int UART2_UnlockMutex();
 ssize_t UART2_Read(void * buf, size_t nbytes);
 ssize_t UART2_Write(void * buf, size_t nbytes);
 ssize_t UART2_Printf(const char * fmt, ...);
+void Debug_Printf(const char * fmt, ...);
 
 #endif

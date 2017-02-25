@@ -54,7 +54,9 @@
 osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
 osMutexId uart2_mutexHandle;
+osMutexId mem_mutexHandle;
 osSemaphoreId uart2_txSemaphoreHandle;
+osSemaphoreId mem_semaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -111,6 +113,10 @@ void MX_FREERTOS_Init(void) {
   osMutexDef(uart2_mutex);
   uart2_mutexHandle = osRecursiveMutexCreate(osMutex(uart2_mutex));
 
+  /* definition and creation of mem_mutex */
+  osMutexDef(mem_mutex);
+  mem_mutexHandle = osRecursiveMutexCreate(osMutex(mem_mutex));
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -119,6 +125,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of uart2_txSemaphore */
   osSemaphoreDef(uart2_txSemaphore);
   uart2_txSemaphoreHandle = osSemaphoreCreate(osSemaphore(uart2_txSemaphore), 1);
+
+  /* definition and creation of mem_semaphore */
+  osSemaphoreDef(mem_semaphore);
+  mem_semaphoreHandle = osSemaphoreCreate(osSemaphore(mem_semaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

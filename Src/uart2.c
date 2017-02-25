@@ -34,9 +34,6 @@ ssize_t UART2_Write(void *buf, size_t nbytes)
 		return -1;
 	}
 
-	/* Ensure semaphore is down (they initialize up...)*/
-	osSemaphoreWait(uart2_txSemaphoreHandle, 0);
-
 	HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(
 			&huart6,
 			(uint8_t *) buf,
@@ -73,4 +70,26 @@ ssize_t UART2_Printf(const char * fmt, ...)
 	UART2_UnlockMutex();
 
 	return len;
+}
+
+void Debug_Printf(const char * fmt, ...)
+{
+	if (UART2_LockMutex(osWaitForever)) {
+		/* TODO: Handle all error conditions */
+		return;
+	}
+
+	UART2_Printf("[%d] ", osThreadGetId());
+
+	va_list args;
+	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+
+	if (len > 0) {
+		UART2_Write(formatBuffer, len);
+	}
+
+	UART2_Write("\r\n", 2);
+
+
+	UART2_UnlockMutex();
 }

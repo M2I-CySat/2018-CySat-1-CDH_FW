@@ -73,6 +73,12 @@
 #define MEM_CS2_GPIO_Port GPIOB
 #define MEM_CS0_Pin GPIO_PIN_12
 #define MEM_CS0_GPIO_Port GPIOB
+#define MEM_SCK_Pin GPIO_PIN_13
+#define MEM_SCK_GPIO_Port GPIOB
+#define MEM_MISO_Pin GPIO_PIN_14
+#define MEM_MISO_GPIO_Port GPIOB
+#define MEM_MOSI_Pin GPIO_PIN_15
+#define MEM_MOSI_GPIO_Port GPIOB
 #define UART2_TX_Pin GPIO_PIN_6
 #define UART2_TX_GPIO_Port GPIOC
 #define UART2_RX_Pin GPIO_PIN_7
