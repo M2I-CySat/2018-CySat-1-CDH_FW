@@ -47,7 +47,7 @@
 #include "cmsis_os.h"
 
 /* USER CODE BEGIN Includes */     
-
+#include "initialization.h"
 /* USER CODE END Includes */
 
 /* Variables -----------------------------------------------------------------*/
@@ -153,6 +153,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+  InitializeEverything();
   /* USER CODE END RTOS_QUEUES */
 }
 

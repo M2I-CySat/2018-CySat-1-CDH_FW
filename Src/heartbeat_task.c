@@ -5,9 +5,9 @@
 
 void HeartbeatTask(const void * arguments)
 {
-	UART2_Printf("Heartbeat task started!\r\n");
+	Debug_Printf("Heartbeat task started!");
 	for(;;) {
 		osDelay(2000);
-		UART2_Printf("HB\r\n");
+		Debug_Printf("Heartbeat");
 	}
 }

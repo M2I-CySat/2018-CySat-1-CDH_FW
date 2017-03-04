@@ -3,6 +3,7 @@
 
 #include "uart2.h" 
 #include "mutexes.h"
+#include "tasknames.h"
 
 #include "main.h"
 
@@ -61,6 +62,7 @@ ssize_t UART2_Printf(const char * fmt, ...)
 	}
 
 	va_list args;
+	va_start(args, fmt);
 	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
 
 	if (len > 0) {
@@ -79,7 +81,8 @@ void Debug_Printf(const char * fmt, ...)
 		return;
 	}
 
-	UART2_Printf("[%d] ", osThreadGetId());
+	const char * taskname = GetTaskName();
+	UART2_Printf("[%s] ", taskname);
 
 	va_list args;
 	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
