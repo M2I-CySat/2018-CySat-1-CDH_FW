@@ -1,7 +1,7 @@
 # Global project variables
 # MCU Define
 MCU_MODEL=STM32F411xE
-LDSCRIPT=STM32F411RETx_FLASH.ld
+LDSCRIPT = STM32F411RETx_FLASH.ld
 
 # Toolchain
 CC=arm-none-eabi-gcc

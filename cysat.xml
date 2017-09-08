@@ -4,6 +4,6 @@
     <name>cysat</name>
     <mcuId>STM32F411RETx</mcuId>  <!-- mcu-->
     <dbgIF>SWD</dbgIF>
-    <dbgDEV />
+    <dbgDEV>ST-LinkV2-1</dbgDEV>
   </board>
 </targetDefinitions>

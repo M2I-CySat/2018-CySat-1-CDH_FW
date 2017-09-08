@@ -4,6 +4,11 @@
   * Description        : This file provides code for the configuration
   *                      of the I2C instances.
   ******************************************************************************
+  * This notice applies to any and all portions of this file
+  * that are not between comment pairs USER CODE BEGIN and
+  * USER CODE END. Other portions of this file, whether 
+  * inserted by the user or by software development tools
+  * are owned by their respective copyright owners.
   *
   * Copyright (c) 2017 STMicroelectronics International N.V. 
   * All rights reserved.
@@ -74,7 +79,7 @@ void MX_I2C1_Init(void)
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c1) != HAL_OK)
   {
-    Error_Handler();
+    _Error_Handler(__FILE__, __LINE__);
   }
 
 }
@@ -93,7 +98,7 @@ void MX_I2C2_Init(void)
   hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
   if (HAL_I2C_Init(&hi2c2) != HAL_OK)
   {
-    Error_Handler();
+    _Error_Handler(__FILE__, __LINE__);
   }
 
 }
@@ -119,11 +124,11 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* Peripheral clock enable */
+    /* I2C1 clock enable */
     __HAL_RCC_I2C1_CLK_ENABLE();
-
-    /* Peripheral DMA init*/
   
+    /* I2C1 DMA Init */
+    /* I2C1_RX Init */
     hdma_i2c1_rx.Instance = DMA1_Stream0;
     hdma_i2c1_rx.Init.Channel = DMA_CHANNEL_1;
     hdma_i2c1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -136,11 +141,12 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c1_rx) != HAL_OK)
     {
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
     }
 
     __HAL_LINKDMA(i2cHandle,hdmarx,hdma_i2c1_rx);
 
+    /* I2C1_TX Init */
     hdma_i2c1_tx.Instance = DMA1_Stream1;
     hdma_i2c1_tx.Init.Channel = DMA_CHANNEL_0;
     hdma_i2c1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
@@ -153,7 +159,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c1_tx) != HAL_OK)
     {
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
     }
 
     __HAL_LINKDMA(i2cHandle,hdmatx,hdma_i2c1_tx);
@@ -186,11 +192,11 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     GPIO_InitStruct.Alternate = GPIO_AF9_I2C2;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    /* Peripheral clock enable */
+    /* I2C2 clock enable */
     __HAL_RCC_I2C2_CLK_ENABLE();
-
-    /* Peripheral DMA init*/
   
+    /* I2C2 DMA Init */
+    /* I2C2_RX Init */
     hdma_i2c2_rx.Instance = DMA1_Stream2;
     hdma_i2c2_rx.Init.Channel = DMA_CHANNEL_7;
     hdma_i2c2_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -203,11 +209,12 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c2_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c2_rx) != HAL_OK)
     {
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
     }
 
     __HAL_LINKDMA(i2cHandle,hdmarx,hdma_i2c2_rx);
 
+    /* I2C2_TX Init */
     hdma_i2c2_tx.Instance = DMA1_Stream7;
     hdma_i2c2_tx.Init.Channel = DMA_CHANNEL_7;
     hdma_i2c2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
@@ -220,7 +227,7 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* i2cHandle)
     hdma_i2c2_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
     if (HAL_DMA_Init(&hdma_i2c2_tx) != HAL_OK)
     {
-      Error_Handler();
+      _Error_Handler(__FILE__, __LINE__);
     }
 
     __HAL_LINKDMA(i2cHandle,hdmatx,hdma_i2c2_tx);
@@ -248,7 +255,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
     */
     HAL_GPIO_DeInit(GPIOB, SYS_SCL_Pin|SYS_SDA_Pin);
 
-    /* Peripheral DMA DeInit*/
+    /* I2C1 DMA DeInit */
     HAL_DMA_DeInit(i2cHandle->hdmarx);
     HAL_DMA_DeInit(i2cHandle->hdmatx);
   /* USER CODE BEGIN I2C1_MspDeInit 1 */
@@ -269,7 +276,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* i2cHandle)
     */
     HAL_GPIO_DeInit(GPIOB, GPIO_PIN_10|GPIO_PIN_9);
 
-    /* Peripheral DMA DeInit*/
+    /* I2C2 DMA DeInit */
     HAL_DMA_DeInit(i2cHandle->hdmarx);
     HAL_DMA_DeInit(i2cHandle->hdmatx);
   /* USER CODE BEGIN I2C2_MspDeInit 1 */

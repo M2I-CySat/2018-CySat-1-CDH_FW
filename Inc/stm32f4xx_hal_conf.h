@@ -51,6 +51,7 @@
 #define HAL_MODULE_ENABLED  
 
 /* #define HAL_ADC_MODULE_ENABLED   */
+/* #define HAL_CRYP_MODULE_ENABLED   */
 /* #define HAL_CAN_MODULE_ENABLED   */
 /* #define HAL_CRC_MODULE_ENABLED   */
 /* #define HAL_CRYP_MODULE_ENABLED   */
@@ -72,6 +73,7 @@
 /* #define HAL_RTC_MODULE_ENABLED   */
 /* #define HAL_SAI_MODULE_ENABLED   */
 /* #define HAL_SD_MODULE_ENABLED   */
+/* #define HAL_MMC_MODULE_ENABLED   */
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
@@ -155,7 +157,7 @@
   * @brief This is the HAL system configuration section
   */
 #define  VDD_VALUE		      ((uint32_t)3300U) /*!< Value of VDD in mv */           
-#define  TICK_INT_PRIORITY            ((uint32_t)5U)   /*!< tick interrupt priority */            
+#define  TICK_INT_PRIORITY            ((uint32_t)0U)   /*!< tick interrupt priority */            
 #define  USE_RTOS                     0U     
 #define  PREFETCH_ENABLE              1U
 #define  INSTRUCTION_CACHE_ENABLE     1U
@@ -349,6 +351,10 @@
 #ifdef HAL_SD_MODULE_ENABLED
  #include "stm32f4xx_hal_sd.h"
 #endif /* HAL_SD_MODULE_ENABLED */
+
+#ifdef HAL_MMC_MODULE_ENABLED
+ #include "stm32f4xx_hal_mmc.h"
+#endif /* HAL_MMC_MODULE_ENABLED */
 
 #ifdef HAL_SPI_MODULE_ENABLED
  #include "stm32f4xx_hal_spi.h"
