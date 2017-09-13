@@ -82,7 +82,8 @@ void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName);
 void vApplicationMallocFailedHook(void);
 
 /* USER CODE BEGIN 4 */
-__weak void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+void __attribute__((weak))
+vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
 {
    /* Run time stack overflow checking is performed if
    configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2. This hook function is
@@ -91,7 +92,7 @@ __weak void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTask
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN 5 */
-__weak void vApplicationMallocFailedHook(void)
+void __attribute__((weak)) vApplicationMallocFailedHook(void)
 {
    /* vApplicationMallocFailedHook() will only be called if
    configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h. It is a hook
@@ -163,7 +164,8 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* DefaultTask function */
-__weak void DefaultTask(void const * argument)
+void __attribute__((weak))
+DefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN DefaultTask */
