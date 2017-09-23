@@ -85,20 +85,33 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin|SYS_RESET_Pin|NRST_S_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PCPin PCPin */
-  GPIO_InitStruct.Pin = RADIO_TR_Pin|RADIO_RR_Pin;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = RADIO_TR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(RADIO_TR_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = RADIO_RR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(RADIO_RR_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin 
-                           PBPin PBPin */
-  GPIO_InitStruct.Pin = MEM_CS3_Pin|MEM_CS2_Pin|MEM_CS0_Pin|MEM_NWP_Pin 
-                          |MEM_NHOLD_Pin|MEM_CS1_Pin;
+                           PBPin */
+  GPIO_InitStruct.Pin = MEM_CS3_Pin|MEM_CS2_Pin|MEM_NWP_Pin|MEM_NHOLD_Pin 
+                          |MEM_CS1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = MEM_CS0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(MEM_CS0_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin PAPin */
   GPIO_InitStruct.Pin = NYIELD_P_Pin|SYS_RESET_Pin|NRST_S_Pin;

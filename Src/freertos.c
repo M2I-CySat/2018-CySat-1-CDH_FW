@@ -164,8 +164,7 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* DefaultTask function */
-void __attribute__((weak))
-DefaultTask(void const * argument)
+__attribute((weak)) void DefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN DefaultTask */

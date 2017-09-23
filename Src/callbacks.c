@@ -19,3 +19,10 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 		osSemaphoreRelease(mem_semaphoreHandle);
 	}
 }
+
+void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
+{
+	if (hspi == &hspi2) {
+		osSemaphoreRelease(mem_semaphoreHandle);
+	}
+}

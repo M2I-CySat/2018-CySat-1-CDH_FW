@@ -18,4 +18,12 @@ int MEM_WriteDisable(size_t addr);
 int MEM_ReadStatus(size_t addr);
 int MEM_WriteStatus(size_t addr, uint8_t status);
 
+/* Memory map defines */
+
+#define TEST_FLAG_ADDRESS 0x00000010
+#define TEST_FLAG_LENGTH 0x04
+
+#define REBOOT_COUNT_ADDRESS 0x00000014
+#define REBOOT_COUNT_LENGTH 0x04
+
 #endif

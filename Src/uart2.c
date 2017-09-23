@@ -82,7 +82,7 @@ void Debug_Printf(const char * fmt, ...)
 	}
 
 	const char * taskname = GetTaskName();
-	UART2_Printf("[%s] ", taskname);
+	UART2_Printf("[ %s \t]: ", taskname);
 
 	va_list args;
 	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
