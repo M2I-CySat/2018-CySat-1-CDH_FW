@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-int MEM_LockMutex(uint32_t max_delay);
-int MEM_UnlockMutex();
+void MEM_LockMutex(void);
+void MEM_UnlockMutex(void);
 
 ssize_t MEM_Read(uint8_t * buf, size_t addr, size_t len);
 ssize_t MEM_Write(uint8_t * buf, size_t addr, size_t len);
