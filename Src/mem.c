@@ -7,38 +7,37 @@
 
 #include "uart2.h"
 
+#include "assert.h"
+
 #define OP_READ 0x03
 #define OP_WRITE 0x02
 #define OP_RDSR 0x05
 #define OP_WRSR 0x01
 #define OP_WREN 0x06
 #define OP_WRDI 0x04
+#define MEM_MAX_DELAY osWaitForever
 
 static int getChipSelect(size_t addr, GPIO_TypeDef ** port, uint16_t * pin);
 static int simpleSend(size_t addr, uint8_t * data, size_t len);
 
-int MEM_LockMutex(uint32_t max_delay)
+void MEM_LockMutex(void)
 {
-	osStatus status;
-	status = osRecursiveMutexWait(mem_mutexHandle, max_delay);
-	if (status != osOK) {
-		return -1;
+	if (osRecursiveMutexWait(mem_mutexHandle, MEM_MAX_DELAY) != osOK) {
+		hard_failure();
 	}
-	return 0;
 }
 
-int MEM_UnlockMutex()
+void MEM_UnlockMutex(void)
 {
 	if (osRecursiveMutexRelease(mem_mutexHandle) != osOK) {
-		return -1;	
+		hard_failure();
 	}
-	return 0;
 }
 
 int MEM_ReadStatus(size_t addr)
 {
 	int retval;
-	MEM_LockMutex(osWaitForever);
+	MEM_LockMutex();
 
 	GPIO_TypeDef * port;
 	uint16_t pin;
@@ -85,7 +84,7 @@ ssize_t MEM_Read(uint8_t * buf, size_t addr, size_t len)
 {
 
 	int retval;
-	MEM_LockMutex(osWaitForever);
+	MEM_LockMutex();
 
 	GPIO_TypeDef * port;
 	uint16_t pin;
@@ -144,7 +143,7 @@ ssize_t MEM_Write(uint8_t * buf, size_t addr, size_t len)
 {
 
 	int retval;
-	MEM_LockMutex(osWaitForever);
+	MEM_LockMutex();
 
 	GPIO_TypeDef * port;
 	uint16_t pin;
@@ -251,7 +250,7 @@ static int getChipSelect(size_t addr, GPIO_TypeDef ** port, uint16_t * pin)
 static int simpleSend(size_t addr, uint8_t * data, size_t len)
 {
 	int retval;
-	MEM_LockMutex(osWaitForever);
+	MEM_LockMutex();
 
 	GPIO_TypeDef * port;
 	uint16_t pin;
@@ -287,4 +286,3 @@ releaseMutex:
 	MEM_UnlockMutex();
 	return retval;
 }
-
