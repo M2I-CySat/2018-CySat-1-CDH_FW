@@ -8,6 +8,7 @@ void InitializeEverything()
 	/* Down semaphores */
 	osSemaphoreWait(mem_semaphoreHandle, 0);
 	osSemaphoreWait(uart2_txSemaphoreHandle, 0);
+	osSemaphoreWait(sys_i2c_semaphoreHandle, 0);
 
 	/* GPIOA */
 	HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin | NRST_S_Pin, GPIO_PIN_SET);

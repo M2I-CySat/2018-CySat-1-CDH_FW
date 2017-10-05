@@ -8,11 +8,13 @@
 /* Mutexes */
 extern osMutexId uart2_mutexHandle;
 extern osMutexId mem_mutexHandle;
+extern osMutexId sys_i2c_mutexHandle;
 extern osMutexId threadnames_mutexHandle;
 
 /* Semaphores */
 extern osSemaphoreId uart2_txSemaphoreHandle;
 extern osSemaphoreId mem_semaphoreHandle;
+extern osSemaphoreId sys_i2c_semaphoreHandle;
 
 
 #endif
