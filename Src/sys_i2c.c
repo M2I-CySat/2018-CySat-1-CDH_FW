@@ -37,8 +37,6 @@ int SYS_I2C_Write(uint8_t addr, uint8_t * data, size_t len)
 	}
 	osSemaphoreWait(sys_i2c_semaphoreHandle, osWaitForever);
 
-	retval = 0;
-
 releaseMutex:
 	SYS_I2C_UnlockMutex();
 
@@ -56,8 +54,6 @@ int SYS_I2C_Read(uint8_t addr, uint8_t * data, size_t len)
 		goto releaseMutex;
 	}
 	osSemaphoreWait(sys_i2c_semaphoreHandle, osWaitForever);
-
-	retval = 0;
 
 releaseMutex:
 	SYS_I2C_UnlockMutex();

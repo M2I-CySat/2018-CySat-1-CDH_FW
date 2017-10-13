@@ -3,6 +3,7 @@
 #include "tests.h"
 #include "uart2.h"
 #include "mem.h"
+#include "utilities.h"
 
 #define TEST_FLAG_1 0x0f0f0f0f
 #define TEST_FLAG_2 0xf0f0f0f0
@@ -55,8 +56,7 @@ static uint32_t read_test_flag(void)
 
 	MEM_Read(buf, TEST_FLAG_ADDRESS, TEST_FLAG_LENGTH);
 
-	flag = buf[0] | (buf[1] << 8) | 
-		(buf[2] << 16) | (buf[3] << 24);
+	flag = Unpack32(buf);
 
 	return flag;
 }
@@ -64,10 +64,7 @@ static uint32_t read_test_flag(void)
 static void write_test_flag(uint32_t flag)
 {
 	uint8_t buf[TEST_FLAG_LENGTH];
-	buf[0] = flag & 0xff;
-	buf[1] = (flag >> 8) & 0xff;
-	buf[2] = (flag >> 16) & 0xff;
-	buf[3] = (flag >> 24) & 0xff;
+	Pack32(buf, flag);
 
 	MEM_Write(buf, TEST_FLAG_ADDRESS, TEST_FLAG_LENGTH);
 }
