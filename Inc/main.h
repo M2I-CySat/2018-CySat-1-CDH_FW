@@ -58,8 +58,7 @@
 
 #define RADIO_TR_Pin GPIO_PIN_0
 #define RADIO_TR_GPIO_Port GPIOC
-#define RADIO_RR_Pin GPIO_PIN_1
-#define RADIO_RR_GPIO_Port GPIOC
+#define RADIO_TR_EXTI_IRQn EXTI0_IRQn
 #define RADIO_TX_Pin GPIO_PIN_2
 #define RADIO_TX_GPIO_Port GPIOA
 #define RADIO_RX_Pin GPIO_PIN_3
