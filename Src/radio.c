@@ -1,6 +1,11 @@
 #include "radio.h"
 #include "sys_i2c.h"
 #include "uart2.h"
+#include "FreeRTOSConfig.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "assert.h"
+#include "cmsis_os.h"
 
 #include <string.h>
 
@@ -104,6 +109,18 @@ enum RADIO_I2C_REGISTERS {
 
 #define MAX_DATA_SIZE 256
 
+/* Queue operations */
+#define TX_QUEUE_LENGTH 4
+
+struct tx_queue_item {
+    size_t len;
+    uint8_t data[MAX_DATA_SIZE];
+};
+
+/*** Static variables for queues ***/
+// TODO: This should be done with cmsis-os API rather than straight FreeRTOS
+static osMailQId tx_queueHandle;
+
 /**** Static functions ****/
 
 /* Wrapper for I2C transmit and receive */
@@ -178,7 +195,7 @@ static int transmit_packet(uint8_t * data, size_t len)
 	if ((len < 1) || (len > 256)) {
 		Debug_Printf("Unable to transmit packet due to bad length");
 		retval = -1;
-		goto final;
+		goto fail;
 	}
 	
 	SYS_I2C_LockMutex();
@@ -218,7 +235,7 @@ static int transmit_packet(uint8_t * data, size_t len)
     
 unlock_mutex:
     SYS_I2C_UnlockMutex();
-final:
+fail:
 	return retval;
 }
 
@@ -229,7 +246,7 @@ static ssize_t receive_packet(uint8_t * data, size_t max_len)
     if (max_len < (MAX_DATA_SIZE + 4)) {
         Debug_Printf("Unable to receive; buffer too small!");
         len = -1;
-        goto final;
+        goto fail;
     }
     
     SYS_I2C_LockMutex();
@@ -319,6 +336,47 @@ static ssize_t receive_packet(uint8_t * data, size_t max_len)
     
 unlock_mutex:
     SYS_I2C_UnlockMutex();
-final:
+fail:
     return len;
+}
+
+
+int RADIO_Init(void)
+{
+    osMailQDef(tx_queue, 4, struct tx_queue_item);
+    tx_queueHandle = osMailCreate(osMailQ(tx_queue), NULL);
+                                  
+    return 0;
+}
+
+int Radio_Transmit(uint8_t * data, size_t len)
+{
+    int retval = 0;
+    if (len > MAX_DATA_SIZE) {
+        Debug_Printf("Data too large; cannot queue for radio transmit");
+        retval = -1;
+        goto fail;
+    }
+    
+    struct tx_queue_item * item = osMailAlloc(tx_queueHandle, osWaitForever);
+    if (item == NULL) {
+        Debug_Printf("Error allocating item from TX queue pool");
+        retval = -1;
+        goto fail;
+    }
+    
+    item->len = len;
+    memcpy(item->data, data, len);
+    
+    // TODO: Use cmsis-os instead of freertos API 
+    if (osMailPut(tx_queueHandle, item)) {
+        Debug_Printf("Error queueing item for send");
+        retval = -1;
+        /* Free them item, only if it fails to send! */
+        osMailFree(tx_queueHandle, item);
+        goto fail;
+    }
+    
+fail:
+    return retval;
 }
