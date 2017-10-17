@@ -6,3 +6,4 @@ output
 .*
 *.tmp
 build
+*.kdev4

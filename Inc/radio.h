@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+/* Public functions for radio */
+
+/* Post a message to the radio transmit queue */
 int RADIO_Transmit(uint8_t * data, size_t len);
-uint8_t * RADIO_Receive(void);
 
 #endif
