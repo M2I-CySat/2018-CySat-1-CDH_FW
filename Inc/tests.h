@@ -5,5 +5,6 @@
 
 /* Write/Readback test for memory */
 int Test_Mem(void);
+int Test_RadioTransmit(void);
 
 #endif

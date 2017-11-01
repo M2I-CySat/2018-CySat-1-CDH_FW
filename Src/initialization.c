@@ -2,6 +2,7 @@
 #include "cmsis_os.h"
 #include "mutexes.h"
 #include "gpio.h"
+#include "radio.h"
 
 void InitializeEverything()
 {
@@ -9,6 +10,7 @@ void InitializeEverything()
 	osSemaphoreWait(mem_semaphoreHandle, 0);
 	osSemaphoreWait(uart2_txSemaphoreHandle, 0);
 	osSemaphoreWait(sys_i2c_semaphoreHandle, 0);
+	osSemaphoreWait(radio_txSemaphoreHandle, 0);
 
 	/* GPIOA */
 	HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin | NRST_S_Pin, GPIO_PIN_SET);
@@ -21,4 +23,5 @@ void InitializeEverything()
 				MEM_NWP_Pin | MEM_NHOLD_Pin,
 			GPIO_PIN_SET);
 
+	Radio_Init();
 }

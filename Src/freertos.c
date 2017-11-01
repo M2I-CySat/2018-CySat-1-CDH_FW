@@ -58,12 +58,14 @@
 /* Variables -----------------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
+osThreadId radio_TxTaskHandle;
 osMutexId uart2_mutexHandle;
 osMutexId mem_mutexHandle;
 osMutexId sys_i2c_mutexHandle;
 osSemaphoreId uart2_txSemaphoreHandle;
 osSemaphoreId mem_semaphoreHandle;
 osSemaphoreId sys_i2c_semaphoreHandle;
+osSemaphoreId radio_txSemaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -72,6 +74,7 @@ osSemaphoreId sys_i2c_semaphoreHandle;
 /* Function prototypes -------------------------------------------------------*/
 void DefaultTask(void const * argument);
 extern void HeartbeatTask(void const * argument);
+extern void He100_TxTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -146,6 +149,10 @@ void MX_FREERTOS_Init(void) {
   osSemaphoreDef(sys_i2c_semaphore);
   sys_i2c_semaphoreHandle = osSemaphoreCreate(osSemaphore(sys_i2c_semaphore), 1);
 
+  /* definition and creation of radio_txSemaphore */
+  osSemaphoreDef(radio_txSemaphore);
+  radio_txSemaphoreHandle = osSemaphoreCreate(osSemaphore(radio_txSemaphore), 1);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -163,6 +170,10 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(heartbeatTask, HeartbeatTask, osPriorityNormal, 0, 1024);
   heartbeatTaskHandle = osThreadCreate(osThread(heartbeatTask), NULL);
 
+  /* definition and creation of radio_TxTask */
+  osThreadDef(radio_TxTask, He100_TxTask, osPriorityIdle, 0, 1024);
+  radio_TxTaskHandle = osThreadCreate(osThread(radio_TxTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -174,7 +185,7 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* DefaultTask function */
-__attribute__((weak)) void DefaultTask(void const * argument)
+__attribute((weak)) void DefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN DefaultTask */

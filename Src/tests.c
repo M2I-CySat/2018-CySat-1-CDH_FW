@@ -1,16 +1,28 @@
 #include <stdint.h>
+#include <string.h>
 
 #include "tests.h"
 #include "uart2.h"
 #include "mem.h"
 #include "utilities.h"
+#include "radio.h"
+
 
 #define TEST_FLAG_1 0x0f0f0f0f
 #define TEST_FLAG_2 0xf0f0f0f0
 #define TEST_FLAG_3 0x55aa55aa
 
+#define HELLO "Hello, world!\n"
+
 static uint32_t read_test_flag(void);
 static void write_test_flag(uint32_t flag);
+
+int Test_RadioTransmit(void)
+{
+	Radio_Transmit((uint8_t *) HELLO, strlen(HELLO));
+
+	return 0;
+}
 
 int Test_Mem(void)
 {

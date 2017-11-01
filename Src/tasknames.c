@@ -3,6 +3,7 @@
 
 extern osThreadId defaultTaskHandle;
 extern osThreadId heartbeatTaskHandle;
+extern osThreadId radio_TxTaskHandle;
 
 const char * GetTaskName(void)
 {
@@ -11,6 +12,8 @@ const char * GetTaskName(void)
 		return "Default";
 	} else if (id == heartbeatTaskHandle) {
 		return "Heartbeat";
+	} else if (id == radio_TxTaskHandle) {
+		return "Radio TX";
 	} else {
 		return "?";
 	}
