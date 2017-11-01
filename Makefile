@@ -99,7 +99,9 @@ Src/tests.c \
 Src/utilities.c \
 Src/assert.c \
 Src/sys_i2c.c \
-Src/radio.c
+Src/radio.c \
+Src/radio_cmc.c \
+Src/radio_he100.c
 
 # ASM sources
 ASM_SOURCES =  \
