@@ -14,7 +14,6 @@ struct he100_header {
 };
 
 static ssize_t radio_tx(uint8_t * data, size_t len);
-static ssize_t radio_rx(uint8_t * data, size_t len);
 
 static void pack_header(uint8_t * buf, struct he100_header * hdr);
 static void unpack_header(struct he100_header * hdr, uint8_t * buf);
@@ -23,13 +22,16 @@ static uint16_t compute_checksum(uint8_t * buf, size_t len);
 
 static void transmit_item(struct tx_queue_item * item);
 
+static void notify_txThread(uint16_t type, uint16_t size);
+static void handle_data(uint16_t size);
+
 static osMessageQId response_queueHandle;
 
 /* Response types for response queue */
-#define RETRANSMIT_WAIT 100
-#define TX_RESP_WAIT 100
-#define TX_ACK 0x0A0A
-#define TX_NACK 0xFFFF
+#define RETRANSMIT_WAIT 	100
+#define TX_RESP_WAIT 		100
+#define TX_ACK 			0x0A0A
+#define TX_NACK 			0xFFFF
 
 #define I_CMD_NOP 		0x1001
 #define I_CMD_RESET 		0x1002
@@ -43,6 +45,10 @@ static osMessageQId response_queueHandle;
 #define O_CMD_RECEIVED_DATA	0x1004
 #define O_CMD_CONFIG 		0x1005
 #define O_CMD_SET_CONFIG_ACK 	0x1006
+
+#define HE100_SYNC (('H' << 8) | ('e'))
+
+#define RADIO_UART 		huart2
 
 void He100_TxTask(void)
 {
@@ -87,6 +93,11 @@ void He100_TxTask(void)
 							(payload == TX_NACK)) {
 						Debug_Printf("Transmit NACK... Retrying!");
 						osDelay(RETRANSMIT_WAIT);
+
+						/* This is safe. It can't deadlock because
+						 * the item hasn't been freed from the pool
+						 * yet.
+						 */
 						osMailPut(tx_queueHandle, item);
 						break;
 					} else if (type == O_CMD_TRANSMIT_ACK) {
@@ -123,6 +134,70 @@ void He100_RxTask(void)
 	 * Received Data needs to be dispatched to the appropriate task
 	 * via that task's command queue.
 	 */
+	uint8_t buf[8];
+	struct he100_header hdr;
+	HAL_StatusTypeDef status;
+
+	for (;;) {
+		status = HAL_UART_Receive_DMA(&RADIO_UART, buf, 8);
+		if (status) {
+			Debug_Printf("Error with Radio UART RX");
+		}
+
+		osSemaphoreWait(radio_rxSemaphoreHandle, osWaitForever);
+		unpack_header(&hdr, buf);
+
+		if (hdr.sync != HE100_SYNC) {
+			/* TODO: Resync */
+			Debug_Printf("Received invalid sync bytes");
+			continue;
+		}
+
+		uint16_t check = compute_checksum(buf + 2, 4);
+		if (check != hdr.checksum) {
+			Debug_Printf("Bad header checksum");
+			continue;
+		}
+
+		switch (hdr.type){
+			case O_CMD_NOP_ACK:
+			case O_CMD_RESET_ACK:
+			case O_CMD_TRANSMIT_ACK:
+			case O_CMD_SET_CONFIG_ACK:
+				notify_txThread(hdr.type, hdr.size);
+				break;
+			case O_CMD_RECEIVED_DATA:
+				handle_data(hdr.size);
+				break;
+			case O_CMD_CONFIG:
+				Debug_Printf("Received config - Don't know what to do");
+				break;
+			default:
+				Debug_Printf("Unrecognized O_CMD type");
+		}
+	}
+}
+
+static void notify_txThread(uint16_t type, uint16_t size)
+{
+	uint32_t val = ((type << 16) & 0xffff0000) | (size & 0x0000ffff);
+	osMessagePut(response_queueHandle, val, osWaitForever);
+}
+
+static void handle_data(uint16_t size)
+{
+	static uint8_t buf[280];
+	HAL_StatusTypeDef status;
+
+	status = HAL_UART_Receive_DMA(&RADIO_UART, buf, size);
+	if (status) {
+		Debug_Printf("Error with radio receive");
+	}
+	osSemaphoreWait(radio_rxSemaphoreHandle, osWaitForever);
+
+	/* Validate payload checksum? */
+
+	/* Dispatch command to command parsing and handling */
 }
 
 static void transmit_item(struct tx_queue_item * item)
@@ -156,7 +231,7 @@ static void transmit_item(struct tx_queue_item * item)
 static ssize_t radio_tx(uint8_t * buf, size_t len)
 {
 	HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(
-			&huart2,
+			&RADIO_UART,
 			buf,
 			len);
 	if (status) {
@@ -181,6 +256,17 @@ static void pack_header(uint8_t * buf, struct he100_header * hdr)
 
 	buf[6] = (hdr->checksum & 0xff00) >> 8;
 	buf[7] = hdr->checksum & 0x00ff;
+}
+
+static void unpack_header(struct he100_header * hdr, uint8_t * buf)
+{
+	hdr->sync = (buf[1] & 0x00ff) | ((buf[0] << 8) & 0xff00);
+
+	hdr->type = (buf[3] & 0x00ff) | ((buf[2] << 8) & 0xff00);
+
+	hdr->size = (buf[5] & 0x00ff) | ((buf[4] << 8) & 0xff00);
+
+	hdr->checksum = (buf[7] & 0x00ff) | ((buf[6] << 8) & 0xff00);
 }
 
 static uint16_t compute_checksum(uint8_t * buf, size_t len)

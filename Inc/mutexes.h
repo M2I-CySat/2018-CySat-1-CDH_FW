@@ -14,6 +14,7 @@ extern osMutexId threadnames_mutexHandle;
 /* Semaphores */
 extern osSemaphoreId uart2_txSemaphoreHandle;
 extern osSemaphoreId radio_txSemaphoreHandle;
+extern osSemaphoreId radio_rxSemaphoreHandle;
 extern osSemaphoreId mem_semaphoreHandle;
 extern osSemaphoreId sys_i2c_semaphoreHandle;
 
