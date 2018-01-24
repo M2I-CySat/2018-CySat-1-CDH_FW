@@ -14,4 +14,7 @@ int EPS_UpdateTelemetry(int flags);
 /* Read the latest telemetry from the EPS */
 int EPS_GetTelemetry(struct eps_telemetry * out);
 
+/* Initialize RTOS constructs */
+int EPS_Init(void);
+
 #endif

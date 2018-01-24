@@ -4,18 +4,25 @@
 #include "uart2.h"
 
 struct dl_queue_item {
+	int flags;
+	uint32_t id;
 };
 
 osMailQId dl_queueHandle;
 osMailQDef(dl_queue, 4, struct dl_queue_item);
 
-void DownlinkTask()
+int Downlink_Init()
 {
 	if ((dl_queueHandle = osMailCreate(osMailQ(dl_queue), NULL)) == NULL) {
 		Debug_Printf("ERROR - Unable to create Downlink Queue");
 		hard_failure();
 	}
 
+	return 0;
+}
+
+void DownlinkTask()
+{
 	for (;;) {
 		osDelay(10000);
 	}

@@ -11,7 +11,7 @@ static int heap_pop(struct heap_item * out);
 osMailQId heap_queueHandle;
 osMailQDef(heap_queue, 4, struct heap_item);
 
-void HeapTask()
+int Heap_Init()
 {
 	/* Initialize queue */
 	if ((heap_queueHandle = osMailCreate(
@@ -20,6 +20,11 @@ void HeapTask()
 		hard_failure();
 	}
 
+	return 0;
+}
+
+void HeapTask()
+{
 	/* Monitor the queue for incoming items, and place them on the heap */
 	for(;;) {
 		osDelay(10000);

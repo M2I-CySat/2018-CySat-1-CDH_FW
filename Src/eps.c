@@ -17,7 +17,7 @@ static struct eps_telemetry telemetry;
 /* Update stored values */
 static int updateTelemetry(void);
 
-void EPSTask()
+int EPS_Init()
 {
 	/* Initialization */
 	if ((eps_queueHandle = osMailCreate(osMailQ(eps_queue), NULL)) == NULL) {
@@ -25,8 +25,11 @@ void EPSTask()
 		hard_failure();
 	}
 
-	/* End initialization */
+	return 0;
+}
 
+void EPSTask()
+{
 	Debug_Printf("EPS Task Running");
 
 	/* Watch the queue for incoming requests to update the data, then do so 

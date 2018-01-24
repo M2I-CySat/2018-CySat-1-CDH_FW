@@ -3,8 +3,11 @@
 #include "mutexes.h"
 #include "gpio.h"
 #include "radio.h"
+#include "heap.h"
+#include "eps.h"
+#include "downlink.h"
 
-void InitializeEverything()
+void InitializeRTOS()
 {
 	/* Down semaphores */
 	osSemaphoreWait(mem_semaphoreHandle, 0);
@@ -12,6 +15,14 @@ void InitializeEverything()
 	osSemaphoreWait(sys_i2c_semaphoreHandle, 0);
 	osSemaphoreWait(radio_txSemaphoreHandle, 0);
 
+	Radio_Init();
+	Heap_Init();
+	EPS_Init();
+	Downlink_Init();
+}
+
+void InitializeGPIO()
+{
 	/* GPIOA */
 	HAL_GPIO_WritePin(GPIOA, NYIELD_P_Pin | NRST_S_Pin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA, SYS_RESET_Pin, GPIO_PIN_RESET);
@@ -22,6 +33,4 @@ void InitializeEverything()
 			MEM_CS0_Pin | MEM_CS1_Pin | MEM_CS2_Pin | MEM_CS3_Pin |
 				MEM_NWP_Pin | MEM_NHOLD_Pin,
 			GPIO_PIN_SET);
-
-	Radio_Init();
 }

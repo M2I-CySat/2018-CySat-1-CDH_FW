@@ -8,4 +8,7 @@ int Downlink_AckPacket(int packet_id);
 int Downlink_Start(void);
 int Downlink_Stop(void);
 
+/* Initialize RTOS constructs */
+int Downlink_Init(void);
+
 #endif

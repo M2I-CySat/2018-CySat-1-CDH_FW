@@ -56,6 +56,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include "initialization.h"
 
 /* USER CODE END Includes */
 
@@ -114,6 +115,7 @@ int main(void)
   MX_USART6_UART_Init();
 
   /* USER CODE BEGIN 2 */
+  InitializeGPIO();
 
   /* USER CODE END 2 */
 

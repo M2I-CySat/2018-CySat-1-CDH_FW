@@ -1,7 +1,11 @@
 #ifndef _heap_h
 #define _heap_h
 
+#include <stdint.h>
+
 struct heap_item {
+	uint32_t id;
+	uint8_t prio;
 };
 
 /* Allocate an item to be populated with data, then sent to the heap
@@ -25,5 +29,8 @@ int Heap_PushItem(struct heap_item * item);
  * task. Do not use an item obtained with Heap_AllocItem.
  */
 int Heap_PopItem(struct heap_item * out);
+
+/* Initialize RTOS constructs */
+int Heap_Init(void);
 
 #endif
