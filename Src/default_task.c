@@ -10,9 +10,6 @@ void DefaultTask(const void * arguments)
 	Debug_Printf("Default task started");
 	Debug_Printf("Running power-on tests");
 
-	Debug_Printf("Should print 5: %d", 5);
-	Debug_Printf("Should print 5.5: %f", 5.5);
-
 	osDelay(500);
 	Debug_Printf("Beginning tests...");
 	osDelay(100);

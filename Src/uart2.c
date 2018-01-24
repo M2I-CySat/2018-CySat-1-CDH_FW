@@ -63,11 +63,13 @@ ssize_t UART2_Printf(const char * fmt, ...)
 
 	va_list args;
 	va_start(args, fmt);
-	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+	ssize_t len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+	va_end(args);
 
 	if (len > 0) {
 		UART2_Write(formatBuffer, len);
 	}
+
 
 	UART2_UnlockMutex();
 
@@ -85,7 +87,9 @@ void Debug_Printf(const char * fmt, ...)
 	UART2_Printf("[ %s \t]: ", taskname);
 
 	va_list args;
+	va_start(args, fmt);
 	ssize_t len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+	va_end(args);
 
 	if (len > 0) {
 		UART2_Write(formatBuffer, len);
