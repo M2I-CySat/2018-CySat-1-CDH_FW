@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2017 STMicroelectronics International N.V. 
+  * Copyright (c) 2018 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -60,14 +60,21 @@ osThreadId defaultTaskHandle;
 osThreadId heartbeatTaskHandle;
 osThreadId radio_TxTaskHandle;
 osThreadId radio_RxTaskHandle;
+osThreadId heapTaskHandle;
+osThreadId downlinkTaskHandle;
+osThreadId epsTaskHandle;
 osMutexId uart2_mutexHandle;
 osMutexId mem_mutexHandle;
 osMutexId sys_i2c_mutexHandle;
+osMutexId rtc_mutexHandle;
+osMutexId imu_mutexHandle;
+osMutexId eps_mutexHandle;
 osSemaphoreId uart2_txSemaphoreHandle;
 osSemaphoreId mem_semaphoreHandle;
 osSemaphoreId sys_i2c_semaphoreHandle;
 osSemaphoreId radio_txSemaphoreHandle;
 osSemaphoreId radio_rxSemaphoreHandle;
+osSemaphoreId eps_semaphoreHandle;
 
 /* USER CODE BEGIN Variables */
 
@@ -78,6 +85,9 @@ void DefaultTask(void const * argument);
 extern void HeartbeatTask(void const * argument);
 extern void He100_TxTask(void const * argument);
 extern void He100_RxTask(void const * argument);
+extern void HeapTask(void const * argument);
+extern void DownlinkTask(void const * argument);
+extern void EPSTask(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -135,6 +145,18 @@ void MX_FREERTOS_Init(void) {
   osMutexDef(sys_i2c_mutex);
   sys_i2c_mutexHandle = osRecursiveMutexCreate(osMutex(sys_i2c_mutex));
 
+  /* definition and creation of rtc_mutex */
+  osMutexDef(rtc_mutex);
+  rtc_mutexHandle = osRecursiveMutexCreate(osMutex(rtc_mutex));
+
+  /* definition and creation of imu_mutex */
+  osMutexDef(imu_mutex);
+  imu_mutexHandle = osRecursiveMutexCreate(osMutex(imu_mutex));
+
+  /* definition and creation of eps_mutex */
+  osMutexDef(eps_mutex);
+  eps_mutexHandle = osRecursiveMutexCreate(osMutex(eps_mutex));
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -159,6 +181,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of radio_rxSemaphore */
   osSemaphoreDef(radio_rxSemaphore);
   radio_rxSemaphoreHandle = osSemaphoreCreate(osSemaphore(radio_rxSemaphore), 1);
+
+  /* definition and creation of eps_semaphore */
+  osSemaphoreDef(eps_semaphore);
+  eps_semaphoreHandle = osSemaphoreCreate(osSemaphore(eps_semaphore), 1);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -185,6 +211,18 @@ void MX_FREERTOS_Init(void) {
   osThreadDef(radio_RxTask, He100_RxTask, osPriorityHigh, 0, 1024);
   radio_RxTaskHandle = osThreadCreate(osThread(radio_RxTask), NULL);
 
+  /* definition and creation of heapTask */
+  osThreadDef(heapTask, HeapTask, osPriorityNormal, 0, 1024);
+  heapTaskHandle = osThreadCreate(osThread(heapTask), NULL);
+
+  /* definition and creation of downlinkTask */
+  osThreadDef(downlinkTask, DownlinkTask, osPriorityNormal, 0, 1024);
+  downlinkTaskHandle = osThreadCreate(osThread(downlinkTask), NULL);
+
+  /* definition and creation of epsTask */
+  osThreadDef(epsTask, EPSTask, osPriorityNormal, 0, 1024);
+  epsTaskHandle = osThreadCreate(osThread(epsTask), NULL);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
@@ -196,7 +234,7 @@ void MX_FREERTOS_Init(void) {
 }
 
 /* DefaultTask function */
-__attribute__((weak)) void DefaultTask(void const * argument)
+__attribute((weak)) void DefaultTask(void const * argument)
 {
 
   /* USER CODE BEGIN DefaultTask */

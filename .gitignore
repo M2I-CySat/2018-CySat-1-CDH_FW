@@ -7,3 +7,4 @@ output
 *.tmp
 build
 *.kdev4
+doc

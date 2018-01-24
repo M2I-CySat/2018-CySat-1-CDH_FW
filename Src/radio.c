@@ -6,13 +6,15 @@
 
 #include <string.h>
 
-
 osMailQId tx_queueHandle;
+osMailQDef(tx_queue, 4, struct tx_queue_item);
 
 int Radio_Init(void)
 {
-    osMailQDef(tx_queue, 4, struct tx_queue_item);
-    tx_queueHandle = osMailCreate(osMailQ(tx_queue), NULL);
+    if ((tx_queueHandle = osMailCreate(osMailQ(tx_queue), NULL)) ==  NULL) {
+	    Debug_Printf("ERROR - Unable to create TX Queue");
+	    hard_failure();
+    }
 
     return 0;
 }
