@@ -85,7 +85,7 @@ void Debug_Printf(const char * fmt, ...)
 	UART2_Printf("[ %s \t]: ", taskname);
 
 	va_list args;
-	int len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
+	ssize_t len = vsnprintf(formatBuffer, FMT_BUFF_SIZE, fmt, args);
 
 	if (len > 0) {
 		UART2_Write(formatBuffer, len);

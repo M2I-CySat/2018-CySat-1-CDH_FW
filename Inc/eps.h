@@ -5,12 +5,13 @@
 #define EPS_STORE_RESULT 	0x02
 
 struct eps_telemetry {
+	float battery_voltage;
 };
 
 /* Request the EPS thread to update its latest telemetry */
 int EPS_UpdateTelemetry(int flags);
 
 /* Read the latest telemetry from the EPS */
-int EPS_GetTelemetry(struct eps_values * out);
+int EPS_GetTelemetry(struct eps_telemetry * out);
 
 #endif

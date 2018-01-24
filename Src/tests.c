@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "utilities.h"
 #include "radio.h"
+#include "eps.h"
 
 
 #define TEST_FLAG_1 0x0f0f0f0f
@@ -17,14 +18,35 @@
 static uint32_t read_test_flag(void);
 static void write_test_flag(uint32_t flag);
 
-int Test_RadioTransmit(void)
+int Test_EPS()
+{
+	Debug_Printf("Sending blocking update request to EPS task");
+	if (EPS_UpdateTelemetry(EPS_BLOCK)) {
+		Debug_Printf("!!! TEST FAILED !!! Error from EPS_UpdateTelemetry");
+	}
+	Debug_Printf("UpdateTelemetry returned");
+
+	Debug_Printf("Reading telemetry values from EPS");
+	struct eps_telemetry telemetry;
+	EPS_GetTelemetry(&telemetry);
+	Debug_Printf("Battery voltage should be nonzero: %2.3f",
+			telemetry.battery_voltage);
+	
+	if (telemetry.battery_voltage == 0.0) {
+		Debug_Printf("!!! TEST FAILED !!! EPS did not actually update!");
+	}
+
+	return 0;
+}
+
+int Test_RadioTransmit()
 {
 	Radio_Transmit((uint8_t *) HELLO, strlen(HELLO));
 
 	return 0;
 }
 
-int Test_Mem(void)
+int Test_Mem()
 {
 	uint32_t test_flag;
 	int test_failure = 0;
@@ -61,7 +83,7 @@ int Test_Mem(void)
 	return test_failure;
 }
 
-static uint32_t read_test_flag(void)
+static uint32_t read_test_flag()
 {
 	uint8_t buf[TEST_FLAG_LENGTH];
 	uint32_t flag;

@@ -3,6 +3,8 @@
 #include "uart2.h"
 #include "assert.h"
 
+#include <string.h>
+
 struct eps_queue_item {
 	int flags;
 };
@@ -17,10 +19,15 @@ static int updateTelemetry(void);
 
 void EPSTask()
 {
+	/* Initialization */
 	if ((eps_queueHandle = osMailCreate(osMailQ(eps_queue), NULL)) == NULL) {
 		Debug_Printf("ERROR - Unable to create EPS queue");
 		hard_failure();
 	}
+
+	/* End initialization */
+
+	Debug_Printf("EPS Task Running");
 
 	/* Watch the queue for incoming requests to update the data, then do so 
 	 *
@@ -37,9 +44,10 @@ void EPSTask()
 		if (evt.status == osEventMail) {
 			struct esp_queue_item * item = evt.value.p;
 
+			Debug_Printf("Received request");
 			/* Do things with item based on item.flags */
 		} else {
-			Debug_Printf("Unexpected status for EPS queue")
+			Debug_Printf("Unexpected status for EPS queue");
 		}
 	}
 }
@@ -57,8 +65,7 @@ int EPS_UpdateTelemetry(int flags)
 		return -1;
 	}
 
-	item.flags = flags;
-
+	item->flags = flags;
 	if (osMailPut(eps_queueHandle, item)) {
 		Debug_Printf("Error queueing item for send!");
 		osMailFree(eps_queueHandle, item);
@@ -77,11 +84,16 @@ int EPS_GetTelemetry(struct eps_telemetry * out)
 	 * Release the EPS mutex
 	 */
 
+	/* TODO: Lock mutex (with helper function) */
+	memcpy(out, &telemetry, sizeof(struct eps_telemetry));
+	/* TODO: Unlock mutex */
+
 	return -1;
 }
 
 static int updateTelemetry(void)
 {
+	Debug_Printf("Updating telemetry from EPS");
 	/* Lock the SYS_I2C Mutex
 	 * Perform a transaction with the EPS
 	 * Release the I2C mutex

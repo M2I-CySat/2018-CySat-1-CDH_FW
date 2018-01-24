@@ -13,19 +13,19 @@ const char * GetTaskName(void)
 {
 	osThreadId id = osThreadGetId();
 	if (id == defaultTaskHandle) {
-		return "Default";
+		return "Default  ";
 	} else if (id == heartbeatTaskHandle) {
 		return "Heartbeat";
 	} else if (id == radio_TxTaskHandle) {
-		return "Radio TX";
+		return "Radio TX ";
 	} else if (id == radio_RxTaskHandle) {
-		return "Radio RX";
+		return "Radio RX ";
 	} else if (id == epsTaskHandle) {
-		return "EPS";
+		return "EPS      ";
 	} else if (id == heapTaskHandle) {
-		return "Heap";
+		return "Heap     ";
 	} else if (id == downlinkTaskHandle) {
-		return "Downlink";
+		return "Downlink ";
 	} else {
 		return "?";
 	}
