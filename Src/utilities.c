@@ -7,7 +7,7 @@ uint32_t Unpack32(uint8_t * buf)
 }
 void Pack32(uint8_t * buf, uint32_t flag)
 {
-  buf[0] = flag & 0xff;
+	buf[0] = flag & 0xff;
 	buf[1] = (flag >> 8) & 0xff;
 	buf[2] = (flag >> 16) & 0xff;
 	buf[3] = (flag >> 24) & 0xff;

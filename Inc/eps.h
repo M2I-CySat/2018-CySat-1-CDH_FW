@@ -5,7 +5,7 @@
 #define EPS_STORE_RESULT 	0x02
 
 struct eps_telemetry {
-	float battery_voltage;
+	float battery_bus_voltage;
 };
 
 /* Request the EPS thread to update its latest telemetry */

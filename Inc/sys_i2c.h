@@ -11,7 +11,7 @@ void SYS_I2C_LockMutex(void);
 void SYS_I2C_UnlockMutex(void);
 
 #define I2C_ADDRESS_RADIO 0x02 /* placeholder */
-#define I2C_ADDRESS_EPS 0x03   /* placeholder */
+#define I2C_ADDRESS_EPS 0x2B
 
 
 #endif
