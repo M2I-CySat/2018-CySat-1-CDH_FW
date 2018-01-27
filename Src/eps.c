@@ -73,7 +73,7 @@ void EPSTask()
 
 			if(item.flags & EPS_STORE_RESULT){
 				/* TODO: Is this how heap is used? */
-				heap_item * store_telemetry = Heap_AllocItem();
+				struct heap_item * store_telemetry = Heap_AllocItem();
 				store_telemetry->id = &telemetry;
 				store_telemetry->prio = EPS_PRIORITY;
 
@@ -168,7 +168,7 @@ static int updateTelemetry(void)
 }
 
 /* TODO: For now, all commands sent have 2 data bytes. Might need to add
- * this functionality */
+ * functionality for 1 data byte */
 static int sendCommand(int command, uint8_t * receiveData)
 {
 	int retval = 0;

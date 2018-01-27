@@ -31,17 +31,45 @@ void DownlinkTask()
 /* Post a message to the DL queue that a packet has been ack'd */
 int Downlink_AckPacket(int packet_id)
 {
-	return -1;
+	struct dl_queue_item * ack_packet = osMailAlloc(dl_queueHandle, 0);
+	ack_packet->flags = DL_ACK;
+	ack_packet->id = packet_id;
+
+	if (osMailPut(dl_queueHandle, ack_packet)) {
+                Debug_Printf("Error queueing item for send!");
+                osMailFree(dl_queueHandle, item);
+                return -1;
+        }
+
+	return 0;
 }
 
 /* Post a message to the DL queue to start */
 int Downlink_Start(void)
 {
-	return -1;
+	struct dl_queue_item * start_packet = osMailAlloc(dl_queueHandle, 0);
+	start_packet->flags = DL_START;
+	
+	if (osMailPut(dl_queueHandle, start_packet)) {
+                Debug_Printf("Error queueing item for send!");
+                osMailFree(dl_queueHandle, item);
+                return -1;
+        }
+
+	return 0;
 }
 
 /* Post a message to the DL queue to stop */
 int Downlink_Stop(void)
 {
-	return -1;
+	struct dl_queue_item * stop_packet = osMailAlloc(dl_queueHandle, 0);
+        stop_packet->flags = DL_STOP;
+        
+        if (osMailPut(dl_queueHandle, stop_packet)) {
+                Debug_Printf("Error queueing item for send!");
+                osMailFree(dl_queueHandle, item);
+                return -1;
+        }
+
+	return 0;
 }
