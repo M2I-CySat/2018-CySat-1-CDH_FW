@@ -3,9 +3,39 @@
 
 #include <stdint.h>
 
+enum heap_item_type {
+	event,
+	eps,
+	payload,
+	adcs
+};
+
 struct heap_item {
 	uint32_t id;
 	uint8_t prio;
+	enum heap_item_type type;
+	union {
+		struct eps_data eps_data;
+		struct payload_data payload_data;
+		struct adcs_data adcs_data;
+		struct event_data event_data;
+	} data;
+};
+
+struct event_data {
+
+};
+
+struct eps_data {
+
+};
+
+struct payload_data {
+
+};
+
+struct adcs_data {
+
 };
 
 /* Allocate an item to be populated with data, then sent to the heap

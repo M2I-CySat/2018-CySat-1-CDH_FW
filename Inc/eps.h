@@ -3,6 +3,7 @@
 
 #define EPS_BLOCK 			0x01
 #define EPS_STORE_RESULT 	0x02
+#define EPS_PRIORITY		0xFF /* placeholder */
 
 struct eps_telemetry {
 	float battery_bus_voltage;

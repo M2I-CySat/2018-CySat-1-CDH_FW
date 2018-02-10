@@ -30,9 +30,9 @@ int Test_EPS()
 	struct eps_telemetry telemetry;
 	EPS_GetTelemetry(&telemetry);
 	Debug_Printf("Battery voltage should be nonzero: %2.3f",
-			telemetry.battery_voltage);
+			telemetry.battery_bus_voltage);
 	
-	if (telemetry.battery_voltage == 0.0) {
+	if (telemetry.battery_bus_voltage == 0.0) {
 		Debug_Printf("!!! TEST FAILED !!! EPS did not actually update!");
 	}
 

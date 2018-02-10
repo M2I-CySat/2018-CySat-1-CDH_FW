@@ -60,7 +60,7 @@ void EPSTask()
 		osEvent evt;
 		evt = osMailGet(eps_queueHandle, osWaitForever);
 		if (evt.status == osEventMail) {
-			struct esp_queue_item * item = evt.value.p;
+			struct eps_queue_item * item = evt.value.p;
 
 			Debug_Printf("Received request");
 			
@@ -132,7 +132,7 @@ int EPS_GetTelemetry(struct eps_telemetry * out)
 
 static int updateTelemetry(void)
 {
-	int retval = -1;
+	int retval = 0;
 
 	Debug_Printf("Updating telemetry from EPS");
 
@@ -170,9 +170,7 @@ static int updateTelemetry(void)
 /* TODO: For now, all commands sent have 2 data bytes. Might need to add
  * functionality for 1 data byte */
 static int sendCommand(int command, uint8_t * receiveData)
-{
-	int retval = 0;
-	
+{	
 	/* Construct data array */
 	uint8_t * data[2];
 	data[0] = command & 0xFF;
@@ -182,19 +180,20 @@ static int sendCommand(int command, uint8_t * receiveData)
 
 	if(SYS_I2C_Write(I2C_ADDRESS_EPS, &data, sendLen)){
 		/* TODO: Error handling */
-		retval = -1;
+		Debug_Printf
+		return -1;
 	}
 
 	if(receiveData){
 		if(SYS_I2C_Read(I2C_ADDRESS_EPS, receiveData, receiveLen)){
 			/* TODO: Error handling */
-			retval = -1;
+			return -1;
 		}
 	}
 
 	SYS_I2C_UnlockMutex();
 
-	return retval;
+	return 0;
 }
 
 static void EPS_LockMutex(void)

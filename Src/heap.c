@@ -25,27 +25,48 @@ int Heap_Init()
 
 void HeapTask()
 {
+	Debug_Printf("Heap Task Running");
 	/* Monitor the queue for incoming items, and place them on the heap */
 	for(;;) {
+		osEvent evt;
+		evt = osMailGet(heap_queueHandle, osWaitForever);
+		if(evt.status == osEventMail){
+			struct heap_item * item = evt.value.p;
+
+			Debug_Printf("Received Request");
+
+			/* Actually put item on the heap */
+		}
 		osDelay(10000);
 	}
 }
 
+/* This method can't do error handling within */
 struct heap_item * Heap_AllocItem(void)
 {
-	return NULL;
+	return osMailAlloc(heap_queueHandle, 0);
 }
 
 void Heap_FreeItem(struct heap_item * item)
 {
+	osStatus status = osMailFree(heap_queueHandle, item);
+	if (status != osOK) {
+		Debug_Printf("Couldn't free item from heap queue");
+	}
 }
 
 int Heap_PushItem(struct heap_item * item)
 {
-	return -1;
+	if (osMailPut(heap_queueHandle, item)) {
+		Debug_Printf("Error queueing item for heap!");
+                osMailFree(heap_queueHandle, item);
+                return -1;
+	}
+	return 0;
 }
 
 int Heap_PopItem(struct heap_item * out)
 {
+	/* TODO: I'm not sure what this does */
 	return -1;
 }
