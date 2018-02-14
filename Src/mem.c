@@ -95,6 +95,7 @@ ssize_t MEM_Read(uint8_t * buf, size_t addr, size_t len)
 		goto releaseMutex;
 	}
 
+	/* TODO: Fix this logic! */
 	if ((addr + len) >> 18 != ((unsigned int) chip)) {
 		Debug_Printf("Read would cause chip boundary crossover.");
 		retval = -1;
@@ -154,6 +155,7 @@ ssize_t MEM_Write(uint8_t * buf, size_t addr, size_t len)
 		goto releaseMutex;
 	}
 
+	/* TODO: Fix this logic */
 	if ((addr + len) >> 18 != ((unsigned int) chip)) {
 		Debug_Printf("Read would cause chip boundary crossover.");
 		retval = -1;
