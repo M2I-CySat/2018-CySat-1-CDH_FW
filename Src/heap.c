@@ -171,6 +171,8 @@ static inline uint32_t get_heap_size(void)
 	MEM_Read(buf, HEAP_CURRENT_SIZE, 4);
 
 	// TODO: Use helper to unpack32 and return
+	uint32_t bottom =Unpack32(buf);
+	
 	MEM_UnlockMutex();
 }
 /**
@@ -178,10 +180,9 @@ static inline uint32_t get_heap_size(void)
 */
 static inline void set_heap_size(uint32_t size);
 {
-	// TODO: Implement
-	HEAP_CURRENT_SIZE=size;
-	//TODO: Is this it? Or do we want include some some error handling that 
-	//says "if the specified size is less than what's in the heap, we would want to 
-	//pop and percolate the nodes we cut off"?
-
+	MEM_LockMutex();
+	uint8_t buf[4];
+	Pack32(&buf, size);
+	MEM_Write(buf, HEAP_CURRENT_SIZE, 4);
+	MEM_UnlockMutex();
 }

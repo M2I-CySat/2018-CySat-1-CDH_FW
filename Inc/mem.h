@@ -25,12 +25,15 @@ int MEM_WriteStatus(size_t addr, uint8_t status);
 
 #define REBOOT_COUNT_ADDRESS 	0x00000014
 #define REBOOT_COUNT_LENGTH 	0x04
-
+//the amount of bytes that each item takes up
 #define HEAP_ITEM_SIZE			0x00000040
+//the most amount of items we can have in the heap at a time
 #define HEAP_NUM_ITEMS			0x00001000
 
 #define HEAP_START 				0x00001000
+//the amount of bytes that the heap takes up
 #define HEAP_SIZE ((HEAP_ITEM_SIZE * HEAP_NUM_ITEMS))
 #define HEAP_END ((HEAP_START + HEAP_SIZE))
+//the memory address where the variable for the current number of elements is stored
 #define HEAP_CURRENT_SIZE ((HEAP_END))
 #endif
