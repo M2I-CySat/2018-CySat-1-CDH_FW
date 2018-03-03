@@ -79,16 +79,12 @@ int Heap_PopItem(struct heap_item * out)
 
 static inline int heap_read_item(size_t index, uint8_t * out)
 {
-	MEM_Read(out, HEAP_START + (index * HEAP_ITEM_SIZE), HEAP_ITEM_SIZE);
-
-	return 0;
+	return MEM_Read(out, HEAP_START + (index * HEAP_ITEM_SIZE), HEAP_ITEM_SIZE);
 }
 
 static inline int heap_write_item(size_t index, uint8_t * in)
 {
-	MEM_Write(in, HEAP_START + (index * HEAP_ITEM_SIZE), HEAP_ITEM_SIZE);
-
-	return 0;
+	return MEM_Write(in, HEAP_START + (index * HEAP_ITEM_SIZE), HEAP_ITEM_SIZE);
 }
 
 static int heap_push(struct heap_item * item)
@@ -105,14 +101,17 @@ static int heap_push(struct heap_item * item)
 
 static int heap_pop(struct heap_item * out)
 {
+	int retval = 0;
 	MEM_LockMutex();
 	static uint8_t buf[HEAP_ITEM_SIZE];
 	static uint8_t bufl[HEAP_ITEM_SIZE];
 	static uint8_t bufr[HEAP_ITEM_SIZE];
 
 	/* Read first item into out */
-	// TODO: Handle errors
-	heap_read_item(0, buf);
+	if(heap_read_item(0, buf)){
+		retval =  -1;
+		goto unlockMutex;
+	}
 
 	// TODO: Unpack buf into out
 	
@@ -129,7 +128,7 @@ static int heap_pop(struct heap_item * out)
 	while (index < heap_bottom) {
 		/* buf already contains the current one */
 		heap_read_item(index * 2, bufl);
-		heap_read_itme((index * 2) + 1, bufr);
+		heap_read_item((index * 2) + 1, bufr);
 
 		uint32_t keyl = Unpack32(bufl);
 		uint32_t keyr = Unpack32(bufr);
@@ -143,14 +142,14 @@ static int heap_pop(struct heap_item * out)
 		} else if (keyl < keyr) {
 			/* Swap buf with bufl */
 			heap_write_item(bufl, index);
-			memcpy(buf, bufl, MEM_ITEM_SIZE);
+			memcpy(buf, bufl, HEAP_ITEM_SIZE);
 
 			key = keyl;
 			index = index * 2;
 		} else {
 			/* Swap buf with bufr */
 			heap_write_item(bufr, index);
-			memcpy(buf, bufr, MEM_ITEM_SIZE);
+			memcpy(buf, bufr, HEAP_ITEM_SIZE);
 
 			key = keyr;
 			index = (index * 2) + 1;
@@ -159,21 +158,23 @@ static int heap_pop(struct heap_item * out)
 
 	set_heap_size(heap_bottom);
 
-	
+unlockMutex:
 	MEM_UnlockMutex();
-	return 0;
+	
+	return retval;
 }
 
+/**
+  * Get the current size of the heap
+  */
 static inline uint32_t get_heap_size(void)
 {
-	MEM_LockMutex();
 	uint8_t buf[4];
+	MEM_LockMutex();	
 	MEM_Read(buf, HEAP_CURRENT_SIZE, 4);
-
-	// TODO: Use helper to unpack32 and return
-	uint32_t bottom =Unpack32(buf);
-	
 	MEM_UnlockMutex();
+	
+	return Unpack32(buf);
 }
 /**
 *   Sets the heap size to the specified number. 
