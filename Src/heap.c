@@ -92,9 +92,24 @@ static int heap_push(struct heap_item * item)
 	MEM_LockMutex();
 
 	// Pack item into buf
+	static uint8_t buf[HEAP_ITEM_SIZE];
+	uint32_t packed = Pack32(buf, HEAP_ITEM_SIZE);
 	// Write item to heap_bottom + 1
+	heap_write_item(heap_bottom+1, packed);
 	// Percolate up
+	
+	//TODO: percolate up
+	uint32_t key = Unpack32(buf);
+	uint32_t index = HEAP_CURRENT_SIZE; //sets index to the element that was just put on the end.
+	
+	while(index > HEAP_START)
+	{
+		//swap with the element above.
+	}
+	
+	
 	// Update heap_size = heap_bottom
+	set_heap_size(heap_bottom);
 	
 	MEM_UnlockMutex();
 }
