@@ -139,16 +139,18 @@ static int heap_pop(struct heap_item * out)
 	/* Percolate down */
 	uint32_t key = Unpack32(buf);
 	uint32_t index = 0;
-	// TODO: Fix out of bounds children 
-	while (index < heap_bottom) {
+	while (index * 2 < heap_bottom) {
 		/* buf already contains the current one */
 		heap_read_item(index * 2, bufl);
-		heap_read_item((index * 2) + 1, bufr);
+
+		/* If r is outside bounds, sets it to max value */
+		uint32_t keyr = 0xFFFFFFFF;
+		if((index * 2) + 1 < heap_bottom){
+			heap_read_item((index * 2) + 1, bufr);
+			keyr = Unpack32(bufr);
+		}
 
 		uint32_t keyl = Unpack32(bufl);
-		uint32_t keyr = Unpack32(bufr);
-
-		// TODO: Handle special case of only left child
 
 		if ((key < keyl) && (key < keyr)) {
 			/* Write item and break */

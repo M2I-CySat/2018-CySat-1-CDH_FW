@@ -3,6 +3,12 @@
 #include "cmsis_os.h"
 #include "uart2.h"
 
+#define NUM_TO_SEND = 4
+
+static inline void clear_ack(uint32_t id);
+static inline int transmit_item(void);
+static inline void downlink_items(void);
+
 struct dl_queue_item {
 	int flags;
 	uint32_t id;
@@ -10,6 +16,10 @@ struct dl_queue_item {
 
 osMailQId dl_queueHandle;
 osMailQDef(dl_queue, 4, struct dl_queue_item);
+static int started = 0;
+static int awaitAck[NUM_TO_SEND];
+static int sentLen = 0;
+
 
 int Downlink_Init()
 {
@@ -24,7 +34,79 @@ int Downlink_Init()
 void DownlinkTask()
 {
 	for (;;) {
-		osDelay(10000);
+		osEvent evt;
+		evt = osMailGet(heap_queueHandle, osWaitForever);
+		if(evt.status == osEventMail){
+			struct dl_queue_item * item = evt.value.p;
+			switch(dl_queue_item->flags){
+				case DL_ACK:
+					clear_ack(item.id);
+					if(started){
+						downlink_items();
+					}
+					break;
+				case DL_START:
+					started = 1;
+					downlink_items();
+					break;
+				case DL_STOP:
+					started = 0;
+					break;
+				default:
+					Debug_Printf("Weird DL flag");
+			}
+		}
+	}
+}
+
+static inline void clear_ack(uint32_t id)
+{
+	int i = 0;
+	for(i = 0; i < sentLen; i++){
+		if(awaitAck[i] == id){
+			int j;
+			awaitAck[i] = 0;
+			for(j = i; j < NUM_TO_SEND-1; j++){
+				int tmp = awaitAck[j];
+				awaitAck[j] = awaitAck[j+1];
+				awaitAck[j+1] = tmp;
+			}
+			awaitAck[NUM_TO_SEND-1] = 0;
+			sentLen--;
+			return;
+		}
+	}
+	Debug_Printf("Received confirmation ack for non existent item");
+}
+
+static inline void downlink_items(void)
+{
+	while(sentLen < NUM_TO_SEND){
+		int sent_id = transmit_item();
+		if(sent_id > 0){
+			awaitAck[sentLen++] = sent_id;
+		} else {
+			Debug_Printf("Failed to transmit item");
+			break;
+		}
+	}
+}
+
+/* Grab an item from the heap and return an id for the sent item */
+static inline int transmit_item(void)
+{
+	struct heap_item * out;
+	Heap_PopItem(&out);
+	
+	//TODO: package out into a buffer and send off to Radio_Transmit
+	uint8_t buf[HEAP_ITEM_SIZE];
+	uint8_t * id;
+	Pack32(*buf, out->id);
+	switch(out->heap_item_type){
+		case event:
+		case eps:
+		case payload:
+		case adcs:
 	}
 }
 
