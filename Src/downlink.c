@@ -97,17 +97,27 @@ static inline int transmit_item(void)
 {
 	struct heap_item * out;
 	Heap_PopItem(&out);
-	
-	//TODO: package out into a buffer and send off to Radio_Transmit
 	uint8_t buf[HEAP_ITEM_SIZE];
-	uint8_t * id;
-	Pack32(*buf, out->id);
+	Pack32(buf, out->id);
+	buf[4] = out->type;
 	switch(out->heap_item_type){
 		case event:
+			memcpy(buf+5, *(out->event_data), EVENT_DATA_SIZE);
+			break;	
 		case eps:
+			memcpy(buf+5, *(out->eps_data), EPS_DATA_SIZE);
+			break;
 		case payload:
+			memcpy(buf+5, *(out->payload_data), EPS_DATA_SIZE);
+			break;
 		case adcs:
+			memcpy(buf+5, *(out->adcs_data), ADCS_DATA_SIZE);
+			break;
 	}
+	if(Radio_Transmit(buf, HEAP_ITEM_SIZE)){
+		return -1;
+	}
+	return out->id;
 }
 
 /* Post a message to the DL queue that a packet has been ack'd */
