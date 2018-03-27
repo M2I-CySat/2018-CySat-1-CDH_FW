@@ -89,6 +89,7 @@ static inline int heap_write_item(size_t index, uint8_t * in)
 
 static int heap_push(struct heap_item * item)
 {
+	int retval = 0;
 	MEM_LockMutex();
 
 	// Pack item into buf
@@ -139,14 +140,14 @@ static int heap_pop(struct heap_item * out)
 	/* Percolate down */
 	uint32_t key = Unpack32(buf);
 	uint32_t index = 0;
-	while (index * 2 < heap_bottom) {
+	while ((index * 2 + 1) < heap_bottom) {
 		/* buf already contains the current one */
-		heap_read_item(index * 2, bufl);
+		heap_read_item(index * 2 + 1, bufl);
 
 		/* If r is outside bounds, sets it to max value */
 		uint32_t keyr = 0xFFFFFFFF;
-		if((index * 2) + 1 < heap_bottom){
-			heap_read_item((index * 2) + 1, bufr);
+		if((index * 2) + 2 < heap_bottom){
+			heap_read_item((index * 2) + 2, bufr);
 			keyr = Unpack32(bufr);
 		}
 
@@ -162,14 +163,14 @@ static int heap_pop(struct heap_item * out)
 			memcpy(buf, bufl, HEAP_ITEM_SIZE);
 
 			key = keyl;
-			index = index * 2;
+			index = index * 2 + 1;
 		} else {
 			/* Swap buf with bufr */
 			heap_write_item(bufr, index);
 			memcpy(buf, bufr, HEAP_ITEM_SIZE);
 
 			key = keyr;
-			index = (index * 2) + 1;
+			index = (index * 2) + 2;
 		}
 	}
 
