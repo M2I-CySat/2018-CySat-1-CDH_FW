@@ -123,13 +123,33 @@ static int heap_pop(struct heap_item * out)
 	static uint8_t bufl[HEAP_ITEM_SIZE];
 	static uint8_t bufr[HEAP_ITEM_SIZE];
 
-	/* Read first item into out */
+	/* Read first item into buf */
 	if(heap_read_item(0, buf)){
 		retval =  -1;
 		goto unlockMutex;
 	}
-
-	// TODO: Unpack buf into out
+	
+	out->id = Unpack32(buf);
+	out->prio = buf[4];
+	//TODO: this assumes data is an array. Should we change to this?
+	switch(buf[5]){
+		case 0:
+			out->type = event;
+			memcpy(&(out->event_data), buf+5, EVENT_DATA_SIZE);
+			break;
+		case 1: 
+			out->type = eps;
+			memcpy(&(out->eps_data), buf+5, EPS_DATA_SIZE);  
+			break;
+		case 2:
+			out->type = payload;
+			memcpy(&(out->payload_data), buf+5, PAYLOAD_DATA_SIZE);
+			break;
+		case 3:
+			out->type = adcs;
+			memcpy(&(out->adcs_data), buf+5, ADCS_DATA_SIZE);
+			break;
+	}
 	
 
 	/**** Perform heap operation ****/
