@@ -20,6 +20,11 @@ int MEM_WriteStatus(size_t addr, uint8_t status);
 
 /* Memory map defines */
 
+#define ADCS_DATA_SIZE 0x4
+#define PAYLOAD_DATA_SIZE 0x4
+#define EVENT_DATA_SIZE 0x4
+#define EPS_DATA_SIZE 0x4
+
 #define TEST_FLAG_ADDRESS 		0x00000010
 #define TEST_FLAG_LENGTH 		0x04
 

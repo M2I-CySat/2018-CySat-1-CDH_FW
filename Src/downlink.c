@@ -108,7 +108,7 @@ static inline int transmit_item(void)
 			memcpy(buf+5, *(out->eps_data), EPS_DATA_SIZE);
 			break;
 		case payload:
-			memcpy(buf+5, *(out->payload_data), EPS_DATA_SIZE);
+			memcpy(buf+5, *(out->payload_data), PAYLOAD_DATA_SIZE);
 			break;
 		case adcs:
 			memcpy(buf+5, *(out->adcs_data), ADCS_DATA_SIZE);
