@@ -4,6 +4,7 @@
 #include "assert.h"
 #include "mutexes.h"
 #include "heap.h"
+#include "sys_i2c.h"
 
 #include <string.h>
 
@@ -67,20 +68,19 @@ void EPSTask()
 			updateTelemetry();
 
 			/* Release Semaphore if needed */
-			if(item.flags & EPS_BLOCK){
+			if(item->flags & EPS_BLOCK){
 				osSemaphoreRelease(eps_semaphoreHandle);	
 			}
 
-			if(item.flags & EPS_STORE_RESULT){
+			if(item->flags & EPS_STORE_RESULT){
 				/* TODO: Is this how heap is used? */
 				struct heap_item * store_telemetry = Heap_AllocItem();
-				store_telemetry->id = &telemetry;
+				store_telemetry->id = (uint32_t) &telemetry;
 				store_telemetry->prio = EPS_PRIORITY;
 
 				if(Heap_PushItem(store_telemetry)){
 					/* Give up on failure */
-					Debug_Printf("Something went wrong with
-						storing item to the heap");
+					Debug_Printf("Something went wrong with storing item to the heap");
 					Heap_FreeItem(store_telemetry);
 				}
 			}
@@ -172,18 +172,19 @@ static int updateTelemetry(void)
 static int sendCommand(int command, uint8_t * receiveData)
 {	
 	/* Construct data array */
-	uint8_t * data[2];
+	uint8_t data[2];
 	data[0] = command & 0xFF;
 	data[1] = (command >> 8) & 0xFF;
 
 	SYS_I2C_LockMutex();
 
-	if(SYS_I2C_Write(I2C_ADDRESS_EPS, &data, sendLen)){
+	if(SYS_I2C_Write(I2C_ADDRESS_EPS, data, 2)){
 		/* TODO: Error handling */
-		Debug_Printf
+		Debug_Printf("Error writing to EPS");
 		return -1;
 	}
 
+	int receiveLen = 2;//TODO: Assign value
 	if(receiveData){
 		if(SYS_I2C_Read(I2C_ADDRESS_EPS, receiveData, receiveLen)){
 			/* TODO: Error handling */

@@ -4,6 +4,7 @@
 #include "uart2.h"
 #include "mem.h"
 #include "utilities.h"
+#include <string.h>
 
 /* Perform heap operations */
 static int heap_push(struct heap_item * item);
@@ -41,7 +42,7 @@ void HeapTask()
 			struct heap_item * item = evt.value.p;
 
 			Debug_Printf("Received Request");
-			heap_push(heap_item);
+			heap_push(item);
 		}
 		osDelay(10000);
 	}
@@ -92,20 +93,29 @@ static int heap_push(struct heap_item * item)
 	int retval = 0;
 	MEM_LockMutex();
 
-	// Pack item into buf
 	static uint8_t buf[HEAP_ITEM_SIZE];
-	uint32_t packed = Pack32(buf, HEAP_ITEM_SIZE);
-	// Write item to heap_bottom + 1
-	heap_write_item(heap_bottom+1, packed);
-	// Percolate up
+	static uint8_t parent[HEAP_ITEM_SIZE];
+
+	//TODO: package item into buf
 	
-	//TODO: percolate up
+	/*** Perform heap operation ***/
+	uint32_t heap_bottom = get_heap_size() + 1;
+	heap_write_item(heap_bottom, buf);
+	
 	uint32_t key = Unpack32(buf);
-	uint32_t index = HEAP_CURRENT_SIZE; //sets index to the element that was just put on the end.
-	
-	while(index > HEAP_START)
+	int index = heap_bottom;
+	while(index >= 0)
 	{
-		//swap with the element above.
+		heap_read_item((index-1)/2, parent);
+		uint32_t keyp = Unpack32(parent);
+		if(key < keyp){
+			heap_write_item((size_t) index, parent);
+			index = (index-1)/2;
+		} else {
+			heap_write_item((size_t) index, buf);
+			break;
+		}
+
 	}
 	
 	
@@ -113,6 +123,8 @@ static int heap_push(struct heap_item * item)
 	set_heap_size(heap_bottom);
 	
 	MEM_UnlockMutex();
+
+	return retval;
 }
 
 static int heap_pop(struct heap_item * out)
@@ -131,26 +143,27 @@ static int heap_pop(struct heap_item * out)
 	
 	out->id = Unpack32(buf);
 	out->prio = buf[4];
+	size_t data_size;
 	//TODO: this assumes data is an array. Should we change to this?
 	switch(buf[5]){
 		case 0:
 			out->type = event;
-			memcpy(&(out->event_data), buf+5, EVENT_DATA_SIZE);
+			data_size = EVENT_DATA_SIZE;
 			break;
 		case 1: 
 			out->type = eps;
-			memcpy(&(out->eps_data), buf+5, EPS_DATA_SIZE);  
+			data_size = EPS_DATA_SIZE;  
 			break;
 		case 2:
 			out->type = payload;
-			memcpy(&(out->payload_data), buf+5, PAYLOAD_DATA_SIZE);
+			data_size = PAYLOAD_DATA_SIZE;
 			break;
 		case 3:
 			out->type = adcs;
-			memcpy(&(out->adcs_data), buf+5, ADCS_DATA_SIZE);
+			data_size = ADCS_DATA_SIZE;
 			break;
 	}
-	
+	memcpy(&(out->data), buf+6, data_size);
 
 	/**** Perform heap operation ****/
 	/* Swap bottom to top */
@@ -175,18 +188,18 @@ static int heap_pop(struct heap_item * out)
 
 		if ((key < keyl) && (key < keyr)) {
 			/* Write item and break */
-			heap_write_item(buf, index);
+			heap_write_item(index, buf);
 			break;
 		} else if (keyl < keyr) {
 			/* Swap buf with bufl */
-			heap_write_item(bufl, index);
+			heap_write_item(index, bufl);
 			memcpy(buf, bufl, HEAP_ITEM_SIZE);
-
+			//TODO: why the memcpy and key change?
 			key = keyl;
 			index = index * 2 + 1;
 		} else {
 			/* Swap buf with bufr */
-			heap_write_item(bufr, index);
+			heap_write_item(index, bufr);
 			memcpy(buf, bufr, HEAP_ITEM_SIZE);
 
 			key = keyr;
@@ -217,11 +230,11 @@ static inline uint32_t get_heap_size(void)
 /**
 *   Sets the heap size to the specified number. 
 */
-static inline void set_heap_size(uint32_t size);
+static inline void set_heap_size(uint32_t size)
 {
 	MEM_LockMutex();
 	uint8_t buf[4];
-	Pack32(&buf, size);
+	Pack32(buf, size);
 	MEM_Write(buf, HEAP_CURRENT_SIZE, 4);
 	MEM_UnlockMutex();
 }

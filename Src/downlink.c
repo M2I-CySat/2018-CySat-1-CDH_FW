@@ -2,8 +2,14 @@
 #include "downlink.h"
 #include "cmsis_os.h"
 #include "uart2.h"
+#include "mem.h"
+#include "heap.h"
+#include "utilities.h"
+#include "radio.h"
 
-#define NUM_TO_SEND = 4
+#include <string.h>
+
+#define NUM_TO_SEND 4
 
 static inline void clear_ack(uint32_t id);
 static inline int transmit_item(void);
@@ -16,9 +22,9 @@ struct dl_queue_item {
 
 osMailQId dl_queueHandle;
 osMailQDef(dl_queue, 4, struct dl_queue_item);
-static int started = 0;
-static int awaitAck[NUM_TO_SEND];
-static int sentLen = 0;
+static uint32_t started = 0;
+static uint32_t awaitAck[NUM_TO_SEND];
+static uint32_t sentLen = 0;
 
 
 int Downlink_Init()
@@ -35,12 +41,12 @@ void DownlinkTask()
 {
 	for (;;) {
 		osEvent evt;
-		evt = osMailGet(heap_queueHandle, osWaitForever);
+		evt = osMailGet(dl_queueHandle, osWaitForever);
 		if(evt.status == osEventMail){
 			struct dl_queue_item * item = evt.value.p;
-			switch(dl_queue_item->flags){
+			switch(item->flags){
 				case DL_ACK:
-					clear_ack(item.id);
+					clear_ack(item->id);
 					if(started){
 						downlink_items();
 					}
@@ -61,7 +67,7 @@ void DownlinkTask()
 
 static inline void clear_ack(uint32_t id)
 {
-	int i = 0;
+	size_t i = 0;
 	for(i = 0; i < sentLen; i++){
 		if(awaitAck[i] == id){
 			int j;
@@ -95,25 +101,27 @@ static inline void downlink_items(void)
 /* Grab an item from the heap and return an id for the sent item */
 static inline int transmit_item(void)
 {
-	struct heap_item * out;
-	Heap_PopItem(&out);
+	struct heap_item * out = {0};
+	Heap_PopItem(out);
 	uint8_t buf[HEAP_ITEM_SIZE];
 	Pack32(buf, out->id);
 	buf[4] = out->type;
-	switch(out->heap_item_type){
+	size_t data_size;
+	switch(out->type){
 		case event:
-			memcpy(buf+5, *(out->event_data), EVENT_DATA_SIZE);
+			data_size = EVENT_DATA_SIZE;
 			break;	
 		case eps:
-			memcpy(buf+5, *(out->eps_data), EPS_DATA_SIZE);
+			data_size = EPS_DATA_SIZE;
 			break;
 		case payload:
-			memcpy(buf+5, *(out->payload_data), PAYLOAD_DATA_SIZE);
+			data_size = PAYLOAD_DATA_SIZE;
 			break;
 		case adcs:
-			memcpy(buf+5, *(out->adcs_data), ADCS_DATA_SIZE);
+			data_size = ADCS_DATA_SIZE;
 			break;
 	}
+	memcpy(buf+5, out->data, data_size);
 	if(Radio_Transmit(buf, HEAP_ITEM_SIZE)){
 		return -1;
 	}
@@ -129,7 +137,7 @@ int Downlink_AckPacket(int packet_id)
 
 	if (osMailPut(dl_queueHandle, ack_packet)) {
                 Debug_Printf("Error queueing item for send!");
-                osMailFree(dl_queueHandle, item);
+                osMailFree(dl_queueHandle, ack_packet);
                 return -1;
         }
 
@@ -144,7 +152,7 @@ int Downlink_Start(void)
 	
 	if (osMailPut(dl_queueHandle, start_packet)) {
                 Debug_Printf("Error queueing item for send!");
-                osMailFree(dl_queueHandle, item);
+                osMailFree(dl_queueHandle, start_packet);
                 return -1;
         }
 
@@ -159,7 +167,7 @@ int Downlink_Stop(void)
         
         if (osMailPut(dl_queueHandle, stop_packet)) {
                 Debug_Printf("Error queueing item for send!");
-                osMailFree(dl_queueHandle, item);
+                osMailFree(dl_queueHandle, stop_packet);
                 return -1;
         }
 
