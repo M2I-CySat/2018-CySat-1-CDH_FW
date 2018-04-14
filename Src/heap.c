@@ -113,6 +113,9 @@ static int heap_push(struct heap_item * item)
 		case adcs:
 			data_size = ADCS_DATA_SIZE;
 			break;
+		default:
+			data_size = 0;
+			break;
 	}
 	memcpy(buf+6, item->data, data_size);
 	
@@ -178,6 +181,9 @@ static int heap_pop(struct heap_item * out)
 		case 3:
 			out->type = adcs;
 			data_size = ADCS_DATA_SIZE;
+			break;
+		default:
+			data_size = 0;
 			break;
 	}
 	memcpy(out->data, buf+6, data_size);
