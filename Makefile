@@ -104,7 +104,9 @@ Src/radio_cmc.c \
 Src/radio_he100.c \
 Src/heap.c \
 Src/eps.c \
-Src/downlink.c
+Src/downlink.c \
+Src/adcs.c \
+Src/payload.c
 
 # ASM sources
 ASM_SOURCES =  \
