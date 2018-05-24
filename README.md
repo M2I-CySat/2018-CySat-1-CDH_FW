@@ -1,7 +1,8 @@
-cysat
+CySat-1
+C&DH Firmware
 =====
 
-The CySat cubesat project at Iowa State University
+Firmware running on the Command and Data Handling board for CySat-1.  This firmware operates all major functions of the satellite.
 
 ## Branch Structure
 ### Master
