@@ -95,8 +95,29 @@ static int heap_push(struct heap_item * item)
 
 	static uint8_t buf[HEAP_ITEM_SIZE];
 	static uint8_t parent[HEAP_ITEM_SIZE];
-
-	//TODO: package item into buf
+	
+	Pack32(buf, item->id);
+	buf[4] = item->prio;
+	buf[5] = item->type;
+	size_t data_size;
+	switch(item->type){
+		case event:
+			data_size = EVENT_DATA_SIZE;
+			break;
+		case eps:
+			data_size = EPS_DATA_SIZE;
+			break;
+		case payload:
+			data_size = PAYLOAD_DATA_SIZE;
+			break;
+		case adcs:
+			data_size = ADCS_DATA_SIZE;
+			break;
+		default:
+			data_size = 0;
+			break;
+	}
+	memcpy(buf+6, item->data, data_size);
 	
 	/*** Perform heap operation ***/
 	uint32_t heap_bottom = get_heap_size() + 1;
@@ -144,7 +165,6 @@ static int heap_pop(struct heap_item * out)
 	out->id = Unpack32(buf);
 	out->prio = buf[4];
 	size_t data_size;
-	//TODO: this assumes data is an array. Should we change to this?
 	switch(buf[5]){
 		case 0:
 			out->type = event;
@@ -162,8 +182,11 @@ static int heap_pop(struct heap_item * out)
 			out->type = adcs;
 			data_size = ADCS_DATA_SIZE;
 			break;
+		default:
+			data_size = 0;
+			break;
 	}
-	memcpy(&(out->data), buf+6, data_size);
+	memcpy(out->data, buf+6, data_size);
 
 	/**** Perform heap operation ****/
 	/* Swap bottom to top */
@@ -193,16 +216,16 @@ static int heap_pop(struct heap_item * out)
 		} else if (keyl < keyr) {
 			/* Swap buf with bufl */
 			heap_write_item(index, bufl);
-			memcpy(buf, bufl, HEAP_ITEM_SIZE);
+			//memcpy(buf, bufl, HEAP_ITEM_SIZE);
 			//TODO: why the memcpy and key change?
-			key = keyl;
+			//key = keyl;
 			index = index * 2 + 1;
 		} else {
 			/* Swap buf with bufr */
 			heap_write_item(index, bufr);
-			memcpy(buf, bufr, HEAP_ITEM_SIZE);
+			//memcpy(buf, bufr, HEAP_ITEM_SIZE);
 
-			key = keyr;
+			//key = keyr;
 			index = (index * 2) + 2;
 		}
 	}

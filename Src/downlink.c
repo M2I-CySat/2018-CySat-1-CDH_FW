@@ -105,7 +105,8 @@ static inline int transmit_item(void)
 	Heap_PopItem(out);
 	uint8_t buf[HEAP_ITEM_SIZE];
 	Pack32(buf, out->id);
-	buf[4] = out->type;
+	buf[4] = out->prio;
+	buf[5] = out->type;
 	size_t data_size;
 	switch(out->type){
 		case event:
@@ -121,7 +122,7 @@ static inline int transmit_item(void)
 			data_size = ADCS_DATA_SIZE;
 			break;
 	}
-	memcpy(buf+5, out->data, data_size);
+	memcpy(buf+6, out->data, data_size);
 	if(Radio_Transmit(buf, HEAP_ITEM_SIZE)){
 		return -1;
 	}
