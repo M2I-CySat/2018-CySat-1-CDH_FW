@@ -53,11 +53,18 @@ int Test_Mem()
 
 	Debug_Printf("Memory test running");
 
+	uint8_t sr;
+	Debug_Printf("Reading status register");
+	sr = MEM_ReadStatus(TEST_FLAG_ADDRESS);
+	Debug_Printf("Status register: 0x%x", sr);
+
 	test_flag = read_test_flag();
-	Debug_Printf("Initial contents of test flag: 0x%x");
+	Debug_Printf("Initial contents of test flag: 0x%x", test_flag);
 
 	Debug_Printf("Writing flag 1 (0x%x)...", TEST_FLAG_1);
 	write_test_flag(TEST_FLAG_1);
+
+	test_flag = read_test_flag();
 	Debug_Printf("Read back test flag 1: (0x%x)", test_flag);
 	if (test_flag != TEST_FLAG_1) {
 		Debug_Printf("!!! TEST FAILED !!!");
@@ -66,6 +73,8 @@ int Test_Mem()
 
 	Debug_Printf("Writing flag 2 (0x%x)...", TEST_FLAG_2);
 	write_test_flag(TEST_FLAG_2);
+
+	test_flag = read_test_flag();
 	Debug_Printf("Read back test flag 2: (0x%x)", test_flag);
 	if (test_flag != TEST_FLAG_2) {
 		Debug_Printf("!!! TEST FAILED !!!");
@@ -74,6 +83,8 @@ int Test_Mem()
 
 	Debug_Printf("Writing flag 3 (0x%x)...", TEST_FLAG_3);
 	write_test_flag(TEST_FLAG_3);
+
+	test_flag = read_test_flag();
 	Debug_Printf("Read back test flag 3: (0x%x)", test_flag);
 	if (test_flag != TEST_FLAG_3) {
 		Debug_Printf("!!! TEST FAILED !!!");

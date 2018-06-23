@@ -61,7 +61,7 @@ int MEM_ReadStatus(size_t addr)
 	osSemaphoreWait(mem_semaphoreHandle, osWaitForever);
 
 	/* Read data */
-	status = HAL_SPI_Receive_DMA(
+	status = HAL_SPI_Receive_IT(
 			&hspi2,
 			&op,
 			1);
@@ -121,7 +121,7 @@ ssize_t MEM_Read(uint8_t * buf, size_t addr, size_t len)
 	osSemaphoreWait(mem_semaphoreHandle, osWaitForever);
 
 	/* Read data */
-	status = HAL_SPI_Receive_DMA(
+	status = HAL_SPI_Receive_IT(
 			&hspi2,
 			buf,
 			len);
