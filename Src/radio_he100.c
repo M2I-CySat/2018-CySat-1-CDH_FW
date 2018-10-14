@@ -83,7 +83,7 @@ void He100_TxTask(void)
 				if (evt.status == osEventMessage) {
 					uint16_t type = (evt.value.v >> 16) & 0xffff;
 					uint16_t payload = evt.value.v & 0xffff;
-
+//Straight from the he datasheet o commands and i commands
 					if ((type == O_CMD_TRANSMIT_ACK) && 
 							(payload == TX_ACK)) {
 						Debug_Printf("Transmit acknowledged!");

@@ -48,9 +48,12 @@ int MEM_ReadStatus(size_t addr)
 		goto releaseMutex;
 	}
 
+	Debug_Printf("In readstatus before begin");
 	/* Begin transaction */
 	HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET);
 
+	Debug_Printf("In readstatus after begin");
+	
 	uint8_t op = OP_RDSR;
 	HAL_StatusTypeDef status;
 	status = HAL_SPI_Transmit_DMA(&hspi2, &op, 1);
@@ -58,9 +61,14 @@ int MEM_ReadStatus(size_t addr)
 		retval = -1;
 		goto endTransaction;
 	}
+	Debug_Printf("before semaphore");
 	osSemaphoreWait(mem_semaphoreHandle, osWaitForever);
+	Debug_Printf("after semaphore");
 
 	/* Read data */
+	//Start seeing weird stuff here
+	//Look into the difference between master and slave recieve
+	//
 	status = HAL_SPI_Receive_IT(
 			&hspi2,
 			&op,
