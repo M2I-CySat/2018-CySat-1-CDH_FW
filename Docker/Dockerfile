@@ -1,6 +1,10 @@
 # Useful commands
-#	docker system prune -a 
-#	docker build .
+#	Kill all docker images
+#		docker system prune -a 
+#	Build our docker image	
+#		docker build -t cysat .
+#	Finally, run our image
+#		docker run -it --privileged -v /dev/bus/usb:/dev/bus/usb --expose=3333 cysat:latest 
 
 
 # Lets use arch, its much eaiser
@@ -29,15 +33,18 @@ RUN git clone https://github.com/M2I-CySat/CySat-1-CDH_FW.git /app/firmware
 WORKDIR /app/firmware
 RUN make
 
+# I am groot!
 USER root
+
+# Udev rule for the Nucleo board
+RUN echo 'ATTRS{idVendor}=="0483", ATTRS{idProduct}=="374b", MODE="664", GROUP="plugdev"' >> /etc/udev/rules.d/99-openocd.rules
 
 # Humans do like names, dont they
 ENV NAME cysat
 
-# run /bin/bash when the container launches
-# CMD ["bash"]
 
+# Move to directory with the script to run our tools
 WORKDIR /app/firmware/Docker
-# Lets see if I can get this pos to run our commands as is
-#CMD "tmux new-session 'openocd -f /usr/share/openocd/scripts/board/st_nucleo_f4.cfg ; read' \; split-window 'arm-none-eabi-gdb /app/firmware/build/cysat.elf ; read'"
+
+# Finally, when the docker container run this script to start our tools
 CMD "./cysat-dev.sh"
