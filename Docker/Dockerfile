@@ -20,9 +20,7 @@ RUN pacman -Sy --noconfirm arm-none-eabi-gcc arm-none-eabi-newlib arm-none-eabi-
 # All of this nonsense is to get openocd to install because Arch does not trust their users and is stupid in some ways...
 RUN chown -R nobody /app
 USER nobody
-RUN git clone https://git.code.sf.net/p/openocd/code openocd
-RUN wget https://aur.archlinux.org/cgit/aur.git/snapshot/openocd.tar.gz
-RUN tar xvzf openocd.tar.gz
+RUN git clone https://aur.archlinux.org/openocd.git
 WORKDIR /app/openocd
 RUN chown -R nobody /app
 USER root
